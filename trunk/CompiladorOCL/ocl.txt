@@ -1,0 +1,3 @@
+context ProgramaFidelidade::cadastrar(c : Cliente) : void
+pre parametroOk: not cliente->includes(c)
+post resultadoOk: cliente = cliente@pre->including(c) and 10 = 123.32
