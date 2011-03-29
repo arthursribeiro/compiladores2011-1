@@ -27,8 +27,8 @@ WhiteSpace     = {LineTerminator} | [ \t\f]
 Identifier = [:jletter:] [:jletterdigit:]*
 
 DecIntegerLiteral = 0 | [1-9][0-9]*
-
-FloatLiteral = "."DecIntegerLiteral
+Integer = -? {DecIntegerLiteral}
+FloatLiteral = -? {DecIntegerLiteral} \. {DecIntegerLiteral}
 
 %state STRING
 %%
@@ -68,7 +68,7 @@ FloatLiteral = "."DecIntegerLiteral
   {Identifier}                   { return symbol(sym.IDENTIFIER,yytext()); }
  
   /* literals */
-  {DecIntegerLiteral}            { return symbol(sym.INTEGER_LITERAL,yytext()); }
+  {Integer}            { return symbol(sym.INTEGER_LITERAL,yytext()); }
   {FloatLiteral}            	 { return symbol(sym.FLOAT_LITERAL,yytext()); }
   \'                             { string.setLength(0); yybegin(STRING); }
   \.           { return symbol(sym.POINT,yytext()); }
