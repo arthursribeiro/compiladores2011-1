@@ -15,7 +15,7 @@ import java_cup.runtime.*;
     return new Symbol(type, yyline, yycolumn);
   }
   private Symbol symbol(int type, Object value) {
-    System.out.println(value);
+    System.out.println("Type: "+type+" Value: "+value);
     return new Symbol(type, yyline, yycolumn, value);
   }
 %}
@@ -24,11 +24,15 @@ LineTerminator = \r|\n|\r\n
 InputCharacter = [^\r\n]
 WhiteSpace     = {LineTerminator} | [ \t\f]
 
-Identifier = [:jletter:] [:jletterdigit:]*
+Identifier = ([:jletter:] | "_") ([:jletterdigit:] | "_")*
 
 DecIntegerLiteral = 0 | [1-9][0-9]*
 Integer = -? {DecIntegerLiteral}
 FloatLiteral = -? {DecIntegerLiteral} \. {DecIntegerLiteral}
+Number = ({Integer}|{FloatLiteral}) {exponencial}
+exponencial = ( ("e" | "E") ( "+" | "-" )? [0-9] ([0-9])* )
+
+Coment = --([^\n\r])*[\n\r]
 
 %state STRING
 %%
@@ -62,14 +66,18 @@ FloatLiteral = -? {DecIntegerLiteral} \. {DecIntegerLiteral}
 <YYINITIAL> "true"           { return symbol(sym.TRUE,yytext()); }
 <YYINITIAL> "false"           { return symbol(sym.FALSE,yytext()); }
 <YYINITIAL> ":"           { return symbol(sym.DOUBLEPOINT,yytext()); }
+<YYINITIAL> "::"           { return symbol(sym.DDOUBLEPOINT,yytext()); }
+<YYINITIAL> ","            { return symbol(sym.VIRGULA, yytext()); }
 <YYINITIAL> "->"           { return symbol(sym.ARROW,yytext()); }
+<YYINITIAL> "|"             { return symbol(sym.PIPELINE, yytext()); }
  <YYINITIAL> {
   /* identifiers */ 
   {Identifier}                   { return symbol(sym.IDENTIFIER,yytext()); }
- 
+  {Coment}	{}
   /* literals */
   {Integer}            { return symbol(sym.INTEGER_LITERAL,yytext()); }
-  {FloatLiteral}            	 { return symbol(sym.FLOAT_LITERAL,yytext()); }
+  {FloatLiteral}		 { return symbol(sym.FLOAT_LITERAL,yytext()); }
+  {Number}            	 { return symbol(sym.FLOAT_LITERAL,yytext()); }
   \'                             { string.setLength(0); yybegin(STRING); }
   \.           { return symbol(sym.POINT,yytext()); }
 

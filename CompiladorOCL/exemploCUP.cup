@@ -53,6 +53,9 @@ terminal			POINT;
 terminal			DOUBLEPOINT;
 terminal			ARROW;
 terminal			VOID;
+terminal			PIPELINE;
+terminal			DDOUBLEPOINT;
+terminal			VIRGULA;
 terminal Integer    INTEGER_LITERAL;
 terminal Double    	FLOAT_LITERAL;
 terminal String		STRING_LITERAL;
@@ -65,6 +68,21 @@ non terminal Integer    expr, term, factor;
 
 
 /* The grammar */
+
+relationalOperator ::= EQ | GREATERTHAN | LESSTHAN | GREATEREQTHAN | LESSEQTHAN | NOTEQ
+
+addOperator ::= PLUS | MINUS 
+
+multiplyOperator ::= MULTIPLY | DIVIDE
+
+unaryOperator ::= MINUS | NOT
+
+logicalOperator ::= AND | OR | XOR | IMPLIES
+
+number ::= INTEGER | FLOAT
+
+pathName ::= IDENTIFIER ( DDOUBLEPOINT IDENTIFIER )*
+
 expr_part ::= IDENTIFIER;
 expr      ::= expr_part PLUS expr_part  
 	    ;
