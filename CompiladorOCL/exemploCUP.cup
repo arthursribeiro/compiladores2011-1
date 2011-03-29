@@ -1,0 +1,70 @@
+import java_cup.runtime.*;
+
+/* Preliminaries to set up and use the scanner.  */
+scan with {: return scanner.next_token(); :};
+
+/* Terminals (tokens returned by the scanner). */
+terminal            IDENTIFIER;
+terminal            SELF;
+terminal            RESULT;
+terminal            AND;
+terminal            BODYCONTEXT;
+terminal            CONTEXT;
+terminal            DEF;
+terminal            DERIVE;
+terminal            ELSE;
+terminal            ENDIF;
+terminal            ENDPACKAGE;
+terminal            IF;
+terminal            IMPLIES;
+terminal            IN;
+terminal            INIT;
+terminal            INV;
+terminal            LET;
+terminal            NOT;
+terminal            OR;
+terminal            PACKAGE;
+terminal            POST;
+terminal            PRE;
+terminal            ATPRE;
+terminal            STATIC;
+terminal            THEN;
+terminal            XOR;
+terminal            TRUE;
+terminal            FALSE;
+terminal			EQ;
+terminal			MINUS;
+terminal			MULTIPLY;
+terminal			DIVIDE;
+terminal			LESSTHAN;
+terminal			GREATERTHAN;
+terminal			NOTEQ;
+terminal			LESSEQTHAN;
+terminal			GREATEREQTHAN;
+terminal			PLUS;
+terminal			LEFTPARENTHESIS;
+terminal			RIGHTPARENTHESIS;
+terminal			LEFTBRACK;
+terminal			RIGHTBRACK;
+terminal			LEFTBRACKET;
+terminal			RIGHTBRACKET;
+terminal			MOD;
+terminal			POINT;
+terminal			DOUBLEPOINT;
+terminal			ARROW;
+terminal			VOID;
+terminal Integer    INTEGER_LITERAL;
+terminal Double    	FLOAT_LITERAL;
+terminal String		STRING_LITERAL;
+
+/* Non terminals */
+non terminal            expr_list, expr_part;
+non terminal Integer    expr, term, factor;
+
+/* Precedences */
+
+
+/* The grammar */
+expr_part ::= IDENTIFIER;
+expr      ::= expr_part PLUS expr_part  
+	    ;
