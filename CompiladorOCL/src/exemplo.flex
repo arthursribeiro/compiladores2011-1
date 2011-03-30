@@ -66,10 +66,15 @@ Coment = --([^\n\r])*[\n\r]
 <YYINITIAL> "true"           { return symbol(sym.TRUE,yytext()); }
 <YYINITIAL> "false"           { return symbol(sym.FALSE,yytext()); }
 <YYINITIAL> ":"           { return symbol(sym.DOUBLEPOINT,yytext()); }
+<YYINITIAL> ";"           { return symbol(sym.POINT_VIRGULA,yytext()); }
 <YYINITIAL> "::"           { return symbol(sym.DDOUBLEPOINT,yytext()); }
 <YYINITIAL> ","            { return symbol(sym.VIRGULA, yytext()); }
 <YYINITIAL> "->"           { return symbol(sym.ARROW,yytext()); }
 <YYINITIAL> "|"             { return symbol(sym.PIPELINE, yytext()); }
+<YYINITIAL> "Set"              { return symbol(sym.COLLECTION, yytext()); }
+<YYINITIAL> "Bag"             { return symbol(sym.COLLECTION, yytext()); }
+<YYINITIAL> "Sequence"             { return symbol(sym.COLLECTION, yytext()); }
+<YYINITIAL> "Collection"             { return symbol(sym.COLLECTION, yytext()); }
  <YYINITIAL> {
   /* identifiers */ 
   {Identifier}                   { return symbol(sym.IDENTIFIER,yytext()); }
