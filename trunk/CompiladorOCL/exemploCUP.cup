@@ -56,33 +56,105 @@ terminal			VOID;
 terminal			PIPELINE;
 terminal			DDOUBLEPOINT;
 terminal			VIRGULA;
+terminal			COLLECTION;
+terminal			POINT_VIRGULA;
 terminal Integer    INTEGER_LITERAL;
 terminal Double    	FLOAT_LITERAL;
 terminal String		STRING_LITERAL;
 
 /* Non terminals */
-non terminal            expr_list, expr_part;
-non terminal Integer    expr, term, factor;
+non terminal            oclFile, packageName, oclExpressions,constraint,contextDeclaration,classifierContext,
+					operationContext, stereotype, operationName, formalParameterList, typeSpecifier,
+					collectionType, oclExpression, returnType, expression, logicalExpression, 
+					relationalExpression, additiveExpression, multiplicativeExpression, 
+					unaryExpression, postfixExpression, primaryExpression, propertyCallParameters, 
+					literal, simpleTypeSpecifier, literalCollection, collectionItem, declarator, 
+					pathName, timeExpression, actualParameterList, collectionKind, relationalOperator, 
+					addOperator, multiplyOperator, unaryOperator, logicalOperator, number;
+
 
 /* Precedences */
 
 
 /* The grammar */
 
-relationalOperator ::= EQ | GREATERTHAN | LESSTHAN | GREATEREQTHAN | LESSEQTHAN | NOTEQ
+oclFile ::= ( PACKAGE packageName oclExpressions ENDPACKAGE )+;
 
-addOperator ::= PLUS | MINUS 
+packageName ::= pathName;
 
-multiplyOperator ::= MULTIPLY | DIVIDE
+oclExpressions ::= ( constraint )*;
 
-unaryOperator ::= MINUS | NOT
+constraint ::= contextDeclaration( stereotype IDENTIFIER? DOUBLEPOINT oclExpression)+;
 
-logicalOperator ::= AND | OR | XOR | IMPLIES
+contextDeclaration ::= CONTEXT ( operationContext | classifierContext );
 
-number ::= INTEGER | FLOAT
+classifierContext ::= (IDENTIFIER DOUBLEPOINT IDENTIFIER ) | IDENTIFIER;
 
-pathName ::= IDENTIFIER ( DDOUBLEPOINT IDENTIFIER )*
+operationContext ::= IDENTIFIER DDOUBLEPOINT operationName LEFTPARENTHESIS formalParameterList RIGHTPARENTHESIS ( DOUBLEPOINT returnType )?;
 
-expr_part ::= IDENTIFIER;
-expr      ::= expr_part PLUS expr_part  
-	    ;
+stereotype ::= ( PRE | POST );
+
+operationName ::= IDENTIFIER | EQ | PLUS | MINUS | LESSTHAN | GREATEREQTHAN |
+					IMPLIES | NOT | OR | XOR | AND | LESSEQTHAN | GREATERTHAN | DIVIDE | MULTIPLY | NOTEQ;
+					
+formalParameterList ::= ( IDENTIFIER DOUBLEPOINT typeSpecifier (VIRGULA IDENTIFIER DOUBLEPOINT typeSpecifier )* )?;
+
+typeSpecifier ::= simpleTypeSpecifier | collectionType;
+
+collectionType ::= collectionKind LEFTPARENTHESIS simpleTypeSpecifier RIGHTPARENTHESIS;
+
+oclExpression ::= expression;
+
+returnType ::= typeSpecifier;
+
+expression ::= logicalExpression;
+
+logicalExpression ::= relationalExpression ( logicalOperator relationalExpression )*;
+
+relationalExpression ::= additiveExpression ( relationalOperator additiveExpression )?;
+
+additiveExpression ::= multiplicativeExpression ( addOperator multiplicativeExpression )*;
+
+multiplicativeExpression ::= unaryExpression ( multiplyOperator unaryExpression )*;
+
+unaryExpression ::= ( unaryOperator postfixExpression ) | postfixExpression;
+
+postfixExpression ::= primaryExpression ( (POINT | ARROW) propertyCall )*;
+
+primaryExpression ::= literalCollection | literal | propertyCall | LEFTPARENTHESIS expression RIGHTPARENTHESIS;
+
+propertyCallParameters := LEFTPARENTHESIS ( declarator )? ( actualParameterList )? RIGHTPARENTHESIS;
+
+literal ::= STRING_LITERAL | FLOAT_LITERAL | INTEGER_LITERAL;
+
+simpleTypeSpecifier ::= pathName;
+
+literalCollection ::= collectionKind LEFTBRACKET ( collectionItem (VIRGULA collectionItem )* )? RIGHTBRACKET;
+
+collectionItem ::= expression (POINT POINT expression )?;
+
+propertyCall ::= pathName ( timeExpression )? ( qualifiers )? ( propertyCallParameters )?;
+
+qualifiers ::= LEFTBRACK actualParameterList RIGHTBRACK;
+
+declarator ::= IDENTIFIER ( VIRGULA IDENTIFIER )* ( DOUBLEPOINT simpleTypeSpecifier )? ( POINT_VIRGULA IDENTIFIER POINT_VIRGULA typeSpecifier EQ expression )? PIPELINE ;
+
+pathName ::= IDENTIFIER ( DDOUBLEPOINT IDENTIFIER )*;
+
+timeExpression ::= ATPRE;
+
+actualParameterList ::= expression (VIRGULA expression)*;
+
+collectionKind ::= COLLECTION;
+
+relationalOperator ::= EQ | GREATERTHAN | LESSTHAN | GREATEREQTHAN | LESSEQTHAN | NOTEQ;
+
+addOperator ::= PLUS | MINUS ;
+
+multiplyOperator ::= MULTIPLY | DIVIDE;
+
+unaryOperator ::= MINUS | NOT;
+
+logicalOperator ::= AND | OR | XOR | IMPLIES;
+
+number ::= INTEGER | FLOAT;
