@@ -18,6 +18,18 @@ import java_cup.runtime.*;
     System.out.println("Type: "+type+" Value: "+value);
     return new Symbol(type, yyline, yycolumn, value);
   }
+  
+  private void zzScanError(int errorCode) {
+    String message;
+    try {
+      message = ZZ_ERROR_MSG[errorCode];
+    }
+    catch (ArrayIndexOutOfBoundsException e) {
+      message = ZZ_ERROR_MSG[ZZ_UNKNOWN_ERROR];
+    }
+
+    throw new Error(message+" at line: "+(yyline+1)+" and column: "+yycolumn);
+  }
 %}
 
 LineTerminator = \r|\n|\r\n
@@ -26,13 +38,14 @@ WhiteSpace     = {LineTerminator} | [ \t\f]
 
 Identifier = ([:jletter:] | "_") ([:jletterdigit:] | "_")*
 
-DecIntegerLiteral = 0 | [1-9][0-9]*
+DecIntegerLiteral = 0 | [0-9][0-9]*
 Integer = -? {DecIntegerLiteral}
 FloatLiteral = -? {DecIntegerLiteral} \. {DecIntegerLiteral}
 Number = ({Integer}|{FloatLiteral}) {exponencial}
 exponencial = ( ("e" | "E") ( "+" | "-" )? [0-9] ([0-9])* )
 
-Coment = --([^\n\r])*[\n\r]
+Coment = --([^\n\r])*{EndComent}
+EndComent = ([\n\r])?
 
 %state STRING
 %%
@@ -60,7 +73,6 @@ Coment = --([^\n\r])*[\n\r]
 <YYINITIAL> "post"           { return symbol(sym.POST,yytext()); }
 <YYINITIAL> "pre"           { return symbol(sym.PRE,yytext()); }
 <YYINITIAL> "@pre"           { return symbol(sym.ATPRE,yytext()); }
-<YYINITIAL> "static"           { return symbol(sym.STATIC,yytext()); }
 <YYINITIAL> "then"           { return symbol(sym.THEN,yytext()); }
 <YYINITIAL> "xor"           { return symbol(sym.XOR,yytext()); }
 <YYINITIAL> "true"           { return symbol(sym.TRUE,yytext()); }
@@ -76,9 +88,6 @@ Coment = --([^\n\r])*[\n\r]
 <YYINITIAL> "Sequence"             { return symbol(sym.COLLECTION, yytext()); }
 <YYINITIAL> "Collection"             { return symbol(sym.COLLECTION, yytext()); }
  <YYINITIAL> {
-  /* identifiers */ 
-  {Identifier}                   { return symbol(sym.IDENTIFIER,yytext()); }
-  {Coment}	{}
   /* literals */
   {Integer}            { return symbol(sym.INTEGER_LITERAL,yytext()); }
   {FloatLiteral}		 { return symbol(sym.FLOAT_LITERAL,yytext()); }
@@ -91,6 +100,7 @@ Coment = --([^\n\r])*[\n\r]
 	"-"								{ return symbol(sym.MINUS,yytext()); }
 	"*"								{ return symbol(sym.MULTIPLY,yytext()); }
 	"/"								{ return symbol(sym.DIVIDE,yytext()); }
+	"mod"                            { return symbol(sym.MOD,yytext()); }
 	"<"								{ return symbol(sym.LESSTHAN,yytext()); }
 	">"								{ return symbol(sym.GREATERTHAN,yytext()); }
 	"<>"							{ return symbol(sym.NOTEQ,yytext()); }
@@ -103,22 +113,26 @@ Coment = --([^\n\r])*[\n\r]
   	"]"                            { return symbol(sym.RIGHTBRACK,yytext()); }
   	"{"                            { return symbol(sym.LEFTBRACKET,yytext()); }
   	"}"                            { return symbol(sym.RIGHTBRACKET,yytext()); }
+  	
+  	 /* identifiers */ 
+  {Identifier}                   { return symbol(sym.IDENTIFIER,yytext()); }
+  {Coment}					{}
  
   /* whitespace */
   {WhiteSpace}                   { /* ignore */ }
 }
  <STRING> {
   \'                             { yybegin(YYINITIAL); 
-                                   return symbol(sym.STRING_LITERAL, 
+  								   return symbol(sym.STRING_LITERAL, 
                                    string.toString()); }
-  [^\n\r\"\\]+                   { string.append( yytext() ); }
+  [^\n\r\'\\]+                   { string.append( yytext() );}
   \\t                            { string.append('\t'); }
   \\n                            { string.append('\n'); }
 
   \\r                            { string.append('\r'); }
-  \\\"                           { string.append('\"'); }
+  \\\'                           { string.append('\''); }
   \\                             { string.append('\\'); }
 }
  /* error fallback */
 .|\n                             { throw new Error("Illegal character <"+
-                                                    yytext()+">"); }
+                                                    yytext()+"> at line: "+(yyline+1)); }

@@ -1,3 +1,209 @@
-context ProgramaFidelidade::cadastrar(c : Cliente) : void
-pre parametroOk: not cliente->includes(c)
-post resultadoOk: cliente = cliente@pre->including(c) and 10.6868 = 132E12
+context Person::getMortgage(sum : Money, security : House) 
+pre: self.mortgages.monthlyPayment->sum() <= self.salary * 0.30 
+
+context Person::getMortgage(sum : Money, security : House) 
+pre: security.value >= security.mortgages.principal->sum()
+
+context LoyaltyAccount::isEmpty(): Boolean 
+pre : at
+post: result = (points = 0) 
+
+context LoyaltyAccount::isEmpty(): Boolean 
+post: result = (points = 0) 
+
+context LoyaltyAccount::isEmpty(): Boolean 
+pre : 0 > 0 
+post: result = (points = 0) 
+
+context LoyaltyAccount::isEmpty(): Boolean 
+pre : true
+pre funciona : a
+pre : 0 > 0 
+post: result = (points = 0) 
+
+context Customer::birthdayHappens() 
+post: age = age@pre + 1 
+
+context Service::upgradePointsEarned(amount: Integer) 
+post: calcPoints() = calcPoints@pre() + amount
+
+context Service::upgradePointsEarned(amount: Integer) 
+post: calcPoints() = calcPoints@pre() + amount@pre
+
+context LoyaltyProgram::enroll(c : Customer) 
+pre : c.name <> '' 
+post: participants = participants@pre->including( c )
+
+context File::save() 
+post: self.project.builders->forAll( b : Builder | 
+                                     b.incrementalBuild() )
+                                     
+                                     
+context LoyaltyProgram::addTransaction( accNr: Integer, 
+                                        pName: String, 
+                                        servId: Integer, 
+                                        amnt: Real, 
+                                        d: Date,
+                                        acc : LoyaltyAccount,
+                                        newT : Transaction,
+                                        card : CustomerCard ) 
+post: acc.points = acc.points@pre + newT.points            and 
+         newT.oclIsNew()                                      and 
+         amnt =  0 implies newT.oclIsTypeOf( Burning )        and 
+         amnt >  0 implies newT.oclIsTypeOf( Earning )        and 
+         acc.transactions - acc.transaction@pre = Set{ newT } and 
+         card.transactions - card.transaction@pre = Set{ newT } 
+         
+context LoyaltyProgram::addTransaction( accNr: Integer, 
+                                        pName: String, 
+                                        servId: Integer, 
+                                        amnt: Real, 
+                                        d: Date,
+                                        acc : LoyaltyAccount,
+                                        newT : Transaction,
+                                        card : CustomerCard ) 
+post: acc.points = acc.points@pre + newT.points            and 
+         newT.oclIsNew()                                      and 
+         amnt =  0 implies newT.oclIsTypeOf( Burning )        and 
+         amnt >  0 implies newT.oclIsTypeOf( Earning )        and 
+         acc.transactions - acc.transaction@pre = Set{ newT } and 
+         card.transactions - card.transaction@pre = Set{ newT } 
+
+         
+context LoyaltyProgram::addTransaction( accNr: Integer, 
+                                        pName: String, 
+                                        servId: Integer, 
+                                        amnt: Real, 
+                                        d: Date,
+                                        acc : LoyaltyAccount,
+                                        newT : Transaction,
+                                        card : CustomerCard ) 
+post: acc.points = acc.points@pre + newT.points            and 
+         newT.oclIsNew()                                      
+post:  amnt =  0 implies newT.oclIsTypeOf( Burning )        and 
+         amnt >  0 implies newT.oclIsTypeOf( Earning )        and 
+         acc.transactions - acc.transaction@pre = Set{ newT } and 
+         card.transactions - card.transaction@pre = Set{ newT }
+          
+context LoyaltyProgram::enrollAndCreateCustomer( n : String, 
+                                               d: Date ) : Customer 
+post: result.oclIsNew() and 
+      result.name = n and 
+      result.dateOfBirth = d and 
+      participants->includes( result )         
+
+context LoyaltyProgram::selectPopularPartners( d: Date, popularTrans : Set(Transaction) ) 
+                                               : Set(ProgramPartner) 
+post: popularTrans->forAll( date.isAfter(d) ) and 
+          popularTrans->select( amount > 500.00 )->size() > 20000  
+          
+context LoyaltyProgram::enroll(c : Customer) 
+pre : not participants->includes(c) 
+post: participants = participants@pre->including(c) 
+
+
+context LoyaltyProgram::addService(p: ProgramPartner, 
+                                   l: ServiceLevel, 
+                                   s: Service) 
+pre: partners->includes( p ) 
+pre: levels->includes( l ) 
+post: partners.deliveredServices->includes( s ) 
+post: levels.availableServices->includes( s )
+
+context LoyaltyProgram::addService(p: ProgramPartner, 
+                                   l: ServiceLevel, 
+                                   s: Service) 
+pre: partners->includes( p ) and levels->includes( l ) 
+post: partners.deliveredServices->includes( s ) and 
+               levels.availableServices->includes( s ) 
+               
+context Stove::open() 
+pre : status = StoveState::off 
+post: status = StoveState::off and isOpen 
+
+context ElectricStove::open() 
+pre : status = StoveState::off and temperature <= 100 
+post: isOpen 
+
+context LoyaltyProgram::enroll(c : Customer) 
+pre : not (participants->includes(c)) 
+post: participants = participants@pre->including(c) 
+post: Membership->select(m : Membership | m.participants = c)-> 
+          forAll( account->notEmpty() and 
+                  account.points = 0  and 
+                  account.transactions->isEmpty() )
+                  
+context LoyaltyProgram::enroll(c : Customer) 
+pre : not (participants->includes(c)) 
+post: participants = participants@pre->including(c) 
+post: Membership->select(m, h : Membership | m.participants = c)-> 
+          forAll( account->notEmpty() and 
+                  account.points = 0  and 
+                  account.transactions->isEmpty() )  
+                  
+context Transaction::getProgram() : LoyaltyProgram 
+post: result = self.card.Membership.program
+
+context LoyaltyProgram::enrollAndCreateCustomer( n : String, 
+                                               d: Date ) : Customer 
+post: result.oclIsNew() and 
+      result.name = n and 
+      result.dateOfBirth = d and 
+      participants->includes( result ) 
+      
+context LoyaltyProgram::enrollAndCreateCustomer( n : String, 
+                                               d: Date ) : Customer 
+post: result.oclIsNew() and 
+      result.name = n and  -- comentario
+      result.dateOfBirth = d and 
+      participants->includes( result ) 
+      
+context LoyaltyProgram::enrollAndCreateCustomer( n : String, 
+                                               d: Date ) : Customer 
+post: result.oclIsNew() and 
+      result.name = n and 
+      -- comentario
+      result.dateOfBirth = d and 
+      participants->includes( result ) 
+      
+context Subject::hasChanged() 
+post:  observer.update(12, 14)  
+
+context Cartao::nomeTratamentoCliente(n: String) : String
+pre: 'Sr.'.concat(n).equals('Sr. V')
+
+context Cartao::nomeTratamentoCliente(n: String) : String
+post: if self.m = true then 'Sr.'.concat(n) else 'Sra.'.concat(n) endif
+
+context Cartao::nomeTratamentoCliente(n: String) : String
+post: (if self.m = true then 'Sr.'.concat(n) else 'Sra.'.concat(n) endif).size() >= 0
+
+context Subject::hasChanged() 
+post:  12.abs()
+
+context Subject::hasChanged() 
+post:  -12.abs()
+
+context Subject::hasChanged() 
+post:  12.87e-82.round()
+
+context Subject::hasChanged() 
+post:  -12.87e-82.round()
+
+context Subject::hasChanged() 
+post:  true.oclIsTypeOf(BooleanType)
+
+context Classe::metodo()
+pre: self.variavel->collect(a | a.isTrue())
+
+context Classe::metodo()
+pre condicao: self.pega->collect(a,b | a = b)
+
+context Classe::metodo()
+pre condicao: self.pega->collect(a,b: Boolean | a = b)
+
+context Classe::metodo()
+pre condicao: self.pega->collect(a,b: Boolean | a.compare(b))
+
+context Classe::metodo()
+pre condicao: self.pega->collect(a,b: Boolean | -12.87e-82.round())

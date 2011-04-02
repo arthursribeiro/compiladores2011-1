@@ -1,18 +1,40 @@
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
+import java_cup.symbol;
+import java_cup.runtime.Symbol;
+
 
 public class Main {
 	public static void main(String[] args) {
 //		java.util.Scanner sc = new java.util.Scanner(System.in);
 //		String file = sc.nextLine();
 		try {
-			String[] params = new String[1];
-			params[0] = "C:\\Users\\DAVI\\Documents\\workspace\\Java\\CompiladorOCL\\ocl.txt";
-			Scanner.main(params);
+//			parser p = new parser();
+//			p.parse();
 			
+			/* create a parsing object */
+			Scanner sc = new Scanner(new java.io.FileReader("C:\\Users\\DAVI\\Documents\\workspace\\Java\\CompiladorOCL\\ocl.txt"));
+			parser parser_obj = new parser(sc);
+
+			/* open input files, etc. here */
+			Symbol parse_tree = null;
+
+			try {
+				parse_tree = parser_obj.parse();
+			}catch(Error er){ 
+				System.err.println(er.getMessage());
+			}catch (Exception e) {
+				System.err.println(e.getMessage());
+			}
+//			String[] params = new String[1];
+//			params[0] = "C:\\Users\\DAVI\\Documents\\workspace\\Java\\CompiladorOCL\\ocl.txt";
+//			Scanner.main(params);
+			
+		} catch (Error er){
+			System.err.println(er.getMessage());
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 		}
 	}
 }
