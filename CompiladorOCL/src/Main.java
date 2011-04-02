@@ -14,8 +14,8 @@ public class Main {
 //			p.parse();
 			
 			/* create a parsing object */
-			Scanner sc = new Scanner(new java.io.FileReader("C:\\Users\\DAVI\\Documents\\workspace\\Java\\CompiladorOCL\\ocl.txt"));
-			parser parser_obj = new parser(sc);
+			AnalisadorLexico sc = new AnalisadorLexico(new java.io.FileReader("C:\\Users\\DAVI\\Documents\\workspace\\Java\\CompiladorOCL\\ocl.txt"));
+			AnalisadorSintatico parser_obj = new AnalisadorSintatico(sc);
 
 			/* open input files, etc. here */
 			Symbol parse_tree = null;
@@ -29,7 +29,7 @@ public class Main {
 			}
 //			String[] params = new String[1];
 //			params[0] = "C:\\Users\\DAVI\\Documents\\workspace\\Java\\CompiladorOCL\\ocl.txt";
-//			Scanner.main(params);
+//			AnalisadorSintatico.main(params);
 			
 		} catch (Error er){
 			System.err.println(er.getMessage());

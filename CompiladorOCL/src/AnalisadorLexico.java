@@ -10,7 +10,7 @@ import java_cup.runtime.*;
  * on 4/2/11 2:46 AM from the specification file
  * <tt>exemplo.flex</tt>
  */
-class Scanner implements java_cup.runtime.Scanner {
+class AnalisadorLexico implements java_cup.runtime.Scanner {
 
 	/** This character denotes the end of file */
 	public static final int YYEOF = -1;
@@ -532,7 +532,7 @@ class Scanner implements java_cup.runtime.Scanner {
 	 *
 	 * @param   in  the java.io.Reader to read input from.
 	 */
-	Scanner(java.io.Reader in) {
+	AnalisadorLexico(java.io.Reader in) {
 		this.zzReader = in;
 	}
 
@@ -542,7 +542,7 @@ class Scanner implements java_cup.runtime.Scanner {
 	 *
 	 * @param   in  the java.io.Inputstream to read input from.
 	 */
-	Scanner(java.io.InputStream in) {
+	AnalisadorLexico(java.io.InputStream in) {
 		this(new java.io.InputStreamReader(in));
 	}
 
@@ -891,11 +891,11 @@ class Scanner implements java_cup.runtime.Scanner {
 			}
 			case 67: break;
 			case 8: 
-			{ return symbol(sym.DOUBLEPOINT,yytext());
+			{ return symbol(TabelaSimbolos.DOUBLEPOINT,yytext());
 			}
 			case 68: break;
 			case 7: 
-			{ return symbol(sym.PLUS,yytext());
+			{ return symbol(TabelaSimbolos.PLUS,yytext());
 			}
 			case 69: break;
 			case 1: 
@@ -904,11 +904,11 @@ class Scanner implements java_cup.runtime.Scanner {
 			}
 			case 70: break;
 			case 65: 
-			{ return symbol(sym.ENDPACKAGE,yytext());
+			{ return symbol(TabelaSimbolos.ENDPACKAGE,yytext());
 			}
 			case 71: break;
 			case 63: 
-			{ return symbol(sym.CONTEXT,yytext());
+			{ return symbol(TabelaSimbolos.CONTEXT,yytext());
 			}
 			case 72: break;
 			case 37: 
@@ -920,31 +920,31 @@ class Scanner implements java_cup.runtime.Scanner {
 			}
 			case 74: break;
 			case 3: 
-			{ return symbol(sym.IDENTIFIER,yytext());
+			{ return symbol(TabelaSimbolos.IDENTIFIER,yytext());
 			}
 			case 75: break;
 			case 17: 
-			{ return symbol(sym.LESSTHAN,yytext());
+			{ return symbol(TabelaSimbolos.LESSTHAN,yytext());
 			}
 			case 76: break;
 			case 29: 
-			{ return symbol(sym.OR,yytext());
+			{ return symbol(TabelaSimbolos.OR,yytext());
 			}
 			case 77: break;
 			case 4: 
-			{ return symbol(sym.INTEGER_LITERAL,yytext());
+			{ return symbol(TabelaSimbolos.INTEGER_LITERAL,yytext());
 			}
 			case 78: break;
 			case 66: 
-			{ return symbol(sym.BODYCONTEXT,yytext());
+			{ return symbol(TabelaSimbolos.BODYCONTEXT,yytext());
 			}
 			case 79: break;
 			case 62: 
-			{ return symbol(sym.IMPLIES,yytext());
+			{ return symbol(TabelaSimbolos.IMPLIES,yytext());
 			}
 			case 80: break;
 			case 45: 
-			{ return symbol(sym.NOT,yytext());
+			{ return symbol(TabelaSimbolos.NOT,yytext());
 			}
 			case 81: break;
 			case 26: 
@@ -952,15 +952,15 @@ class Scanner implements java_cup.runtime.Scanner {
 			}
 			case 82: break;
 			case 61: 
-			{ return symbol(sym.RESULT,yytext());
+			{ return symbol(TabelaSimbolos.RESULT,yytext());
 			}
 			case 83: break;
 			case 54: 
-			{ return symbol(sym.TRUE,yytext());
+			{ return symbol(TabelaSimbolos.TRUE,yytext());
 			}
 			case 84: break;
 			case 53: 
-			{ return symbol(sym.INIT,yytext());
+			{ return symbol(TabelaSimbolos.INIT,yytext());
 			}
 			case 85: break;
 			case 36: 
@@ -968,67 +968,67 @@ class Scanner implements java_cup.runtime.Scanner {
 			}
 			case 86: break;
 			case 18: 
-			{ return symbol(sym.LEFTPARENTHESIS,yytext());
+			{ return symbol(TabelaSimbolos.LEFTPARENTHESIS,yytext());
 			}
 			case 87: break;
 			case 20: 
-			{ return symbol(sym.LEFTBRACK,yytext());
+			{ return symbol(TabelaSimbolos.LEFTBRACK,yytext());
 			}
 			case 88: break;
 			case 56: 
-			{ return symbol(sym.POST,yytext());
+			{ return symbol(TabelaSimbolos.POST,yytext());
 			}
 			case 89: break;
 			case 50: 
-			{ return symbol(sym.ELSE,yytext());
+			{ return symbol(TabelaSimbolos.ELSE,yytext());
 			}
 			case 90: break;
 			case 22: 
-			{ return symbol(sym.LEFTBRACKET,yytext());
+			{ return symbol(TabelaSimbolos.LEFTBRACKET,yytext());
 			}
 			case 91: break;
 			case 10: 
-			{ return symbol(sym.VIRGULA, yytext());
+			{ return symbol(TabelaSimbolos.VIRGULA, yytext());
 			}
 			case 92: break;
 			case 52: 
-			{ return symbol(sym.VOID,yytext());
+			{ return symbol(TabelaSimbolos.VOID,yytext());
 			}
 			case 93: break;
 			case 43: 
-			{ return symbol(sym.DEF,yytext());
+			{ return symbol(TabelaSimbolos.DEF,yytext());
 			}
 			case 94: break;
 			case 19: 
-			{ return symbol(sym.RIGHTPARENTHESIS,yytext());
+			{ return symbol(TabelaSimbolos.RIGHTPARENTHESIS,yytext());
 			}
 			case 95: break;
 			case 51: 
-			{ return symbol(sym.SELF,yytext());
+			{ return symbol(TabelaSimbolos.SELF,yytext());
 			}
 			case 96: break;
 			case 44: 
-			{ return symbol(sym.AND,yytext());
+			{ return symbol(TabelaSimbolos.AND,yytext());
 			}
 			case 97: break;
 			case 46: 
-			{ return symbol(sym.XOR,yytext());
+			{ return symbol(TabelaSimbolos.XOR,yytext());
 			}
 			case 98: break;
 			case 6: 
-			{ return symbol(sym.POINT,yytext());
+			{ return symbol(TabelaSimbolos.POINT,yytext());
 			}
 			case 99: break;
 			case 11: 
-			{ return symbol(sym.GREATERTHAN,yytext());
+			{ return symbol(TabelaSimbolos.GREATERTHAN,yytext());
 			}
 			case 100: break;
 			case 16: 
-			{ return symbol(sym.DIVIDE,yytext());
+			{ return symbol(TabelaSimbolos.DIVIDE,yytext());
 			}
 			case 101: break;
 			case 30: 
-			{ return symbol(sym.IF,yytext());
+			{ return symbol(TabelaSimbolos.IF,yytext());
 			}
 			case 102: break;
 			case 39: 
@@ -1036,28 +1036,28 @@ class Scanner implements java_cup.runtime.Scanner {
 			}
 			case 103: break;
 			case 58: 
-			{ return symbol(sym.ENDIF,yytext());
+			{ return symbol(TabelaSimbolos.ENDIF,yytext());
 			}
 			case 104: break;
 			case 9: 
-			{ return symbol(sym.POINT_VIRGULA,yytext());
+			{ return symbol(TabelaSimbolos.POINT_VIRGULA,yytext());
 			}
 			case 105: break;
 			case 14: 
-			{ return symbol(sym.EQ,yytext());
+			{ return symbol(TabelaSimbolos.EQ,yytext());
 			}
 			case 106: break;
 			case 55: 
-			{ return symbol(sym.THEN,yytext());
+			{ return symbol(TabelaSimbolos.THEN,yytext());
 			}
 			case 107: break;
 			case 34: 
-			{ return symbol(sym.NOTEQ,yytext());
+			{ return symbol(TabelaSimbolos.NOTEQ,yytext());
 			}
 			case 108: break;
 			case 25: 
 			{ yybegin(YYINITIAL); 
-			return symbol(sym.STRING_LITERAL, 
+			return symbol(TabelaSimbolos.STRING_LITERAL, 
 					string.toString());
 			}
 			case 109: break;
@@ -1066,75 +1066,75 @@ class Scanner implements java_cup.runtime.Scanner {
 			}
 			case 110: break;
 			case 21: 
-			{ return symbol(sym.RIGHTBRACK,yytext());
+			{ return symbol(TabelaSimbolos.RIGHTBRACK,yytext());
 			}
 			case 111: break;
 			case 47: 
-			{ return symbol(sym.PRE,yytext());
+			{ return symbol(TabelaSimbolos.PRE,yytext());
 			}
 			case 112: break;
 			case 64: 
-			{ return symbol(sym.PACKAGE,yytext());
+			{ return symbol(TabelaSimbolos.PACKAGE,yytext());
 			}
 			case 113: break;
 			case 32: 
-			{ return symbol(sym.DDOUBLEPOINT,yytext());
+			{ return symbol(TabelaSimbolos.DDOUBLEPOINT,yytext());
 			}
 			case 114: break;
 			case 35: 
-			{ return symbol(sym.LESSEQTHAN,yytext());
+			{ return symbol(TabelaSimbolos.LESSEQTHAN,yytext());
 			}
 			case 115: break;
 			case 41: 
-			{ return symbol(sym.LET,yytext());
+			{ return symbol(TabelaSimbolos.LET,yytext());
 			}
 			case 116: break;
 			case 40: 
-			{ return symbol(sym.FLOAT_LITERAL,yytext());
+			{ return symbol(TabelaSimbolos.FLOAT_LITERAL,yytext());
 			}
 			case 117: break;
 			case 28: 
-			{ return symbol(sym.ARROW,yytext());
+			{ return symbol(TabelaSimbolos.ARROW,yytext());
 			}
 			case 118: break;
 			case 12: 
-			{ return symbol(sym.PIPELINE, yytext());
+			{ return symbol(TabelaSimbolos.PIPELINE, yytext());
 			}
 			case 119: break;
 			case 31: 
-			{ return symbol(sym.IN,yytext());
+			{ return symbol(TabelaSimbolos.IN,yytext());
 			}
 			case 120: break;
 			case 60: 
-			{ return symbol(sym.DERIVE,yytext());
+			{ return symbol(TabelaSimbolos.DERIVE,yytext());
 			}
 			case 121: break;
 			case 49: 
-			{ return symbol(sym.COLLECTION, yytext());
+			{ return symbol(TabelaSimbolos.COLLECTION, yytext());
 			}
 			case 122: break;
 			case 23: 
-			{ return symbol(sym.RIGHTBRACKET,yytext());
+			{ return symbol(TabelaSimbolos.RIGHTBRACKET,yytext());
 			}
 			case 123: break;
 			case 59: 
-			{ return symbol(sym.FALSE,yytext());
+			{ return symbol(TabelaSimbolos.FALSE,yytext());
 			}
 			case 124: break;
 			case 48: 
-			{ return symbol(sym.MOD,yytext());
+			{ return symbol(TabelaSimbolos.MOD,yytext());
 			}
 			case 125: break;
 			case 5: 
-			{ return symbol(sym.MINUS,yytext());
+			{ return symbol(TabelaSimbolos.MINUS,yytext());
 			}
 			case 126: break;
 			case 33: 
-			{ return symbol(sym.GREATEREQTHAN,yytext());
+			{ return symbol(TabelaSimbolos.GREATEREQTHAN,yytext());
 			}
 			case 127: break;
 			case 57: 
-			{ return symbol(sym.ATPRE,yytext());
+			{ return symbol(TabelaSimbolos.ATPRE,yytext());
 			}
 			case 128: break;
 			case 24: 
@@ -1142,11 +1142,11 @@ class Scanner implements java_cup.runtime.Scanner {
 			}
 			case 129: break;
 			case 15: 
-			{ return symbol(sym.MULTIPLY,yytext());
+			{ return symbol(TabelaSimbolos.MULTIPLY,yytext());
 			}
 			case 130: break;
 			case 42: 
-			{ return symbol(sym.INV,yytext());
+			{ return symbol(TabelaSimbolos.INV,yytext());
 			}
 			case 131: break;
 			case 27: 
@@ -1157,7 +1157,7 @@ class Scanner implements java_cup.runtime.Scanner {
 				if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
 					zzAtEOF = true;
 					zzDoEOF();
-					{ return new java_cup.runtime.Symbol(sym.EOF); }
+					{ return new java_cup.runtime.Symbol(TabelaSimbolos.EOF); }
 				} 
 				else {
 					zzScanError(ZZ_NO_MATCH);
@@ -1181,9 +1181,9 @@ class Scanner implements java_cup.runtime.Scanner {
 		}
 		else {
 			for (int i = 0; i < argv.length; i++) {
-				Scanner scanner = null;
+				AnalisadorLexico scanner = null;
 				try {
-					scanner = new Scanner( new java.io.FileReader(argv[i]) );
+					scanner = new AnalisadorLexico( new java.io.FileReader(argv[i]) );
 					while ( !scanner.zzAtEOF ) scanner.next_token();
 				}
 				catch (java.io.FileNotFoundException e) {
