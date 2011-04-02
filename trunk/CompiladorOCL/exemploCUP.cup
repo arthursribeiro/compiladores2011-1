@@ -126,7 +126,9 @@ non terminal            oclFile, packageName, oclExpressions,constraint,contextD
 					propertyCallPost, propertyCallAuxPost, propertyCallAux2Post, propertyCallAux3Post, qualifiersPost, 
 					propertyCallParametersPost, propertyCallParametersAuxPost, propertyCallParametersAux2Post, 
 					declaratorPost, declaratorAuxPost, declaratorAuxLoopPost, declaratorAux2Post, declaratorAux3Post, 
-					actualParameterListPost, actualParameterListAuxPost, actualParameterListAuxLoopPost, 
+					actualParameterListPost, actualParameterListAuxPost, actualParameterListAuxLoopPost,
+					collectionItemPost, collectionItemAuxPost, ifExpressionPost, 
+					literalCollectionPost, literalCollectionAuxPost, literalCollectionAux2Post, literalCollectionAuxLoopPost, 
 					unaryExpressionPost, unaryExpressionAuxPost, postfixExpressionPost, postfixExpressionAux2Post, postfixExpressionAux2LoopPost, primaryExpressionPost, literalPost;
 
 
@@ -209,6 +211,8 @@ operationContextAux ::= DOUBLEPOINT returnType | ;
 
 
 ifExpression ::= IF expression THEN expression ELSE expression ENDIF;
+
+ifExpressionPost ::= IF expressionPost THEN expressionPost ELSE expressionPost ENDIF;
 
 
 
@@ -339,7 +343,7 @@ postfixExpressionAux2Loop ::= postfixExpressionAux2 postfixExpressionAux2Loop | 
 
 
 
-postfixExpressionPost ::= primaryExpressionPost postfixExpressionAux2Loop;
+postfixExpressionPost ::= primaryExpressionPost postfixExpressionAux2LoopPost;
 
 postfixExpressionAux2Post ::= postfixExpressionAux propertyCallPost;
 
@@ -349,7 +353,7 @@ postfixExpressionAux2LoopPost ::= postfixExpressionAux2Post postfixExpressionAux
 
 primaryExpression ::= literalCollection | literal | propertyCall | LEFTPARENTHESIS expression RIGHTPARENTHESIS | SELF | ifExpression;
 
-primaryExpressionPost ::= literalCollection | literalPost | propertyCallPost | LEFTPARENTHESIS expression RIGHTPARENTHESIS | SELF | ifExpression;
+primaryExpressionPost ::= literalCollectionPost | literalPost | propertyCallPost | LEFTPARENTHESIS expressionPost RIGHTPARENTHESIS | SELF | ifExpressionPost;
 
 
 
@@ -395,11 +399,25 @@ literalCollectionAuxLoop ::= literalCollectionAux literalCollectionAuxLoop | ;
 literalCollectionAux2 ::= collectionItem literalCollectionAuxLoop | ;
 
 
+literalCollectionPost ::= collectionKind LEFTBRACKET literalCollectionAux2Post RIGHTBRACKET;
+
+literalCollectionAuxPost ::= VIRGULA collectionItemPost;
+
+literalCollectionAuxLoopPost ::= literalCollectionAuxPost literalCollectionAuxLoopPost | ;
+
+literalCollectionAux2Post ::= collectionItemPost literalCollectionAuxLoopPost | ;
+
+
 /* collectionItem ::= expression (POINT POINT expression )?; */
 
 collectionItem ::= expression collectionItemAux;
 
 collectionItemAux ::= POINT POINT expression | ;
+
+
+collectionItemPost ::= expressionPost collectionItemAuxPost;
+
+collectionItemAuxPost ::= POINT POINT expressionPost | ;
 
 
 /* propertyCall ::= pathName ( timeExpression )? ( qualifiers )? ( propertyCallParameters )?; */
