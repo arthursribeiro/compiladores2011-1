@@ -32,7 +32,8 @@ public class Main {
 					}
 
 				} else {
-					JOptionPane.showMessageDialog(null, "Arquivo não selecionado. Escolha novamente");
+					JOptionPane.showMessageDialog(null, "Arquivo não selecionado. Análise Léxica e Sintática abortada.");
+					return;
 				}
 			}
 			
