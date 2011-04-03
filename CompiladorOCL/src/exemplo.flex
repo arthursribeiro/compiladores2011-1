@@ -1,14 +1,14 @@
-/* JFlex example: part of Java language lexer specification */
+/* JFlex para construção do analisador léxico de parte de OCL */
 import java_cup.runtime.*;
 
 %%
-%class Scanner
+%class AnalisadorLexico
 %standalone
 %unicode
 %cup
 %line
 %column
- %{
+%{
   StringBuffer string = new StringBuffer();
 
   private Symbol symbol(int type) {
