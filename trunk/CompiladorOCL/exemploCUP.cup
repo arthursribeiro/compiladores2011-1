@@ -1,6 +1,6 @@
 import java_cup.runtime.*;
 
-/* Preliminaries to set up and use the scanner.  */
+/* Definindo alguns trechos de código que será utilizado no Analisador Sintático  */
 scan with {: return scanner.next_token(); :};
 
 parser code{: 	public void report_error(String message, Object info){
@@ -188,18 +188,11 @@ constraintAux2Loop ::= constraintAux2 constraintAux2Loop | ;
 constraintAux3 ::= IDENTIFIER | ;
 
 
-/* contextDeclaration ::= CONTEXT ( operationContext | classifierContext ); */
+/* contextDeclaration ::= CONTEXT ( operationContext ); */
 
 contextDeclaration ::= CONTEXT contextDeclarationAux;
 
-contextDeclarationAux ::= operationContext | classifierContext;
-
-
-/* classifierContext ::= (IDENTIFIER DOUBLEPOINT IDENTIFIER ) | IDENTIFIER; */
-
-classifierContext ::= classifierContextAux | IDENTIFIER;
-
-classifierContextAux ::= IDENTIFIER DOUBLEPOINT IDENTIFIER;
+contextDeclarationAux ::= operationContext;
 
 
 /* operationContext ::= IDENTIFIER DDOUBLEPOINT operationName LEFTPARENTHESIS formalParameterList RIGHTPARENTHESIS ( DOUBLEPOINT returnType )?; */
@@ -353,7 +346,7 @@ postfixExpressionAux2LoopPost ::= postfixExpressionAux2Post postfixExpressionAux
 
 primaryExpression ::= literalCollection | literal | propertyCall | LEFTPARENTHESIS expression RIGHTPARENTHESIS | SELF | ifExpression;
 
-primaryExpressionPost ::= literalCollectionPost | literalPost | propertyCallPost | LEFTPARENTHESIS expressionPost RIGHTPARENTHESIS | SELF | ifExpressionPost;
+primaryExpressionPost ::= literalCollectionPost | literalPost | propertyCallPost | LEFTPARENTHESIS expressionPost RIGHTPARENTHESIS | SELF | SELF ATPRE | ifExpressionPost;
 
 
 
@@ -420,11 +413,9 @@ collectionItemPost ::= expressionPost collectionItemAuxPost;
 collectionItemAuxPost ::= POINT POINT expressionPost | ;
 
 
-/* propertyCall ::= pathName ( timeExpression )? ( qualifiers )? ( propertyCallParameters )?; */
+/* propertyCall ::= pathName ( qualifiers )? ( propertyCallParameters )?; */
 
-propertyCall ::= pathName propertyCallAux propertyCallAux2 propertyCallAux3;
-
-propertyCallAux ::= timeExpression | ;
+propertyCall ::= pathName propertyCallAux2 propertyCallAux3;
 
 propertyCallAux2 ::= qualifiers | ;
 
