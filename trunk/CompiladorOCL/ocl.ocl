@@ -1,5 +1,5 @@
 context Person::getMortgage(sum : Money, security : House) 
-post: self@pre.variavel@pre
+pre: self@pre.variavel@pre
 
 context Person::getMortgage(sum : Money, security : House) 
 pre: security.value >= security.mortgages.principal->sum()
