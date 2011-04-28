@@ -29,8 +29,6 @@ public class XMIParser {
 	private static final String UML_CLASS = "uml:Class";
 	private static final String UML_ASSOCIATION = "uml:Association";
 	private static final String UML_ENUMERATION = "uml:Enumeration";
-	private static final String UML_PROPERTY = "uml:Property";
-	private static final String UML_OPERATION = "uml:Operation";
 	private static final String UML_PRIMITIVE_TYPE = "uml:PrimitiveType";
 	
 	private static final String XMI_TYPE = "xmi:type";
