@@ -3,7 +3,7 @@ package xmi.bean;
 public class Atributo {
 	
 	private String idTipo;
-	private Classe tipo;
+	private Entidade tipo;
 	private String visibilidade;
 	private String nome;
 	
@@ -17,6 +17,7 @@ public class Atributo {
 		this.nome = n;
 		this.qtdMax = qtdM;
 		this.qtdMin = qtdMi;
+		this.tipo = null;
 	}
 
 
@@ -30,12 +31,12 @@ public class Atributo {
 	}
 
 
-	public Classe getTipo() {
+	public Entidade getTipo() {
 		return tipo;
 	}
 
 
-	public void setTipo(Classe tipo) {
+	public void setTipo(Entidade tipo) {
 		this.tipo = tipo;
 	}
 
@@ -51,7 +52,14 @@ public class Atributo {
 
 
 	public String getNome() {
-		return nome;
+		if(nome!=null)
+			return nome;
+		else{
+			String aux = tipo.getName();
+			if(aux.length()>=1);
+				aux = (""+aux.charAt(0)).toLowerCase()+aux.substring(1);
+			return (qtdMax>1 || qtdMax<0)?aux+"s":aux;
+		}
 	}
 
 
@@ -81,6 +89,7 @@ public class Atributo {
 	
 	@Override
 	public String toString() {
-		return " "+nome+" ("+idTipo+") ["+qtdMax+" "+qtdMin+"] ";
+		String tipo = this.tipo==null?this.idTipo:this.tipo.getName();
+		return " "+getNome()+" ("+tipo+") ["+qtdMin+" "+qtdMax+"] ";
 	}
 }
