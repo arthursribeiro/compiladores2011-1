@@ -1,5 +1,6 @@
 package xmi;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -12,6 +13,10 @@ import org.w3c.dom.NodeList;
 
 import xmi.bean.Atributo;
 import xmi.bean.Classe;
+import xmi.bean.Entidade;
+import xmi.bean.Enumeration;
+import xmi.bean.Operacao;
+import xmi.bean.Parametro;
 
 
 public class XMIParser {
@@ -19,6 +24,7 @@ public class XMIParser {
 	private static final String OWNED_MEMBER = "ownedMember";
 	private static final String OWNED_ATTRIBUTE = "ownedAttribute";
 	private static final String OWNED_OPERATION = "ownedOperation";
+	private static final String OWNED_LITERAL = "ownedLiteral";
 	private static final String GENERALIZATION = "generalization";
 	private static final String UML_CLASS = "uml:Class";
 	private static final String UML_ASSOCIATION = "uml:Association";
@@ -38,12 +44,14 @@ public class XMIParser {
 	private static final String TYPE = "type";
 	private static final String VISIBILITY = "visibility";
 	private static final String GENERAL = "general";
+	private static final String DIRECTION = "direction";
+	private static final String RETURN = "return";
 	
 	private static final String UPPER_VALUE = "upperValue";
 	private static final String LOWER_VALUE = "lowerValue";
 	private static final String VALUE = "value";
 	
-	private HashMap<String,Classe> classes = new HashMap<String, Classe>();
+	private HashMap<String,Entidade> classes = new HashMap<String, Entidade>();
 	
 	private File xmi;
 	
@@ -76,12 +84,110 @@ public class XMIParser {
 	}
 
 	private void mapeiaIdsClasses() {
-		
-		
+		for (Entidade ent : classes.values()) {
+			if(ent instanceof Classe){
+				Classe c = (Classe) ent;
+				Entidade pai = classes.get(c.getIdClassePai());
+				if(pai!=null && pai instanceof Classe){
+					c.setClassePai((Classe) pai);
+				}
+				
+				for (Atributo att : c.getAtributos()) {
+					Entidade tipo = classes.get(att.getIdTipo());
+					if(tipo!=null){
+						att.setTipo(tipo);
+					}
+				}
+				
+				for (Operacao op : c.getOperacoes()) {
+					Entidade retorno = classes.get(op.getReturnType());
+					if(retorno!=null){
+						op.setReturnClass( retorno);
+					}
+					
+					for (Parametro p : op.getParametros()) {
+						Entidade t = classes.get(p.getIdTipo());
+						if(t!=null){
+							p.setTipo(t);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private void mapeiaOperacao(Node operacao, Classe c) {
+		NodeList parameters = operacao.getChildNodes();
+		NamedNodeMap operacaoMap = operacao.getAttributes();
 		
+		Node name = operacaoMap.getNamedItem(NAME);
+		String n = null;
+		if(name!=null)
+			n = name.getNodeValue();
+		
+		Node visibility = operacaoMap.getNamedItem(VISIBILITY);
+		String v = null;
+		if(visibility!=null)
+			v = visibility.getNodeValue();
+		
+		String retorno = null;
+		ArrayList<Parametro> params = new ArrayList<Parametro>();
+		
+		for (int i = 0; i < parameters.getLength(); i++) {
+			Node attChild = parameters.item(i);
+			NamedNodeMap childMap = attChild.getAttributes();
+			if(childMap==null)
+				continue;
+			Node direction = childMap.getNamedItem(DIRECTION);
+			if(direction!=null && direction.getNodeValue().equalsIgnoreCase(RETURN)){ //Não é parametro, está especificando o retorno
+				Node type = childMap.getNamedItem(TYPE);
+				if(type!=null){
+					retorno = type.getNodeValue();
+				}else{
+					type = getNodeTypeFromParameter(attChild);
+					retorno = getRealType(type);
+				}
+			}else{
+				Parametro p = mapeiaParametro(attChild);
+				params.add(p);
+			}
+		}
+		
+		Operacao op = new Operacao(n,retorno,v,params);
+		c.addOperacao(op);
+	}
+
+	private Parametro mapeiaParametro(Node attChild) {
+		NamedNodeMap atts = attChild.getAttributes();
+		Node n = atts.getNamedItem(NAME);
+		Node t = atts.getNamedItem(TYPE);
+		
+		String name = null;
+		String type = null;
+		
+		if(t==null){
+			t = getNodeTypeFromParameter(attChild);
+			type = getRealType(t);
+		}else{
+			type = t.getNodeValue();
+		}
+		
+		if(n!=null)
+			name = n.getNodeValue();
+		
+		Parametro p = new Parametro(name,type);
+		return p;
+	}
+
+	private Node getNodeTypeFromParameter(Node attChild) {
+		NodeList nl = attChild.getChildNodes();
+		for (int i = 0; i < nl.getLength(); i++) {
+			Node item = nl.item(i);
+			if(item.getNodeName().startsWith(TYPE)){
+				return item;
+			}
+		}
+		return null;
 	}
 
 	private void mapeiaAtributo(Node atributo, Classe c) {
@@ -157,9 +263,28 @@ public class XMIParser {
 		if(type.equalsIgnoreCase(UML_CLASS)){
 			salvaClasse(ownedElement,nodeMap);
 		}else if(type.equalsIgnoreCase(UML_ENUMERATION)){
-			
+			salvaEnumeration(ownedElement,nodeMap);
 		}else if(type.equalsIgnoreCase(UML_ASSOCIATION)){
 			
+		}
+	}
+
+	private void salvaEnumeration(Node ownedElement, NamedNodeMap nodeMap) {
+		Node name = nodeMap.getNamedItem(NAME);
+		Node visibility = nodeMap.getNamedItem(VISIBILITY);
+		Node id = nodeMap.getNamedItem(XMI_ID);
+		if(name!=null && visibility!=null && id!=null){
+			Enumeration e = new Enumeration(name.getNodeValue(),visibility.getNodeValue());
+			NodeList nl = ownedElement.getChildNodes();
+			for (int i = 0; i < nl.getLength(); i++) {
+				Node node = nl.item(i);
+				if(node.getNodeName().startsWith(OWNED_LITERAL)){
+					Node n = node.getAttributes().getNamedItem(NAME);
+					Node v = node.getAttributes().getNamedItem(VISIBILITY);
+					e.addValue(n.getNodeValue(),v.getNodeValue());
+				}
+			}
+			classes.put(id.getNodeValue(), e);
 		}
 	}
 
@@ -217,15 +342,24 @@ public class XMIParser {
 			File xmi = new File("C:\\Users\\DAVI\\Documents\\workspace\\Java\\CompiladorOCL\\src\\Profe.xml");
 			XMIParser parser = new XMIParser(xmi);
 			parser.readXMI();
-			for (Classe c : parser.classes.values()) {
-				System.out.println(c);
-				for (Atributo att : c.getAtributos()) {
-					System.out.println(att);
+			
+			for (Entidade ent : parser.classes.values()) {
+				if(ent instanceof Classe){
+					Classe c = (Classe) ent;
+					System.out.println(c);
+					for (Atributo att : c.getAtributos()) {
+						System.out.println(att);
+					}
+					System.out.println();
+					for (Operacao op : c.getOperacoes()) {
+						System.out.println(op);
+					}
+					System.out.println("\n=====================\n\n");
 				}
-				System.out.println("\n=====================\n\n");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 	}
 }

@@ -2,7 +2,7 @@ package xmi.bean;
 
 import java.util.ArrayList;
 
-public class Classe {
+public class Classe implements Entidade{
 	
 	private String name;
 	private String visibility;
@@ -17,6 +17,8 @@ public class Classe {
 	public Classe(String n, String v) {
 		this.name = n;
 		this.visibility = v;
+		this.idClassePai = "";
+		this.classePai = null;
 	}
 
 	public String getName() {
@@ -45,11 +47,16 @@ public class Classe {
 	
 	@Override
 	public String toString() {
-		return " "+name+"("+idClassePai+") ";
+		String heranca = "";
+		if(idClassePai!=null)
+			heranca = idClassePai;
+		if(classePai!=null)
+			heranca = classePai.getName();
+		return " "+name+"("+heranca+") ";
 	}
 
 	public void addAtributo(Atributo att) throws Exception {
-		atributos.add(att);
+		this.atributos.add(att);
 	}
 
 	public Classe getClassePai() {
@@ -82,5 +89,9 @@ public class Classe {
 
 	public void setAssociacoes(ArrayList<Associacao> associacoes) {
 		this.associacoes = associacoes;
+	}
+
+	public void addOperacao(Operacao op) {
+		this.operacoes.add(op);
 	}
 }
