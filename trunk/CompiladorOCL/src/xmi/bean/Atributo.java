@@ -7,6 +7,10 @@ public class Atributo {
 	private String visibilidade;
 	private String nome;
 	
+	//Atributos que vão me informar se o atributo eh uma colecao
+	//Ex1.: Relacionamento 0..* vai ter qtdMin e qtdMax = -1
+	//Ex2.: Relacionamento 1..* tem qtdMin = 1 e qtdMax = -1
+	//Ex3.: Relacionamento 1..5 tem qtdMin = 1 e qtdMax = 5
 	private int qtdMax;
 	private int qtdMin;
 
