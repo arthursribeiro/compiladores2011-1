@@ -360,4 +360,12 @@ public class XMIParser {
 		}
 		
 	}
+
+	public HashMap<String, Entidade> getClasses() {
+		return classes;
+	}
+
+	public File getXmi() {
+		return xmi;
+	}
 }
