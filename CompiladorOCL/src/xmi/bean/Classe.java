@@ -12,7 +12,6 @@ public class Classe implements Entidade{
 	private ArrayList<Atributo> atributos = new ArrayList<Atributo>();
 	private ArrayList<Operacao> operacoes = new ArrayList<Operacao>();
 	
-	private ArrayList<Associacao> associacoes = new ArrayList<Associacao>();
 	
 	public Classe(String n, String v) {
 		this.name = n;
@@ -81,14 +80,6 @@ public class Classe implements Entidade{
 
 	public void setOperacoes(ArrayList<Operacao> operacoes) {
 		this.operacoes = operacoes;
-	}
-
-	public ArrayList<Associacao> getAssociacoes() {
-		return associacoes;
-	}
-
-	public void setAssociacoes(ArrayList<Associacao> associacoes) {
-		this.associacoes = associacoes;
 	}
 
 	public void addOperacao(Operacao op) {
