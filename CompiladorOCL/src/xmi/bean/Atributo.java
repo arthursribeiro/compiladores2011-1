@@ -62,7 +62,7 @@ public class Atributo {
 			String aux = tipo.getName();
 			if(aux.length()>=1);
 				aux = (""+aux.charAt(0)).toLowerCase()+aux.substring(1);
-			return (qtdMax>1 || qtdMax<0)?aux+"s":aux;
+			return ehColecao()?aux+"s":aux;
 		}
 	}
 
@@ -95,5 +95,10 @@ public class Atributo {
 	public String toString() {
 		String tipo = this.tipo==null?this.idTipo:this.tipo.getName();
 		return " "+getNome()+" ("+tipo+") ["+qtdMin+" "+qtdMax+"] ";
+	}
+
+
+	public boolean ehColecao() {
+		return (qtdMax>1 || qtdMax<0);
 	}
 }
