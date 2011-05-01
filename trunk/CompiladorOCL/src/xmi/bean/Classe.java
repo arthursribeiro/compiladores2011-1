@@ -85,4 +85,18 @@ public class Classe implements Entidade{
 	public void addOperacao(Operacao op) {
 		this.operacoes.add(op);
 	}
+
+	public boolean temPai() {
+		return this.classePai!=null;
+	}
+
+	public boolean ehFilho(Classe c2) {
+		if(classePai!=null){
+			if(classePai.getName().equals(c2.getName()))
+				return true;
+			else
+				return classePai.ehFilho(c2);
+		}
+		return false;
+	}
 }
