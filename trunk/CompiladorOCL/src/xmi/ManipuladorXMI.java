@@ -1,22 +1,27 @@
 package xmi;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import xmi.bean.Atributo;
 import xmi.bean.Classe;
+import xmi.bean.Entidade;
 import xmi.bean.Operacao;
 
 //Classe que vai ter os métodos estáticos
 public class ManipuladorXMI {
 	
-	private static ArrayList<Classe> classes;
+	private static ArrayList<Entidade> classes;
 	private static ArrayList<String> hierarquiaNumbers;
 	
 	private ManipuladorXMI() {
 	}
 	
-	public static void setStaticClasses(ArrayList<Classe> cls){
-		classes = cls;
+	public static void setStaticClasses(Collection<Entidade> cls){
+		classes = new ArrayList<Entidade>();
+		for (Entidade entidade : cls) {
+			classes.add(entidade);
+		}
 		hierarquiaNumbers = new ArrayList<String>();
 		hierarquiaNumbers.add("Integer");
 		hierarquiaNumbers.add("Long");
@@ -25,9 +30,13 @@ public class ManipuladorXMI {
 	}
 	
 	private static Classe getClasse(String idClasse) throws Exception{
-		for (Classe classe : classes) {
-			if(classe.getName().equals(idClasse)){
-				return classe;
+		for (Entidade e : classes) {
+			if(e.getName().equals(idClasse)){
+				try{
+					return (Classe) e;
+				}catch(Exception ex){
+					throw new Exception("Type: <"+idClasse+"> isn't a class.");
+				}
 			}
 		}
 		throw new Exception("Type: <"+idClasse+"> doesn't exists.");

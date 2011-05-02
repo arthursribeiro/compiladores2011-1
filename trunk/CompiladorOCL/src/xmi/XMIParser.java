@@ -1,6 +1,7 @@
 package xmi;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -58,6 +59,10 @@ public class XMIParser {
 			this.xmi = xmi;
 		}else
 			throw new Exception("File '"+xmi.getAbsolutePath()+"' doesn't exists");
+	}
+	
+	public Collection<Entidade> getArrayClasses(){
+		return classes.values();
 	}
 	
 	private void readXMI() {
