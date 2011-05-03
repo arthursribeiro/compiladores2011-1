@@ -1,6 +1,6 @@
 import java_cup.runtime.*;
 
-/* Definindo alguns trechos de código que será utilizado no Analisador Sintático  */
+/* Definindo alguns trechos de cï¿½digo que serï¿½ utilizado no Analisador Sintï¿½tico  */
 scan with {: return scanner.next_token(); :};
 
 parser code{: 	public void report_error(String message, Object info){
@@ -64,7 +64,17 @@ terminal LEFTBRACK;
 terminal RIGHTBRACK;
 terminal LEFTBRACKET;
 terminal RIGHTBRACKET;
-terminal STRING_LITERAL;
+terminal SELECT;
+terminal FORALL;
+terminal INCLUDES;
+terminal INCLUDING;
+terminal SIZE;
+terminal EXISTS;
+terminal ISEMPTY;
+terminal NOTEMPTY;
+terminal EXCLUDESALL;
+terminal INCLUDESALL;
+
 
 /* Non terminals */
 non terminal            oclFile, packageName, oclExpressions,constraint,contextDeclaration,classifierContext,
