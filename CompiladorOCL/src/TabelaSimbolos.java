@@ -8,12 +8,10 @@
 public class TabelaSimbolos {
 	  /* terminals */
 	  public static final int GREATERTHAN = 46;
-	  public static final int FORALL = 59;
 	  public static final int LEFTBRACKET = 55;
 	  public static final int DIVIDE = 43;
 	  public static final int DOUBLEPOINT = 29;
 	  public static final int STRING_LITERAL = 57;
-	  public static final int ISEMPTY = 64;
 	  public static final int RIGHTBRACKET = 56;
 	  public static final int XOR = 26;
 	  public static final int INV = 17;
@@ -21,17 +19,14 @@ public class TabelaSimbolos {
 	  public static final int INIT = 16;
 	  public static final int MINUS = 41;
 	  public static final int PRE = 23;
-	  public static final int EXCLUDESALL = 66;
 	  public static final int VIRGULA = 32;
 	  public static final int NOT = 19;
 	  public static final int AND = 5;
-	  public static final int INCLUDES = 60;
 	  public static final int LESSTHAN = 45;
 	  public static final int IN = 15;
 	  public static final int OR = 20;
 	  public static final int IMPLIES = 14;
 	  public static final int COLLECTION = 35;
-	  public static final int SELECT = 58;
 	  public static final int PIPELINE = 34;
 	  public static final int PLUS = 50;
 	  public static final int LESSEQTHAN = 48;
@@ -40,13 +35,10 @@ public class TabelaSimbolos {
 	  public static final int CONTEXT = 7;
 	  public static final int EOF = 0;
 	  public static final int GREATEREQTHAN = 49;
-	  public static final int SIZE = 62;
 	  public static final int TRUE = 27;
 	  public static final int error = 1;
 	  public static final int SELF = 2;
-	  public static final int EXISTS = 63;
 	  public static final int RIGHTPARENTHESIS = 52;
-	  public static final int INCLUDING = 61;
 	  public static final int MOD = 44;
 	  public static final int DERIVE = 9;
 	  public static final int VOID = 3;
@@ -62,19 +54,15 @@ public class TabelaSimbolos {
 	  public static final int LEFTBRACK = 53;
 	  public static final int POINT = 39;
 	  public static final int PACKAGE = 21;
-	  public static final int NOTEMPTY = 65;
 	  public static final int LEFTPARENTHESIS = 51;
 	  public static final int LET = 18;
 	  public static final int THEN = 25;
-	  public static final int SUM = 68;
 	  public static final int DEF = 8;
 	  public static final int FLOAT_LITERAL = 38;
 	  public static final int FALSE = 28;
-	  public static final int INCLUDESALL = 67;
 	  public static final int ATPRE = 24;
 	  public static final int NOTEQ = 47;
 	  public static final int RESULT = 4;
 	  public static final int INTEGER_LITERAL = 37;
 	  public static final int IDENTIFIER = 36;
 	}
-
