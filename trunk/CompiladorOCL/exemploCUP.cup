@@ -64,6 +64,7 @@ terminal LEFTBRACK;
 terminal RIGHTBRACK;
 terminal LEFTBRACKET;
 terminal RIGHTBRACKET;
+terminal STRING_LITERAL;
 terminal SELECT;
 terminal FORALL;
 terminal INCLUDES;
