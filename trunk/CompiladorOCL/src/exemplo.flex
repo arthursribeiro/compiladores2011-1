@@ -75,8 +75,8 @@ EndComent = ([\n\r])?
 <YYINITIAL> "@pre"           { return symbol(sym.ATPRE,yytext()); }
 <YYINITIAL> "then"           { return symbol(sym.THEN,yytext()); }
 <YYINITIAL> "xor"           { return symbol(sym.XOR,yytext()); }
-<YYINITIAL> "true"           { return symbol(sym.TRUE,yytext()); }
-<YYINITIAL> "false"           { return symbol(sym.FALSE,yytext()); }
+<YYINITIAL> "true"           { return symbol(sym.TRUE, new Boolean(yytext())); }
+<YYINITIAL> "false"           { return symbol(sym.FALSE, new Boolean(yytext())); }
 <YYINITIAL> ":"           { return symbol(sym.DOUBLEPOINT,yytext()); }
 <YYINITIAL> ";"           { return symbol(sym.POINT_VIRGULA,yytext()); }
 <YYINITIAL> "::"           { return symbol(sym.DDOUBLEPOINT,yytext()); }
@@ -89,9 +89,9 @@ EndComent = ([\n\r])?
 <YYINITIAL> "Collection"             { return symbol(sym.COLLECTION, yytext()); }
  <YYINITIAL> {
   /* literals */
-  {Integer}            { return symbol(sym.INTEGER_LITERAL,yytext()); }
-  {FloatLiteral}		 { return symbol(sym.FLOAT_LITERAL,yytext()); }
-  {Number}            	 { return symbol(sym.FLOAT_LITERAL,yytext()); }
+  {Integer}            { return symbol(sym.INTEGER_LITERAL, new Integer(yytext())); }
+  {FloatLiteral}		 { return symbol(sym.FLOAT_LITERAL, new Float(yytext())); }
+  {Number}            	 { return symbol(sym.FLOAT_LITERAL, new Float(yytext())); }
   \'                             { string.setLength(0); yybegin(STRING); }
   \.           { return symbol(sym.POINT,yytext()); }
 
