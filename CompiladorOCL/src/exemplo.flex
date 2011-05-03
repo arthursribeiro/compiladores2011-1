@@ -87,17 +87,6 @@ EndComent = ([\n\r])?
 <YYINITIAL> "Bag"             { return symbol(sym.COLLECTION, yytext()); }
 <YYINITIAL> "Sequence"             { return symbol(sym.COLLECTION, yytext()); }
 <YYINITIAL> "Collection"             { return symbol(sym.COLLECTION, yytext()); }
-<YYINITIAL>  "select"			{ return symbol(sym.SELECT, yytext());}
-<YYINITIAL> "forAll"			{ return symbol(sym.FORALL, yytext());}
-<YYINITIAL> "includes"			{ return symbol(sym.INCLUDES, yytext());}
-<YYINITIAL> "including"			{ return symbol(sym.INCLUDING, yytext());}
-<YYINITIAL> "size"				{ return symbol(sym.SIZE, yytext());}
-<YYINITIAL> "sum"				{ return symbol(sym.SUM, yytext()); }
-<YYINITIAL> "exists"			{ return symbol(sym.EXISTS, yytext());}
-<YYINITIAL> "isEmpty"			{ return symbol(sym.ISEMPTY, yytext());}
-<YYINITIAL> "notEmpty"			{ return symbol(sym.NOTEMPTY, yytext());}
-<YYINITIAL> "excludesAll"		{ return symbol(sym.EXCLUDESALL, yytext());}
-<YYINITIAL> "includesAll"		{ return symbol(sym.INCLUDESALL, yytext());}
  <YYINITIAL> {
   /* literals */
   {Integer}            { return symbol(sym.INTEGER_LITERAL, new Integer(yytext())); }

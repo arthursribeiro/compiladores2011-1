@@ -65,17 +65,6 @@ terminal RIGHTBRACK;
 terminal LEFTBRACKET;
 terminal RIGHTBRACKET;
 terminal STRING_LITERAL;
-terminal SELECT;
-terminal FORALL;
-terminal INCLUDES;
-terminal INCLUDING;
-terminal SIZE;
-terminal EXISTS;
-terminal ISEMPTY;
-terminal NOTEMPTY;
-terminal EXCLUDESALL;
-terminal INCLUDESALL;
-terminal SUM;
 
 
 /* Non terminals */
@@ -344,6 +333,7 @@ postfixExpressionAux ::= POINT | ARROW;
 
 postfixExpressionAux2 ::= postfixExpressionAux propertyCall;
 
+
 postfixExpressionAux2Loop ::= postfixExpressionAux2 postfixExpressionAux2Loop | ;
 
 
@@ -500,8 +490,6 @@ actualParameterListPost ::= expressionPost actualParameterListAuxLoopPost;
 actualParameterListAuxPost ::= VIRGULA expressionPost;
 
 actualParameterListAuxLoopPost ::= actualParameterListAuxPost actualParameterListAuxLoopPost | ;
-
-
 
 collectionKind ::= COLLECTION;
 
