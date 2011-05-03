@@ -75,6 +75,7 @@ terminal ISEMPTY;
 terminal NOTEMPTY;
 terminal EXCLUDESALL;
 terminal INCLUDESALL;
+terminal SUM;
 
 
 /* Non terminals */

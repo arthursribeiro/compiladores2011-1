@@ -1,6 +1,3 @@
-context Person::getMortgage(sum : Money, security : House) 
-pre: security.value >= security.mortgages.principal->sum()
-
 context LoyaltyAccount::isEmpty(): Boolean 
 pre : at
 post: result = (points = 0) 
