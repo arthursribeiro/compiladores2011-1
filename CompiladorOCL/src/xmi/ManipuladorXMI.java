@@ -169,7 +169,7 @@ public class ManipuladorXMI {
 	 * @throws Exception
 	 */
 	
-	public String maxType(String type1, String type2, int line) throws Exception{
+	public static String maxType(String type1, String type2, int line) throws Exception{
 		
 		if(type1.equalsIgnoreCase(type2)){
 			return type1;
@@ -189,7 +189,7 @@ public class ManipuladorXMI {
 								hierarquiaNumbers.get( hierarquiaNumbers.indexOf(type2) );
 				}
 			}
-			throw new Exception("Operation not valid between " + type1 + " and " + type2+".\nAt line "+line);
+			throw new Exception("Semantic ERROR: Operation not valid between " + type1 + " and " + type2+".\nAt line "+line);
 		}
 	}
 	
@@ -203,6 +203,10 @@ public class ManipuladorXMI {
 				return true;
 		}
 		return false;
+	}
+
+	public static boolean isNumber(String type) {
+		return hierarquiaNumbers.contains(type);
 	}
 
 }

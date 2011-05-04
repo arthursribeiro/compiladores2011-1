@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import xmi.ManipuladorXMI;
+
 /**
  * Classe que serve para guardar os atributos
  * da gramatica anotada.
@@ -90,5 +92,9 @@ public class Node {
         public String toString() {
                 return value.toString();
         }
+
+		public boolean isNumber() {
+			return ManipuladorXMI.isNumber(this.type);
+		}
         
 }
