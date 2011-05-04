@@ -1,5 +1,5 @@
 import java_cup.runtime.*;
-import Semantica.ConteudoObjeto;
+import Semantica.AnalisadorSemantico;
 import Semantica.Node;
 
 /* Definindo alguns trechos de código que será utilizado no Analisador Sintático  */
@@ -11,7 +11,8 @@ parser code{:
 				public void report_error(String message, Object info){
 					Symbol sym = (Symbol) info;
 					throw new Error("Syntax ERROR in '"+sym.value+"' at line: "+(sym.left+1));
-			  	} :};
+			  	}
+		 :};
 
 /* Terminals (tokens returned by the scanner). */
 terminal SELF;
@@ -193,7 +194,11 @@ contextDeclarationAux ::= operationContext;
 
 /* operationContext ::= IDENTIFIER DDOUBLEPOINT operationName LEFTPARENTHESIS formalParameterList RIGHTPARENTHESIS ( DOUBLEPOINT returnType )?; */
 
-operationContext ::= IDENTIFIER DDOUBLEPOINT operationName LEFTPARENTHESIS formalParameterList RIGHTPARENTHESIS operationContextAux;
+operationContext ::= IDENTIFIER:idCont DDOUBLEPOINT operationName LEFTPARENTHESIS formalParameterList RIGHTPARENTHESIS DOUBLEPOINT returnType:retorno
+					{:
+						parser.semantico.setContextClass( ((String) idCont) );
+						parser.semantico.setContextType( ((String) retorno) ); 
+					:};
 
 operationContextAux ::= DOUBLEPOINT returnType | ;
 
@@ -242,111 +247,109 @@ expression ::= logicalExpression;
 
 /* logicalExpression ::= relationalExpression ( logicalOperator relationalExpression )*; */
 
-logicalExpression ::= relationalExpression logicalExpressionAuxLoop;
+logicalExpression ::= relationalExpression:relexp logicalExpressionAuxLoop:logexploop 
+						{: 
+							RESULT = parser.semantico.checkLogicalExpression(relexp, logexploop, relexpleft, logexploopleft); 
+						:} ;
 
-logicalExpressionAux ::= logicalOperator relationalExpression;
+logicalExpressionAux ::= logicalOperator:logop relationalExpression:relexp2 
+						{:
+							RESULT = parser.semantico.checkLogicalExpressionAux(relexp2, logop, relexp2left);
+						:};
 
-logicalExpressionAuxLoop ::= logicalExpressionAux logicalExpressionAuxLoop | ;
+logicalExpressionAuxLoop ::= logicalExpressionAux:logexpa logicalExpressionAuxLoop:logexpaloop 
+							{:
+								RESULT = parser.semantico.checkLogicalExpressionAuxLoop(logexpa, logexpaloop, logexpaloopleft);
+							:}
+							| ;
 
 
 /* relationalExpression ::= additiveExpression ( relationalOperator additiveExpression )?; */
 
-relationalExpression ::= additiveExpression relationalExpressionAux;
+relationalExpression ::= additiveExpression:addexp relationalExpressionAux:relexpaux3 
+						{:
+							RESULT = parser.semantico.checkRelationalExpression(relexpaux3, addexp,addexpleft);
+						:};
 
-relationalExpressionAux ::= relationalOperator additiveExpression | ;
+relationalExpressionAux ::= relationalOperator:relop additiveExpression:addexp2 
+							{:
+								RESULT = parser.semantico.checkRelationalExpressionAux(addexp2, relop, addexp2left);
+							:}
+							| ;
 
 
 /* additiveExpression ::= multiplicativeExpression ( addOperator multiplicativeExpression )*; */
 
-additiveExpression ::= multiplicativeExpression:m1 additiveExpressionAuxLoop:a1 {: if(a1 == null) {
-                                                                                       RESULT = ((ConteudoObjeto)m1);
-                                                                                   } else {
-                                                                                       String tipo;
-                                                                                       ConteudoObjeto c1, c2;
-                                                                                       c1 = ((ConteudoObjeto)m1);
-                                                                                       c2 = ((ConteudoObjeto)a1);
-                                                                                       if(c1.getTipo().equals("int") && c2.getTipo().equals("int")){
-                                                                                           tipo = "int";
-                                                                                       } else if (c1.getTipo().equals("int") && c2.getTipo().equals("float")) {
-                                                                                           tipo = "float";
-                                                                                       } else if (c1.getTipo().equals("float") && c2.getTipo().equals("int")) {
-                                                                                           tipo = "float";
-                                                                                       } else if (c1.getTipo().equals("float") && c2.getTipo().equals("float")) {
-                                                                                           tipo = "float";
-                                                                                       } else {
-                                                                                           throw new Exception("Nao eh permitido somar " + c1.getTipo() + " com " + c2.getTipo());
-                                                                                       }
-                                                                                   } :};
+additiveExpression ::= multiplicativeExpression:multexp additiveExpressionAuxLoop:addexpaloop 
+						{:
+							RESULT = parser.semantico.checkAdditiveExpression(addexpaloop, multexp, addexpaloopleft, multexpleft);
+						:};
 
-additiveExpressionAux ::= addOperator multiplicativeExpression;
+additiveExpressionAux ::= addOperator:addop multiplicativeExpression:multexp2 
+						{:
+							RESULT = parser.semantico.checkAdditiveExpressionAux(addop, multexp2, multexp2left);
+						:};
 
-additiveExpressionAuxLoop ::= additiveExpressionAux additiveExpressionAuxLoop | ;
+additiveExpressionAuxLoop ::= additiveExpressionAux:addexpa additiveExpressionAuxLoop:addexpaloop 
+							{:
+								RESULT = parser.semantico.checkAdditiveExpressionAuxLoop(addexpa, addexpaloop, addexpaloopleft, addexpaleft);
+							:} 
+							
+							| ;
 
 
 
 /* multiplicativeExpression ::= unaryExpression ( multiplyOperator unaryExpression )*; */
 
-multiplicativeExpression ::= unaryExpression:ue multiplicativeExpressionAuxLoop:meal {: if(meal == null) {
-                                                                                            RESULT = ((ConteudoObjeto)ue);
-                                                                                        } else {
-                                                                                            String tipo = null;
-                                                                                            ConteudoObjeto c1, c2;
-                                                                                            c1 = ((ConteudoObjeto)ue);
-                                                                                            c2 = ((ConteudoObjeto)meal);
-                                                                                            if(c1.getTipo().equals("int") && c2.getTipo().equals("int")){
-                                                                                                tipo = "int";
-                                                                                            } else if (c1.getTipo().equals("int") && c2.getTipo().equals("float")) {
-                                                                                                tipo = "float";
-                                                                                            } else if (c1.getTipo().equals("float") && c2.getTipo().equals("int")) {
-                                                                                                tipo = "float";
-                                                                                            } else if (c1.getTipo().equals("float") && c2.getTipo().equals("float")) {
-                                                                                                tipo = "float";
-                                                                                            } else {
-                                                                                                System.err.println("Nao eh permitido somar " + c1.getTipo() + " com " + c2.getTipo());
-                                                                                            }
-                                                                                            RESULT = new ConteudoObjeto(tipo, null);
-                                                                                        } :};
+multiplicativeExpression ::= unaryExpression:unexp multiplicativeExpressionAuxLoop:multexpaloop 
+							{:
+								RESULT = parser.semantico.checkMultiplicativeExpression(multexpaloop, unexp, multexpaloopleft, unexpleft);
+							:};
 
-multiplicativeExpressionAux ::= multiplyOperator unaryExpression:ue {: RESULT = ((ConteudoObjeto)ue); :};
+multiplicativeExpressionAux ::= multiplyOperator:multop unaryExpression:unexp
+								{:
+									RESULT  = parser.semantico.checkMultiplicativeExpressionAux(multop, unexp, unexpleft);
+								:};
 
-multiplicativeExpressionAuxLoop ::= multiplicativeExpressionAux:mea multiplicativeExpressionAuxLoop:meal {: if(meal == null) {
-                                                                                                                RESULT = ((ConteudoObjeto)mea);
-                                                                                                            } else {
-                                                                                                                String tipo = null;
-		 	                                                                                                    ConteudoObjeto c1, c2;
-		 	                                                                                                    c1 = ((ConteudoObjeto)mea);
-		 	                                                                                                    c2 = ((ConteudoObjeto)meal);
-		 	                                                                                                    if(c1.getTipo().equals("int") && c2.getTipo().equals("int")){
-		 	                                                                                                        tipo = "int";
-		 	                                                                                                    } else if (c1.getTipo().equals("int") && c2.getTipo().equals("float")) {
-		 	                                                                                                        tipo = "float";
-		 	                                                                                                    } else if (c1.getTipo().equals("float") && c2.getTipo().equals("int")) {
-		 	                                                                                                        tipo = "float";
-		 	                                                                                                    } else if (c1.getTipo().equals("float") && c2.getTipo().equals("float")) {
-		 	                                                                                                        tipo = "float";
-		 	                                                                                                    } else {
-		 	                                                                                                        System.err.println("Nao eh permitido somar " + c1.getTipo() + " com " + c2.getTipo());
-		 	                                                                                                    }
-		 	                                                                                                    RESULT = new ConteudoObjeto(tipo, null);
-			                                                                                                } :} 
-                                  | {: RESULT = null; :} ;
+multiplicativeExpressionAuxLoop ::= multiplicativeExpressionAux:addexpa multiplicativeExpressionAuxLoop:addexpaloop 
+									{:
+										RESULT  = parser.semantico.checkMultiplicativeExpressionAuxLoop(addexpaloop, addexpa, addexpaloopleft, addexpaleft);
+									:} 
+							
+									| ;
 
 
 
 
 /* unaryExpression ::= ( unaryOperator postfixExpression ) | postfixExpression; */
 
-unaryExpression ::= unaryExpressionAux:uea {: RESULT = ((ConteudoObjeto)uea); :} 
-                  | postfixExpression:pe {: RESULT = ((ConteudoObjeto)pe); :};
+unaryExpression ::= unaryExpressionAux:unexp 
+						{:
+							RESULT = unexp;
+						:} 
+					| postfixExpression:postfexp 
+						{:
+							RESULT = postfexp;
+						:};
 
-unaryExpressionAux ::= unaryOperator postfixExpression:pe {: RESULT = ((ConteudoObjeto)pe); :};
+unaryExpressionAux ::= unaryOperator:unop postfixExpression:postfexp 
+						{:
+							RESULT = postfexp;
+						:};
 
 
 
 
 /* postfixExpression ::= primaryExpression ( (POINT | ARROW) propertyCall )*; */
 
-postfixExpression ::= primaryExpression postfixExpressionAux2Loop;
+postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfexp
+					{:
+						if(postfexp==null){
+							RESULT = primexp;
+						}else{
+							//TO DO => Checagem com propertycall 
+						}
+					:};
 
 postfixExpressionAux ::= POINT | ARROW;
 
@@ -357,13 +360,20 @@ postfixExpressionAux2Loop ::= postfixExpressionAux2 postfixExpressionAux2Loop | 
 
 
 
-primaryExpression ::= literalCollection | 
-					  literal:lit1 {: RESULT = lit1; :} 
-					  | propertyCall 
-					  | LEFTPARENTHESIS expression:e1 RIGHTPARENTHESIS {: RESULT = e1; :} 
-					  | SELF 
-					  | SELF timeExpression  
-					  | ifExpression;
+primaryExpression ::= literalCollection 
+					| literal:lit1 
+						{: 
+							RESULT = lit1; 
+						:} 
+					| propertyCall 
+					| LEFTPARENTHESIS expression:exp RIGHTPARENTHESIS 
+						{:
+							RESULT = exp;
+						:} 
+					| SELF 
+					| SELF timeExpression  
+					| ifExpression;
+
 
 
 /* propertyCallParameters := LEFTPARENTHESIS ( declarator )? ( actualParameterList )? RIGHTPARENTHESIS; */
@@ -383,13 +393,17 @@ propertyCallParametersAux2 ::= actualParameterList:a1 {: RESULT = (Node)a1;:}
 
 
 
-booleanLiteral ::= TRUE:boolTrue {: RESULT = new ConteudoObjeto("Boolean",boolTrue); :} 
-					| FALSE:boolFalse {: RESULT = new ConteudoObjeto("Boolean",boolFalse); :};
+booleanLiteral ::= TRUE:boolTrue {: RESULT = new Node(boolTrue,"Boolean"); :} 
+					| FALSE:boolFalse {: RESULT = new Node(boolFalse,"Boolean"); :};
 
-literal ::= STRING_LITERAL:litString {: RESULT = new ConteudoObjeto("String",litString); :} 
-			| number:litNum {: RESULT = (ConteudoObjeto)litNum; :} 
-			| booleanLiteral:litBool {: RESULT = (ConteudoObjeto)litBool; :} 
-			| RESULT:litResult {: parser.semantico.checkStereotype("result",litResultleft); :};
+literal ::= STRING_LITERAL:litString {: RESULT = new Node(litString,"String"); :} 
+			| number:litNum {: RESULT = litNum; :} 
+			| booleanLiteral:litBool {: RESULT = litBool; :} 
+			| RESULT:litResult 
+				{: 	parser.semantico.checkStereotype("result",litResultleft); 
+					RESULT = new Node("result",parser.semantico.getContextReturn());
+				:};
+
 
 
 simpleTypeSpecifier ::= pathName;
@@ -519,4 +533,4 @@ logicalOperator ::= AND {: RESULT = "and"; :}
 
 
 
-number ::= INTEGER_LITERAL:numbInt {: RESULT = new ConteudoObjeto("Integer", numbInt); :} | FLOAT_LITERAL:numbFloat {: RESULT = new ConteudoObjeto("Float", numbFloat); :};
+number ::= INTEGER_LITERAL:numbInt {: RESULT = new Node(numbInt, "Integer"); :} | FLOAT_LITERAL:numbFloat {: RESULT = new Node(numbFloat, "Float"); :};
