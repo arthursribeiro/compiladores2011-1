@@ -7,7 +7,6 @@ import java.util.Set;
 
 import xmi.ManipuladorXMI;
 import xmi.bean.Atributo;
-import xmi.bean.Operacao;
 import xmi.bean.OperacaoMaior;
 import xmi.bean.Parametro;
 
@@ -51,7 +50,7 @@ public class AnalisadorSemantico {
                 return contextClass;
         }
 
-        private void setContextClass(String contextClass) {
+        public void setContextClass(String contextClass) {
                 this.contextClass = contextClass;
         }
 
@@ -67,7 +66,7 @@ public class AnalisadorSemantico {
                 return contextType;
         }
 
-        private void setContextType(String contextType) {
+        public void setContextType(String contextType) {
                 this.contextType = contextType;
         }
         
@@ -110,7 +109,7 @@ public class AnalisadorSemantico {
         }
         
         public void checkStereotype(String token, int line) throws Exception {
-                if (stereotype.equals("pre"))
+                if (!stereotype.equals("post"))
                        throw new Exception("Syntax Error in '"+token + "' at line: "+(line+1) );
         }
         
@@ -122,22 +121,11 @@ public class AnalisadorSemantico {
                 this.stereotype = stereotype;
         }
         
-        public String maxType(String type1, String type2, int line){
-                if(type1.equalsIgnoreCase(type2)){
-                        return type1;
-                }else{
-                        if(type1.equalsIgnoreCase("Float") && type2.equalsIgnoreCase("Integer")){
-                                return type1;
-                        }else if(type2.equalsIgnoreCase("Float") && type1.equalsIgnoreCase("Integer")){
-                                return type2;
-                        }else{
-                                error(line,"Impossivel realizar operacao entre " + type1 + " e " + type2);
-                        }
-                }
-                return null;
+        public String maxType(String type1, String type2, int line) throws Exception{
+                return ManipuladorXMI.maxType(type1, type2, line);
         }
         
-        public Node checkTypesOpArithmetic(Node rule1, Node rule2, int line ){
+        public Node checkTypesOpArithmetic(Node rule1, Node rule2, int line ) throws Exception{
                 Node node = new Node(); 
         if (rule2 == null)
                 node = (Node)rule1;
@@ -157,7 +145,7 @@ public class AnalisadorSemantico {
         return node;
         }
         
-        public Node checkTypesOpArithmeticAux(Node rule1, Node rule2, String operator, int line) {
+        public Node checkTypesOpArithmeticAux(Node rule1, Node rule2, String operator, int line) throws Exception {
                 Node node = new Node();
                 String type;
                 if (rule2 == null) {
@@ -335,4 +323,162 @@ public class AnalisadorSemantico {
 				}
         }
         
+        public Object checkLogicalExpression(Object relexp, Object logexploop, int relexpleft, int logexploopleft) throws Exception{
+        	String typeRelexp = ((Node) relexp).getType();
+			String typeLogexploop = null;
+			if( !( typeRelexp.equals("Boolean") ) ){
+				semanticTypeError("Boolean", typeRelexp, relexpleft);
+			}
+			else if(logexploop == null){
+				return relexp;
+			}else{
+				String typeLogexloop = ((Node) logexploop).getType(); 
+				if( !( typeLogexloop.equals("Boolean") ) ){
+					semanticTypeError("Boolean", typeLogexploop, logexploopleft);
+				}
+				return new Node( "("+((Node)relexp).getValue()+" "+ ((Node)logexploop).getValue()+")","Boolean");
+			}
+			return null;
+        }
+        
+        public Object checkLogicalExpressionAux(Object relexp2, Object logop, int relexp2left) throws Exception{
+        	String typeRelexp2 = ( (Node) relexp2 ).getType();
+			if( !typeRelexp2.equals("Boolean") ){
+				semanticTypeError("Boolean", typeRelexp2, relexp2left);
+			}else{
+				return new Node( ((String) logop)+" "+((Node)relexp2).getValue(),"Boolean");
+			}
+			return null;
+        }
+        
+        public Object checkLogicalExpressionAuxLoop(Object logexpa, Object logexpaloop, int logexpaloopleft) throws Exception{
+			if(logexpaloop==null){
+				return logexpa;
+			}else{
+				String typeLogexpaloop = ( (Node) logexpaloop).getType();
+				if(!typeLogexpaloop.equals("Boolean")){
+					semanticTypeError("Boolean", typeLogexpaloop, logexpaloopleft);
+				}
+				return new Node( ((Node)logexpa).getValue()+" "+ ((Node)logexpaloop).getValue(),"Boolean");
+			}
+        }
+        
+        public Object checkRelationalExpression(Object relexpaux3, Object addexp,int addexpleft) throws Exception{
+        	if(relexpaux3 == null){
+				return addexp;
+			}else{
+				String typeAddexp = ((Node)addexp).getType();
+				if( !((Node)addexp).isNumber() ){
+					semanticNumberTypeError("Number kind", typeAddexp, addexpleft);
+				}
+				return new Node( "(" + ((Node) addexp).getValue() + " " + ((Node) relexpaux3).getValue()+")", "Boolean"); 
+			}
+        }
+        
+        public Object checkRelationalExpressionAux(Object addexp2, Object relop, int addexp2left) throws Exception{
+        	String operador = ((String) relop);
+			String typeAddexp2 = ((Node)addexp2).getType();
+			if( !((Node)addexp2).isNumber() ){
+				semanticNumberTypeError("Number kind", typeAddexp2, addexp2left);
+			}
+			return new Node( operador+" "+((Node)addexp2).getValue(),typeAddexp2);
+        }
+        
+        public Object checkAdditiveExpression(Object addexpaloop, Object multexp, int addexpaloopleft, int multexpleft) throws Exception{
+        	if(addexpaloop == null){
+				return multexp;
+			}else{
+				String typeAddexpaloop = ((Node) addexpaloop).getType();
+				String typeMultexp = ((Node) multexp).getType();
+				if( !((Node) addexpaloop).isNumber() ){
+					semanticNumberTypeError("Number kind", typeAddexpaloop, addexpaloopleft);
+				}else if(!((Node) multexp).isNumber()){
+					semanticNumberTypeError("Number kind", typeMultexp, multexpleft);
+				}else{
+					return new Node( ((Node) multexp).getValue() +" "+((Node) addexpaloop).getValue(),maxType(typeAddexpaloop,typeMultexp,multexpleft));
+				}
+			}
+			return null;
+        }
+        
+        public Object checkAdditiveExpressionAux(Object addop, Object multexp2, int multexp2left) throws Exception{
+        	String operador = ((String) addop);
+			String typeMultexp2 = ((Node)multexp2).getType();
+			if( !((Node)multexp2).isNumber() ){
+				semanticNumberTypeError("Number kind", typeMultexp2, multexp2left);
+			}
+			return new Node( operador+" "+((Node)multexp2).getValue(),typeMultexp2);
+        }
+        
+        public Object checkAdditiveExpressionAuxLoop(Object addexpa, Object addexpaloop, int addexpaloopleft, int addexpaleft) throws Exception{
+        	if(addexpaloop == null){
+				return addexpa;
+			}else{
+				String typeAddexpaloop = ((Node) addexpaloop).getType();
+				String typeAddexpa = ((Node) addexpa).getType();
+				if( !((Node) addexpaloop).isNumber() ){
+					semanticNumberTypeError("Number kind", typeAddexpaloop, addexpaloopleft);
+				}else if(!((Node) addexpa).isNumber()){
+					semanticNumberTypeError("Number kind", typeAddexpa, addexpaleft);
+				}else{
+					return new Node( ((Node) addexpa).getValue() +" "+((Node) addexpaloop).getValue(),maxType(typeAddexpaloop,typeAddexpa,addexpaleft));
+				}
+			}
+			return null;
+        }
+        
+        public Object checkMultiplicativeExpression(Object multexpaloop, Object unexp, int multexpaloopleft, int unexpleft) throws Exception{
+        	if(multexpaloop == null){
+				return unexp;
+			}else{
+				String typeMultexpaloop = ((Node) multexpaloop).getType();
+				String typeUnexp = ((Node) unexp).getType();
+				if( !((Node) multexpaloop).isNumber() ){
+					semanticNumberTypeError("Number kind", typeMultexpaloop, multexpaloopleft);
+				}else if(!((Node) unexp).isNumber()){
+					semanticNumberTypeError("Number kind", typeUnexp, unexpleft);
+				}else{
+					return new Node( ((Node) unexp).getValue() +" "+((Node) multexpaloop).getValue(),maxType(typeMultexpaloop,typeUnexp,unexpleft));
+				}
+			}
+			return null;
+        }
+        
+        public Object checkMultiplicativeExpressionAux(Object multop, Object unexp,int unexpleft) throws Exception{
+        	String operador = ((String) multop);
+    		String typeUnexp = ((Node)unexp).getType();
+    		if( !((Node)unexp).isNumber() ){
+    			semanticNumberTypeError("Number kind", typeUnexp, unexpleft);
+    		}
+    		return new Node( operador+" "+((Node)unexp).getValue(),typeUnexp);
+        }
+        
+        public Object checkMultiplicativeExpressionAuxLoop(Object addexpaloop, Object addexpa, int addexpaloopleft, int addexpaleft) throws Exception{
+        	if(addexpaloop == null){
+				return addexpa;
+			}else{
+				String typeAddexpaloop = ((Node) addexpaloop).getType();
+				String typeAddexpa = ((Node) addexpa).getType();
+				if( !((Node) addexpaloop).isNumber() ){
+					semanticNumberTypeError("Number kind", typeAddexpaloop, addexpaloopleft);
+				}else if(!((Node) addexpa).isNumber()){
+					semanticNumberTypeError("Number kind", typeAddexpa, addexpaleft);
+				}else{
+					return new Node( ((Node) addexpa).getValue() +" "+((Node) addexpaloop).getValue(),maxType(typeAddexpaloop,typeAddexpa,addexpaleft));
+				}
+			}
+			return null;
+        }
+
+		public String getContextReturn() {
+			return this.contextType;
+		}
+		
+		public void semanticTypeError(String typeExpected, String typeGot, int line) throws Exception{
+			throw new Exception("Semantic ERROR: Expected <"+typeExpected+"> and got <"+typeGot+"> at line: "+(line+1));
+		}
+		
+		public void semanticNumberTypeError(String typeExpected, String typeGot, int line) throws Exception{
+			throw new Exception("Semantic ERROR: Expected a "+typeExpected+" and got <"+typeGot+"> at line: "+(line+1));
+		}
 }
