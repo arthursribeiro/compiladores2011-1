@@ -2,21 +2,21 @@ package xmi.bean;
 
 import java.util.ArrayList;
 
-public class Operacao {
+public class OperacaoMaior {
 	
 	private String nome;
 	private String returnType;
 	private Entidade returnClass;
 	private String visibility;
 	
-	private ArrayList<Parametro> parametros;
+	private ArrayList<ArrayList<Parametro>> listaParametros;
 
-	public Operacao(String n, String retorno, String v, ArrayList<Parametro> params) {
+	public OperacaoMaior(String n, String retorno, String v, ArrayList<ArrayList<Parametro>> params) {
 		this.nome = n;
 		this.returnType = retorno;
 		this.visibility = v;
 		this.returnClass = null;
-		this.parametros = params;
+		this.listaParametros = params;
 	}
 
 	public String getNome() {
@@ -56,11 +56,11 @@ public class Operacao {
 	public String toString() {
 		String imp = " "+this.nome+"(";
 		String params = "";
-		String sep = "";
-		for (Parametro p : parametros) {
-			params+= sep+p.getNome();
-			sep = ",";
-		}
+//		String sep = "";
+//		for (Parametro p : parametros) {
+//			params+= sep+p.getNome();
+//			sep = ",";
+//		}
 		imp+=params+")";
 		String ret = "";
 		if(returnType==null)
@@ -71,11 +71,15 @@ public class Operacao {
 		return imp;
 	}
 
-	public ArrayList<Parametro> getParametros() {
-		return parametros;
+	public ArrayList<ArrayList<Parametro>> getListaParametros() {
+		return listaParametros;
 	}
 
-	public void setParametros(ArrayList<Parametro> parametros) {
-		this.parametros = parametros;
+	public void setListaParametros(ArrayList<ArrayList<Parametro>> listaParametros) {
+		this.listaParametros = listaParametros;
+	}
+
+	public void addListParams(ArrayList<Parametro> params) {
+		this.listaParametros.add(params);
 	}
 }

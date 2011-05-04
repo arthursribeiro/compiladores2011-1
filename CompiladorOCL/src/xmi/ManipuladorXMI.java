@@ -6,7 +6,7 @@ import java.util.Collection;
 import xmi.bean.Atributo;
 import xmi.bean.Classe;
 import xmi.bean.Entidade;
-import xmi.bean.Operacao;
+import xmi.bean.OperacaoMaior;
 
 //Classe que vai ter os métodos estáticos
 public class ManipuladorXMI {
@@ -93,19 +93,19 @@ public class ManipuladorXMI {
 	 * 	não pertence à classe (pode ser retornando null).
 	 */
 	 
-	public static Operacao contemFuncao(String context, String idClasse, String idAtributo) throws Exception{
+	public static OperacaoMaior contemFuncao(String context, String idClasse, String idAtributo) throws Exception{
 		Classe classe = getClasse(idClasse);
 		Classe contexto = getClasse(context);
 		if(classe!=null){
-			Operacao ret = getOperacaoFromClass(contexto,classe,idAtributo);
+			OperacaoMaior ret = getOperacaoFromClass(contexto,classe,idAtributo);
 			return ret;
 		}
 		return null;
 	}
 
-	private static Operacao getOperacaoFromClass(Classe context,
+	private static OperacaoMaior getOperacaoFromClass(Classe context,
 			Classe classe, String idOperation) throws Exception {
-		Operacao op = findOperationFromList(classe.getOperacoes(),idOperation);
+		OperacaoMaior op = findOperationFromList(classe.getOperacoes(),idOperation);
 		if(op!=null){
 			if(!context.getName().equals(classe.getName()) && op.getVisibility().equalsIgnoreCase("private")){
 				throw new Exception("Operation: <"+idOperation+"> doesn't come from inheritance <"+context.getName()+"> => <"+context.getName()+">.");
@@ -120,9 +120,9 @@ public class ManipuladorXMI {
 		}
 	}
 
-	private static Operacao findOperationFromList(
-			ArrayList<Operacao> operacoes, String idOperation){
-		for (Operacao op : operacoes) {
+	private static OperacaoMaior findOperationFromList(
+			ArrayList<OperacaoMaior> operacoes, String idOperation){
+		for (OperacaoMaior op : operacoes) {
 			if(op.getNome().equals(idOperation)){
 				return op;
 			}

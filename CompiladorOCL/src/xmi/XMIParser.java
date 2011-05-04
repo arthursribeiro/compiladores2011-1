@@ -16,7 +16,7 @@ import xmi.bean.Atributo;
 import xmi.bean.Classe;
 import xmi.bean.Entidade;
 import xmi.bean.Enumeration;
-import xmi.bean.Operacao;
+import xmi.bean.OperacaoMaior;
 import xmi.bean.Parametro;
 
 
@@ -65,7 +65,7 @@ public class XMIParser {
 		return classes.values();
 	}
 	
-	private void readXMI() {
+	public void readXMI() {
 		try {
 			Document xmiDoc = getDocument();
 			Node xmiRoot = findXMIRoot(xmiDoc);
@@ -102,16 +102,18 @@ public class XMIParser {
 					}
 				}
 				
-				for (Operacao op : c.getOperacoes()) {
+				for (OperacaoMaior op : c.getOperacoes()) {
 					Entidade retorno = classes.get(op.getReturnType());
 					if(retorno!=null){
 						op.setReturnClass( retorno);
 					}
 					
-					for (Parametro p : op.getParametros()) {
-						Entidade t = classes.get(p.getIdTipo());
-						if(t!=null){
-							p.setTipo(t);
+					for (ArrayList<Parametro> parametros : op.getListaParametros()) {
+						for (Parametro p : parametros) {
+							Entidade t = classes.get(p.getIdTipo());
+							if(t!=null){
+								p.setTipo(t);
+							}
 						}
 					}
 				}
@@ -134,6 +136,7 @@ public class XMIParser {
 			v = visibility.getNodeValue();
 		
 		String retorno = null;
+		ArrayList<ArrayList<Parametro>> listParams = new ArrayList<ArrayList<Parametro>>();
 		ArrayList<Parametro> params = new ArrayList<Parametro>();
 		
 		for (int i = 0; i < parameters.getLength(); i++) {
@@ -156,7 +159,9 @@ public class XMIParser {
 			}
 		}
 		
-		Operacao op = new Operacao(n,retorno,v,params);
+		listParams.add(params);
+		
+		OperacaoMaior op = new OperacaoMaior(n,retorno,v,listParams);
 		c.addOperacao(op);
 	}
 
@@ -354,7 +359,7 @@ public class XMIParser {
 						System.out.println(att);
 					}
 					System.out.println();
-					for (Operacao op : c.getOperacoes()) {
+					for (OperacaoMaior op : c.getOperacoes()) {
 						System.out.println(op);
 					}
 					System.out.println("\n=====================\n\n");
