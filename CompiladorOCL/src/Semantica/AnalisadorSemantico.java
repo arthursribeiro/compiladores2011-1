@@ -127,22 +127,22 @@ public class AnalisadorSemantico {
         
         public Node checkTypesOpArithmetic(Node rule1, Node rule2, int line ) throws Exception{
                 Node node = new Node(); 
-        if (rule2 == null)
-                node = (Node)rule1;
-        else{
-                Object value;
-                String type = maxType(((Node)rule1).getType(), ((Node)rule2).getType(), line);
-                if (type == null){
-                        type = ((Node)rule2).getType();
-                    value = ((Node)rule2).getValue(); //TODO: testar isso
-                }else{
-                        value = calcArithmeticValue((Node)rule1, (Node)rule2, rule2.getOperation(), type);
-                        System.err.println("value no aux: " + value + "  " + value.getClass());
+                if (rule2 == null)
+                	node = (Node)rule1;
+                else{
+                	Object value;
+                	String type = maxType(((Node)rule1).getType(), ((Node)rule2).getType(), line);
+                	if (type == null){
+                		type = ((Node)rule2).getType();
+                		value = ((Node)rule2).getValue(); //TODO: testar isso
+                	}else{
+                		value = calcArithmeticValue((Node)rule1, (Node)rule2, rule2.getOperation(), type);
+                		System.err.println("value no aux: " + value + "  " + value.getClass());
+                	}
+                	node.setType(type);
+                	node.setValue(value);
                 }
-                        node.setType(type);
-                node.setValue(value);
-        }
-        return node;
+                return node;
         }
         
         public Node checkTypesOpArithmeticAux(Node rule1, Node rule2, String operator, int line) throws Exception {

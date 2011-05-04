@@ -708,12 +708,12 @@ public class parser extends java_cup.runtime.lr_parser {
     }
 
  	
-				public AnalisadorSemantico semantico = new AnalisadorSemantico();
-				
-				public void report_error(String message, Object info){
-					Symbol sym = (Symbol) info;
-					throw new Error("Syntax ERROR in '"+sym.value+"' at line: "+(sym.left+1));
-			  	}
+  public AnalisadorSemantico semantico = new AnalisadorSemantico();
+
+  public void report_error(String message, Object info){
+	  Symbol sym = (Symbol) info;
+	  throw new Error("Syntax ERROR in '"+sym.value+"' at line: "+(sym.left+1));
+  }
 		 
 }
 
