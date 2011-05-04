@@ -1,9 +1,12 @@
 import java_cup.runtime.*;
 
-/* Definindo alguns trechos de cï¿½digo que serï¿½ utilizado no Analisador Sintï¿½tico  */
+/* Definindo alguns trechos de código que será utilizado no Analisador Sintático  */
 scan with {: return scanner.next_token(); :};
 
-parser code{: 	public void report_error(String message, Object info){
+parser code{: 	
+				public AnalisadorSemantico semantico = new AnalisadorSemantico();
+				
+				public void report_error(String message, Object info){
 					Symbol sym = (Symbol) info;
 					throw new Error("Syntax ERROR in '"+sym.value+"' at line: "+(sym.left+1));
 			  	} :};
@@ -119,19 +122,7 @@ non terminal            oclFile, packageName, oclExpressions,constraint,contextD
 					
 					booleanLiteral, 
 					
-					ifExpression, 
-					
-					oclExpressionPost, expressionPost, logicalExpressionPost, logicalExpressionAuxPost, logicalExpressionAuxLoopPost, relationalExpressionPost, 
-					relationalExpressionAuxPost, additiveExpressionPost, additiveExpressionAuxPost, additiveExpressionAuxLoopPost,
-					multiplicativeExpressionPost, multiplicativeExpressionAuxPost, multiplicativeExpressionAuxLoopPost, 
-					propertyCallPost, propertyCallAuxPost, propertyCallAux2Post, propertyCallAux3Post, qualifiersPost, 
-					propertyCallParametersPost, propertyCallParametersAuxPost, propertyCallParametersAux2Post, 
-					declaratorPost, declaratorAuxPost, declaratorAuxLoopPost, declaratorAux2Post, declaratorAux3Post, 
-					actualParameterListPost, actualParameterListAuxPost, actualParameterListAuxLoopPost,
-					collectionItemPost, collectionItemAuxPost, ifExpressionPost, 
-					literalCollectionPost, literalCollectionAuxPost, literalCollectionAux2Post, literalCollectionAuxLoopPost, 
-					unaryExpressionPost, unaryExpressionAuxPost, postfixExpressionPost, postfixExpressionAux2Post, postfixExpressionAux2LoopPost, primaryExpressionPost, literalPost;
-
+					ifExpression;
 
 /* Precedences */
 
@@ -180,7 +171,9 @@ oclExpressionsAux ::= constraint oclExpressionsAux | ;
 
 constraint ::= contextDeclaration constraintAux2LoopWithOne;
 
-constraintAux2 ::= PRE constraintAux3 DOUBLEPOINT oclExpression | POST constraintAux3 DOUBLEPOINT oclExpressionPost;
+constraintAux2 ::= constraintAux constraintAux3 DOUBLEPOINT oclExpression;
+				
+constraintAux ::= PRE  {: parser.semantico.setStereotype("pre"); :} | POST  {: parser.semantico.setStereotype("post"); :};
 
 constraintAux2LoopWithOne ::= constraintAux2 constraintAux2Loop;
 
@@ -205,8 +198,6 @@ operationContextAux ::= DOUBLEPOINT returnType | ;
 
 
 ifExpression ::= IF expression THEN expression ELSE expression ENDIF;
-
-ifExpressionPost ::= IF expressionPost THEN expressionPost ELSE expressionPost ENDIF;
 
 
 
@@ -237,8 +228,6 @@ collectionType ::= collectionKind LEFTPARENTHESIS simpleTypeSpecifier RIGHTPAREN
 
 oclExpression ::= expression;
 
-oclExpressionPost ::= expressionPost;
-
 
 
 returnType ::= typeSpecifier | VOID;
@@ -246,8 +235,6 @@ returnType ::= typeSpecifier | VOID;
 
 
 expression ::= logicalExpression;
-
-expressionPost ::= logicalExpressionPost;
 
 
 
@@ -260,23 +247,11 @@ logicalExpressionAux ::= logicalOperator relationalExpression;
 logicalExpressionAuxLoop ::= logicalExpressionAux logicalExpressionAuxLoop | ;
 
 
-logicalExpressionPost ::= relationalExpressionPost logicalExpressionAuxLoopPost;
-
-logicalExpressionAuxPost ::= logicalOperator relationalExpressionPost;
-
-logicalExpressionAuxLoopPost ::= logicalExpressionAuxPost logicalExpressionAuxLoopPost | ;
-
-
 /* relationalExpression ::= additiveExpression ( relationalOperator additiveExpression )?; */
 
 relationalExpression ::= additiveExpression relationalExpressionAux;
 
 relationalExpressionAux ::= relationalOperator additiveExpression | ;
-
-
-relationalExpressionPost ::= additiveExpressionPost relationalExpressionAuxPost;
-
-relationalExpressionAuxPost ::= relationalOperator additiveExpressionPost | ;
 
 
 /* additiveExpression ::= multiplicativeExpression ( addOperator multiplicativeExpression )*; */
@@ -288,12 +263,6 @@ additiveExpressionAux ::= addOperator multiplicativeExpression;
 additiveExpressionAuxLoop ::= additiveExpressionAux additiveExpressionAuxLoop | ;
 
 
-additiveExpressionPost ::= multiplicativeExpressionPost additiveExpressionAuxLoopPost;
-
-additiveExpressionAuxPost ::= addOperator multiplicativeExpressionPost;
-
-additiveExpressionAuxLoopPost ::= additiveExpressionAuxPost additiveExpressionAuxLoopPost | ;
-
 
 /* multiplicativeExpression ::= unaryExpression ( multiplyOperator unaryExpression )*; */
 
@@ -304,12 +273,6 @@ multiplicativeExpressionAux ::= multiplyOperator unaryExpression;
 multiplicativeExpressionAuxLoop ::= multiplicativeExpressionAux multiplicativeExpressionAuxLoop | ;
 
 
-multiplicativeExpressionPost ::= unaryExpressionPost multiplicativeExpressionAuxLoopPost;
-
-multiplicativeExpressionAuxPost ::= multiplyOperator unaryExpressionPost;
-
-multiplicativeExpressionAuxLoopPost ::= multiplicativeExpressionAuxPost multiplicativeExpressionAuxLoopPost | ;
-
 
 
 /* unaryExpression ::= ( unaryOperator postfixExpression ) | postfixExpression; */
@@ -318,10 +281,6 @@ unaryExpression ::= unaryExpressionAux | postfixExpression;
 
 unaryExpressionAux ::= unaryOperator postfixExpression;
 
-
-unaryExpressionPost ::= unaryExpressionAuxPost | postfixExpressionPost;
-
-unaryExpressionAuxPost ::= unaryOperator postfixExpressionPost;
 
 
 
@@ -333,22 +292,12 @@ postfixExpressionAux ::= POINT | ARROW;
 
 postfixExpressionAux2 ::= postfixExpressionAux propertyCall;
 
-
 postfixExpressionAux2Loop ::= postfixExpressionAux2 postfixExpressionAux2Loop | ;
 
 
 
-postfixExpressionPost ::= primaryExpressionPost postfixExpressionAux2LoopPost;
 
-postfixExpressionAux2Post ::= postfixExpressionAux propertyCallPost;
-
-postfixExpressionAux2LoopPost ::= postfixExpressionAux2Post postfixExpressionAux2LoopPost | ;
-
-
-
-primaryExpression ::= literalCollection | literal | propertyCall | LEFTPARENTHESIS expression RIGHTPARENTHESIS | SELF | ifExpression;
-
-primaryExpressionPost ::= literalCollectionPost | literalPost | propertyCallPost | LEFTPARENTHESIS expressionPost RIGHTPARENTHESIS | SELF | SELF ATPRE | ifExpressionPost;
+primaryExpression ::= literalCollection | literal:lit1 {: RESULT = lit1; :} | propertyCall | LEFTPARENTHESIS expression RIGHTPARENTHESIS | SELF | SELF timeExpression  | ifExpression;
 
 
 
@@ -363,19 +312,15 @@ propertyCallParametersAux ::= declarator;
 propertyCallParametersAux2 ::= actualParameterList | ;
 
 
-propertyCallParametersPost ::= LEFTPARENTHESIS propertyCallParametersAuxPost propertyCallParametersAux2Post  RIGHTPARENTHESIS | LEFTPARENTHESIS propertyCallParametersAux2Post  RIGHTPARENTHESIS;
-
-propertyCallParametersAuxPost ::= declaratorPost;
-
-propertyCallParametersAux2Post ::= actualParameterListPost | ;
 
 
+booleanLiteral ::= TRUE:boolTrue {: RESULT = new Node(boolTrue,"Boolean"); :} 
+					| FALSE:boolFalse {: RESULT = new Node(boolFalse,"Boolean"); :};
 
-booleanLiteral ::= TRUE | FALSE;
-
-literal ::= STRING_LITERAL | FLOAT_LITERAL | INTEGER_LITERAL | booleanLiteral;
-
-literalPost ::= STRING_LITERAL | FLOAT_LITERAL | INTEGER_LITERAL | booleanLiteral | RESULT;
+literal ::= STRING_LITERAL:litString {: RESULT = new Node(litString,"String"); :} 
+			| number:litNum {: RESULT = litNum; :} 
+			| booleanLiteral:litBool {: RESULT = litBool; :} 
+			| RESULT:litResult {: parser.semantico.checkStereotype("result",litResultleft); :};
 
 
 
@@ -394,14 +339,6 @@ literalCollectionAuxLoop ::= literalCollectionAux literalCollectionAuxLoop | ;
 literalCollectionAux2 ::= collectionItem literalCollectionAuxLoop | ;
 
 
-literalCollectionPost ::= collectionKind LEFTBRACKET literalCollectionAux2Post RIGHTBRACKET;
-
-literalCollectionAuxPost ::= VIRGULA collectionItemPost;
-
-literalCollectionAuxLoopPost ::= literalCollectionAuxPost literalCollectionAuxLoopPost | ;
-
-literalCollectionAux2Post ::= collectionItemPost literalCollectionAuxLoopPost | ;
-
 
 /* collectionItem ::= expression (POINT POINT expression )?; */
 
@@ -410,33 +347,20 @@ collectionItem ::= expression collectionItemAux;
 collectionItemAux ::= POINT POINT expression | ;
 
 
-collectionItemPost ::= expressionPost collectionItemAuxPost;
-
-collectionItemAuxPost ::= POINT POINT expressionPost | ;
-
 
 /* propertyCall ::= pathName ( qualifiers )? ( propertyCallParameters )?; */
 
-propertyCall ::= pathName propertyCallAux2 propertyCallAux3;
+propertyCall ::= pathName propertyCallAux propertyCallAux2 propertyCallAux3;
+
+propertyCallAux ::= timeExpression | ;
 
 propertyCallAux2 ::= qualifiers | ;
 
 propertyCallAux3 ::= propertyCallParameters | ;
 
 
-propertyCallPost ::= pathName propertyCallAuxPost propertyCallAux2Post propertyCallAux3Post;
-
-propertyCallAuxPost ::= timeExpression | ;
-
-propertyCallAux2Post ::= qualifiersPost | ;
-
-propertyCallAux3Post ::= propertyCallParametersPost | ;
-
-
 
 qualifiers ::= LEFTBRACK actualParameterList RIGHTBRACK;
-
-qualifiersPost ::= LEFTBRACK actualParameterListPost RIGHTBRACK;
 
 
 
@@ -453,18 +377,6 @@ declaratorAux2 ::= DOUBLEPOINT simpleTypeSpecifier | ;
 declaratorAux3 ::= POINT_VIRGULA IDENTIFIER POINT_VIRGULA typeSpecifier EQ expression | ;
 
 
-declaratorPost ::= IDENTIFIER declaratorAuxLoopPost declaratorAux2Post declaratorAux3Post PIPELINE ;
-
-declaratorAuxPost ::= VIRGULA IDENTIFIER;
-
-declaratorAuxLoopPost ::= declaratorAuxPost declaratorAuxLoopPost | ;
-
-declaratorAux2Post ::= DOUBLEPOINT simpleTypeSpecifier | ;
-
-declaratorAux3Post ::= POINT_VIRGULA IDENTIFIER POINT_VIRGULA typeSpecifier EQ expressionPost | ;
-
-
-
 
 pathName ::= IDENTIFIER pathNameAuxLoop;
 
@@ -474,7 +386,7 @@ pathNameAuxLoop ::= pathNameAux pathNameAuxLoop | ;
 
 
 
-timeExpression ::= ATPRE;
+timeExpression ::= ATPRE:atPre {: parser.semantico.checkStereotype("@pre",atPreleft); :};
 
 
 
@@ -485,34 +397,42 @@ actualParameterListAux ::= VIRGULA expression;
 actualParameterListAuxLoop ::= actualParameterListAux actualParameterListAuxLoop | ;
 
 
-actualParameterListPost ::= expressionPost actualParameterListAuxLoopPost;
 
-actualParameterListAuxPost ::= VIRGULA expressionPost;
-
-actualParameterListAuxLoopPost ::= actualParameterListAuxPost actualParameterListAuxLoopPost | ;
 
 collectionKind ::= COLLECTION;
 
 
 
-relationalOperator ::= EQ | GREATERTHAN | LESSTHAN | GREATEREQTHAN | LESSEQTHAN | NOTEQ;
+relationalOperator ::= EQ {: RESULT = "="; :}  
+						| GREATERTHAN  {: RESULT = ">"; :} 
+						| LESSTHAN {: RESULT = "<"; :} 
+						| GREATEREQTHAN {: RESULT = ">="; :}  
+						| LESSEQTHAN {: RESULT = "<="; :}  
+						| NOTEQ {: RESULT = "<>"; :} ;
 
 
 
-addOperator ::= PLUS | MINUS | MOD;
+addOperator ::= PLUS {: RESULT = "+"; :}  
+				| MINUS  {: RESULT = "-"; :} 
+				| MOD {: RESULT = "%"; :} ;
 
 
 
-multiplyOperator ::= MULTIPLY | DIVIDE | MOD;
+multiplyOperator ::= MULTIPLY {: RESULT = "*"; :}  
+					| DIVIDE {: RESULT = "/"; :}  
+					| MOD {: RESULT = "%"; :} ;
 
 
 
-unaryOperator ::= MINUS | NOT;
+unaryOperator ::= MINUS {: RESULT = "-"; :} | NOT {: RESULT = "not"; :} ;
 
 
 
-logicalOperator ::= AND | OR | XOR | IMPLIES;
+logicalOperator ::= AND {: RESULT = "and"; :} 
+					| OR {: RESULT = "or"; :} 
+					| XOR {: RESULT = "xor"; :} 
+					| IMPLIES {: RESULT = "implies"; :};
 
 
 
-number ::= INTEGER_LITERAL | FLOAT_LITERAL;
+number ::= INTEGER_LITERAL:numbInt {: RESULT = new Node(numbInt, "Integer"); :} | FLOAT_LITERAL:numbFloat {: RESULT = new Node(numbFloat, "Float"); :};
