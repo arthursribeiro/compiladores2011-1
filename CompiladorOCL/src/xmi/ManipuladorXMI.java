@@ -2,6 +2,7 @@ package xmi;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import xmi.bean.Atributo;
 import xmi.bean.Classe;
@@ -190,6 +191,18 @@ public class ManipuladorXMI {
 			}
 			throw new Exception("Operation not valid between " + type1 + " and " + type2+".\nAt line "+line);
 		}
+	}
+	
+	public static boolean atributoEhColecao(String context, String classe, List<String> caminho) throws Exception{
+		Classe contexto = getClasse(context);
+		Classe c = getClasse(classe);
+		
+		for (String idAtributo : caminho) {
+			Atributo att = getAtribtuoFromClass(contexto, c, idAtributo);
+			if(att.ehColecao())
+				return true;
+		}
+		return false;
 	}
 
 }
