@@ -1,5 +1,6 @@
 import java_cup.runtime.*;
 import Semantica.ConteudoObjeto;
+import Semantica.Node;
 
 /* Definindo alguns trechos de código que será utilizado no Analisador Sintático  */
 scan with {: return scanner.next_token(); :};
@@ -356,18 +357,28 @@ postfixExpressionAux2Loop ::= postfixExpressionAux2 postfixExpressionAux2Loop | 
 
 
 
-primaryExpression ::= literalCollection | literal:lit1 {: RESULT = lit1; :} | propertyCall | LEFTPARENTHESIS expression RIGHTPARENTHESIS | SELF | SELF timeExpression  | ifExpression;
+primaryExpression ::= literalCollection | 
+					  literal:lit1 {: RESULT = lit1; :} 
+					  | propertyCall 
+					  | LEFTPARENTHESIS expression:e1 RIGHTPARENTHESIS {: RESULT = e1; :} 
+					  | SELF 
+					  | SELF timeExpression  
+					  | ifExpression;
 
 
 /* propertyCallParameters := LEFTPARENTHESIS ( declarator )? ( actualParameterList )? RIGHTPARENTHESIS; */
 
 
 
-propertyCallParameters ::= LEFTPARENTHESIS propertyCallParametersAux propertyCallParametersAux2  RIGHTPARENTHESIS | LEFTPARENTHESIS propertyCallParametersAux2  RIGHTPARENTHESIS;
+propertyCallParameters ::= LEFTPARENTHESIS propertyCallParametersAux propertyCallParametersAux2:prop1  RIGHTPARENTHESIS {: System.out.println("Tratar declarator"); :}| 
+							LEFTPARENTHESIS propertyCallParametersAux2:prop2  RIGHTPARENTHESIS{: RESULT = prop2;:};
 
-propertyCallParametersAux ::= declarator;
+propertyCallParametersAux ::= declarator {: System.out.println("Tratar declarator"); :};
 
-propertyCallParametersAux2 ::= actualParameterList | ;
+propertyCallParametersAux2 ::= actualParameterList:a1 {: RESULT = (Node)a1;:}
+								|{: Node resultado = new Node();
+									resultado.setType("void");
+									RESULT = resultado; :} ;
 
 
 
@@ -411,13 +422,15 @@ propertyCall ::= pathName propertyCallAux propertyCallAux2 propertyCallAux3;
 
 propertyCallAux ::= timeExpression | ;
 
-propertyCallAux2 ::= qualifiers | ;
+propertyCallAux2 ::= qualifiers:q1 {: RESULT = q1; :} 
+					 | {: RESULT = null; :};
 
-propertyCallAux3 ::= propertyCallParameters | ;
+propertyCallAux3 ::= propertyCallParameters:prop1 {: RESULT = prop1; :}  
+					|{: RESULT = null; :} ;
 
 
 
-qualifiers ::= LEFTBRACK actualParameterList RIGHTBRACK;
+qualifiers ::= LEFTBRACK actualParameterList:a1 RIGHTBRACK {: RESULT = (Node)a1; :};
 
 
 
@@ -447,14 +460,28 @@ timeExpression ::= ATPRE:atPre {: parser.semantico.checkStereotype("@pre",atPrel
 
 
 
-actualParameterList ::= expression actualParameterListAuxLoop;
+actualParameterList ::= expression:e1 actualParameterListAuxLoop:aloop {: Node resultado;
+																		if(aloop == null){
+																			resultado = (Node)e1;
+																		}
+																		else{
+																			resultado = new Node();
+																			resultado.addElement((Node)e1);
+																			resultado.addAllElements(((Node) aloop).getElements());}
+																			RESULT = resultado; :};
 
-actualParameterListAux ::= VIRGULA expression;
+actualParameterListAux ::= VIRGULA expression:e1 {: RESULT = (Node)e1;:};
 
-actualParameterListAuxLoop ::= actualParameterListAux actualParameterListAuxLoop | ;
-
-
-
+actualParameterListAuxLoop ::= actualParameterListAux:a1 actualParameterListAuxLoop:aloop{: Node resultado; 
+																							if(aloop == null) {
+																								resultado = (Node) a1;
+																							}
+																							else{
+																								resultado = new Node();
+																								resultado.addElement((Node)a1);
+																								resultado.addAllElements(((Node) aloop).getElements());}
+																							RESULT = resultado; :}																						} 
+								|{: RESULT = null; :} ;
 
 collectionKind ::= COLLECTION;
 
