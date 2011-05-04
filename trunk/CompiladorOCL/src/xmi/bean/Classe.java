@@ -10,7 +10,7 @@ public class Classe implements Entidade{
 	private Classe classePai;
 	
 	private ArrayList<Atributo> atributos = new ArrayList<Atributo>();
-	private ArrayList<Operacao> operacoes = new ArrayList<Operacao>();
+	private ArrayList<OperacaoMaior> operacoes = new ArrayList<OperacaoMaior>();
 	
 	
 	public Classe(String n, String v) {
@@ -74,16 +74,22 @@ public class Classe implements Entidade{
 		this.atributos = atributos;
 	}
 
-	public ArrayList<Operacao> getOperacoes() {
+	public ArrayList<OperacaoMaior> getOperacoes() {
 		return operacoes;
 	}
 
-	public void setOperacoes(ArrayList<Operacao> operacoes) {
+	public void setOperacoes(ArrayList<OperacaoMaior> operacoes) {
 		this.operacoes = operacoes;
 	}
 
-	public void addOperacao(Operacao op) {
-		this.operacoes.add(op);
+	public void addOperacao(OperacaoMaior op) {
+		for (OperacaoMaior operacao : this.operacoes) {
+			if(operacao.getNome().equals(op.getNome())){
+				for (ArrayList<Parametro> params : op.getListaParametros()) {
+					operacao.addListParams(params);
+				}
+			}
+		}
 	}
 
 	public boolean temPai() {
