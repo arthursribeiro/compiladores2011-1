@@ -1,4 +1,5 @@
 import java_cup.runtime.*;
+import Semantica.ConteudoObjeto;
 
 /* Definindo alguns trechos de código que será utilizado no Analisador Sintático  */
 scan with {: return scanner.next_token(); :};
@@ -256,7 +257,25 @@ relationalExpressionAux ::= relationalOperator additiveExpression | ;
 
 /* additiveExpression ::= multiplicativeExpression ( addOperator multiplicativeExpression )*; */
 
-additiveExpression ::= multiplicativeExpression additiveExpressionAuxLoop;
+additiveExpression ::= multiplicativeExpression:m1 additiveExpressionAuxLoop:a1 {: if(a1 == null) {
+                                                                                       RESULT = ((ConteudoObjeto)m1);
+                                                                                   } else {
+                                                                                       String tipo;
+                                                                                       ConteudoObjeto c1, c2;
+                                                                                       c1 = ((ConteudoObjeto)m1);
+                                                                                       c2 = ((ConteudoObjeto)a1);
+                                                                                       if(c1.getTipo().equals("int") && c2.getTipo().equals("int")){
+                                                                                           tipo = "int";
+                                                                                       } else if (c1.getTipo().equals("int") && c2.getTipo().equals("float")) {
+                                                                                           tipo = "float";
+                                                                                       } else if (c1.getTipo().equals("float") && c2.getTipo().equals("int")) {
+                                                                                           tipo = "float";
+                                                                                       } else if (c1.getTipo().equals("float") && c2.getTipo().equals("float")) {
+                                                                                           tipo = "float";
+                                                                                       } else {
+                                                                                           throw new Exception("Nao eh permitido somar " + c1.getTipo() + " com " + c2.getTipo());
+                                                                                       }
+                                                                                   } :};
 
 additiveExpressionAux ::= addOperator multiplicativeExpression;
 
@@ -266,20 +285,60 @@ additiveExpressionAuxLoop ::= additiveExpressionAux additiveExpressionAuxLoop | 
 
 /* multiplicativeExpression ::= unaryExpression ( multiplyOperator unaryExpression )*; */
 
-multiplicativeExpression ::= unaryExpression multiplicativeExpressionAuxLoop;
+multiplicativeExpression ::= unaryExpression:ue multiplicativeExpressionAuxLoop:meal {: if(meal == null) {
+                                                                                            RESULT = ((ConteudoObjeto)ue);
+                                                                                        } else {
+                                                                                            String tipo = null;
+                                                                                            ConteudoObjeto c1, c2;
+                                                                                            c1 = ((ConteudoObjeto)ue);
+                                                                                            c2 = ((ConteudoObjeto)meal);
+                                                                                            if(c1.getTipo().equals("int") && c2.getTipo().equals("int")){
+                                                                                                tipo = "int";
+                                                                                            } else if (c1.getTipo().equals("int") && c2.getTipo().equals("float")) {
+                                                                                                tipo = "float";
+                                                                                            } else if (c1.getTipo().equals("float") && c2.getTipo().equals("int")) {
+                                                                                                tipo = "float";
+                                                                                            } else if (c1.getTipo().equals("float") && c2.getTipo().equals("float")) {
+                                                                                                tipo = "float";
+                                                                                            } else {
+                                                                                                System.err.println("Nao eh permitido somar " + c1.getTipo() + " com " + c2.getTipo());
+                                                                                            }
+                                                                                            RESULT = new ConteudoObjeto(tipo, null);
+                                                                                        } :};
 
-multiplicativeExpressionAux ::= multiplyOperator unaryExpression;
+multiplicativeExpressionAux ::= multiplyOperator unaryExpression:ue {: RESULT = ((ConteudoObjeto)ue); :};
 
-multiplicativeExpressionAuxLoop ::= multiplicativeExpressionAux multiplicativeExpressionAuxLoop | ;
+multiplicativeExpressionAuxLoop ::= multiplicativeExpressionAux:mea multiplicativeExpressionAuxLoop:meal {: if(meal == null) {
+                                                                                                                RESULT = ((ConteudoObjeto)mea);
+                                                                                                            } else {
+                                                                                                                String tipo = null;
+		 	                                                                                                    ConteudoObjeto c1, c2;
+		 	                                                                                                    c1 = ((ConteudoObjeto)mea);
+		 	                                                                                                    c2 = ((ConteudoObjeto)meal);
+		 	                                                                                                    if(c1.getTipo().equals("int") && c2.getTipo().equals("int")){
+		 	                                                                                                        tipo = "int";
+		 	                                                                                                    } else if (c1.getTipo().equals("int") && c2.getTipo().equals("float")) {
+		 	                                                                                                        tipo = "float";
+		 	                                                                                                    } else if (c1.getTipo().equals("float") && c2.getTipo().equals("int")) {
+		 	                                                                                                        tipo = "float";
+		 	                                                                                                    } else if (c1.getTipo().equals("float") && c2.getTipo().equals("float")) {
+		 	                                                                                                        tipo = "float";
+		 	                                                                                                    } else {
+		 	                                                                                                        System.err.println("Nao eh permitido somar " + c1.getTipo() + " com " + c2.getTipo());
+		 	                                                                                                    }
+		 	                                                                                                    RESULT = new ConteudoObjeto(tipo, null);
+			                                                                                                } :} 
+                                  | {: RESULT = null; :} ;
 
 
 
 
 /* unaryExpression ::= ( unaryOperator postfixExpression ) | postfixExpression; */
 
-unaryExpression ::= unaryExpressionAux | postfixExpression;
+unaryExpression ::= unaryExpressionAux:uea {: RESULT = ((ConteudoObjeto)uea); :} 
+                  | postfixExpression:pe {: RESULT = ((ConteudoObjeto)pe); :};
 
-unaryExpressionAux ::= unaryOperator postfixExpression;
+unaryExpressionAux ::= unaryOperator postfixExpression:pe {: RESULT = ((ConteudoObjeto)pe); :};
 
 
 
@@ -298,7 +357,6 @@ postfixExpressionAux2Loop ::= postfixExpressionAux2 postfixExpressionAux2Loop | 
 
 
 primaryExpression ::= literalCollection | literal:lit1 {: RESULT = lit1; :} | propertyCall | LEFTPARENTHESIS expression RIGHTPARENTHESIS | SELF | SELF timeExpression  | ifExpression;
-
 
 
 /* propertyCallParameters := LEFTPARENTHESIS ( declarator )? ( actualParameterList )? RIGHTPARENTHESIS; */
@@ -321,7 +379,6 @@ literal ::= STRING_LITERAL:litString {: RESULT = new Node(litString,"String"); :
 			| number:litNum {: RESULT = litNum; :} 
 			| booleanLiteral:litBool {: RESULT = litBool; :} 
 			| RESULT:litResult {: parser.semantico.checkStereotype("result",litResultleft); :};
-
 
 
 simpleTypeSpecifier ::= pathName;
