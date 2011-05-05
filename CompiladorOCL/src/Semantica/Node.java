@@ -20,9 +20,18 @@ public class Node {
         private Object value;
         private String type;
         private String operation;
+        private List<Node> list_caminho;
         private List<Node> list;
         
-        public static final int VALUE = 0;
+        public List<Node> getList_caminho() {
+			return list_caminho;
+		}
+
+		public void setList_caminho(List<Node> list_caminho) {
+			this.list_caminho = list_caminho;
+		}
+
+		public static final int VALUE = 0;
         public static final int VARIABLE = 1;
         public static final int FUNCTION = 2;
         
@@ -32,15 +41,18 @@ public class Node {
                 this.value = value;
                 this.type = type;
                 this.list = new ArrayList<Node>();
+                this.list_caminho = new ArrayList<Node>();
         }
 
         public Node(Object value) {
                 this.value = value;
                 this.list = new ArrayList<Node>();
+                this.list_caminho = new ArrayList<Node>();
         }
         
         public Node() {
                 this.list = new ArrayList<Node>();
+                this.list_caminho = new ArrayList<Node>();
         }
         
         public Object getValue() {
@@ -86,6 +98,14 @@ public class Node {
         
         public List<Node> getElements(){
                 return this.list;
+        }
+        
+        public String listToString(){
+        	String teste = "";
+        	for(Node d: list){
+        		teste += d.toString() + " ";
+        	}
+        	return teste;
         }
         
         @Override
