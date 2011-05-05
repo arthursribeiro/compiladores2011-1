@@ -1,6 +1,7 @@
 import java_cup.runtime.*;
 import Semantica.AnalisadorSemantico;
 import Semantica.Node;
+import Semantica.DeclaratorNode;
 
 /* Definindo alguns trechos de código que será utilizado no Analisador Sintático  */
 scan with {: return scanner.next_token(); :};
@@ -353,12 +354,9 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 
 postfixExpressionAux ::= POINT {: RESULT = "point"; :} | ARROW {: RESULT = "arrow"; :};
 
-postfixExpressionAux2 ::= postfixExpressionAux propertyCall;
+postfixExpressionAux2 ::= postfixExpressionAux propertyCall:pc {: System.out.println("Property Call: " + ((Node)pc).listToString()); :} ;
 
 postfixExpressionAux2Loop ::= postfixExpressionAux2 postfixExpressionAux2Loop | ;
-
-
-
 
 primaryExpression ::= literalCollection 
 					| literal:lit1 
@@ -433,8 +431,11 @@ collectionItemAux ::= POINT POINT expression | ;
 
 /* propertyCall ::= pathName ( qualifiers )? ( propertyCallParameters )?; */
 
-propertyCall ::= pathName:pt propertyCallAux propertyCallAux2 propertyCallAux3;
-
+propertyCall ::= pathName:pt propertyCallAux propertyCallAux2 propertyCallAux3:prop3 {: Node resultado = new Node();
+																						resultado.addCaminho((Node)pt);
+																						if(prop3 != null){
+																							resultado.addAllCaminho(((Node) prop3).getElements());
+																						}	 :};
 propertyCallAux ::= timeExpression | ;
 
 propertyCallAux2 ::= qualifiers:q1 {: RESULT = q1; :} 
@@ -457,9 +458,9 @@ declarator ::= IDENTIFIER:id declaratorAuxLoop:dal declaratorAux2:da2 PIPELINE {
                                                                                      RESULT = decl;
                                                                                  } else {
                                                                                      DeclaratorNode decl = new DeclaratorNode(DeclaratorNode.TYPED_DECLARATOR);
-                                                                                     decl.setTipoConteudo(da2.getTipo());
+                                                                                     decl.setTipoConteudo((Node)da2.getTipo());
                                                                                      decl.addNode(new Node(id.toString(), null));
-                                                                                     decl.addNodes(da2.getElements());
+                                                                                     decl.addNodes((Node)da2.getElements());
                                                                                      RESULT = decl;  
                                                                                  } 
                                                                               :} ;
@@ -480,10 +481,9 @@ declaratorAux2 ::= DOUBLEPOINT simpleTypeSpecifier:sts {: RESULT = new Node(null
                  | {: RESULT = null; :}  ;
 
 
-pathName ::= IDENTIFIER:id pathNameAuxLoop:ploop {: resultado = new Node();
+pathName ::= IDENTIFIER:id pathNameAuxLoop:ploop {: Node resultado = new Node();
 													Node identifier = new Node(id.toString(),"String");
 													if(ploop == null){
-														resultado = new Node();
 														resultado.addElement(identifier);
 														
 													}else{
@@ -511,8 +511,8 @@ timeExpression ::= ATPRE:atPre {: parser.semantico.checkStereotype("@pre",atPrel
 
 actualParameterList ::= expression:e1 actualParameterListAuxLoop:aloop {: Node resultado = new Node();
 																		if(e1 == null && aloop == null){
-																			resultado = null; 
-																		else if(aloop == null){
+																			resultado = null;
+																		}else if(aloop == null){
 																			resultado.addElement((Node)e1);
 																		}else{
 																			resultado.addElement((Node)e1);
