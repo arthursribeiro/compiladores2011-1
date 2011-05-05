@@ -209,4 +209,13 @@ public class ManipuladorXMI {
 		return hierarquiaNumbers.contains(type);
 	}
 
+	public static boolean contemClasse(String contextClass) {
+		for (Entidade e : classes) {
+			if(e.getName().equals(contextClass)){
+				return true;
+			}
+		}
+		return false;
+	}
+
 }
