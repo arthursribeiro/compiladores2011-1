@@ -83,12 +83,17 @@ public class Classe implements Entidade{
 	}
 
 	public void addOperacao(OperacaoMaior op) {
+		boolean botou = false;
 		for (OperacaoMaior operacao : this.operacoes) {
 			if(operacao.getNome().equals(op.getNome())){
 				for (ArrayList<Parametro> params : op.getListaParametros()) {
 					operacao.addListParams(params);
+					botou = true;
 				}
 			}
+		}
+		if(!botou){
+			this.operacoes.add(op);
 		}
 	}
 
