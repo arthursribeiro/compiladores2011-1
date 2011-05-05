@@ -14,6 +14,15 @@ public class Node {
         private List<Node> list_caminho;
         private List<Node> list;
         
+        
+        public void addCaminho(Node element){
+        	list_caminho.add(0, element);
+        }
+    
+        public void addAllCaminho(List<Node> list){
+            this.list_caminho.addAll(0, list);
+        }
+        
         public List<Node> getList_caminho() {
 			return list_caminho;
 		}
