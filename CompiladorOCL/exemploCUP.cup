@@ -373,25 +373,41 @@ unaryExpressionAux ::= unaryOperator:unop postfixExpression:postfexp
 
 postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfexp
 					{:
+						System.out.println("LOL");
+						if (postfexp != null) System.out.println("Esse bixim aqui: "+ ((Node)postfexp).listToString() + " caminho : " + ((Node)postfexp).caminhoToString());
+						Node resultado = new Node("Boolean","Boolean");
+						
 						if(postfexp==null){
 							RESULT = primexp;
 						}else{
-							
+							RESULT = resultado;
 						}
 					:};
 
 postfixExpressionAux ::= POINT {: RESULT = "point"; :} | ARROW {: RESULT = "arrow"; :};
 
-postfixExpressionAux2 ::= postfixExpressionAux propertyCall:pc {: System.out.println("Property Call: " + ((Node)pc).listToString()); :} ;
+postfixExpressionAux2 ::= postfixExpressionAux:paux propertyCall:pc {: System.out.println("BALLS "+((Node)pc).caminhoToString() + " 2 " +((Node)pc).listToString() ); RESULT = (Node)pc; :};
 
-postfixExpressionAux2Loop ::= postfixExpressionAux2 postfixExpressionAux2Loop | ;
+postfixExpressionAux2Loop ::= postfixExpressionAux2:paux2 postfixExpressionAux2Loop:ploop {: Node resultado = new Node();
+																							 resultado.setRole(((Node)paux2).getRole());
+																							 System.out.println("GERAL "+((Node)paux2).caminhoToString());
+																							 resultado.addAllCaminho(((Node)paux2).getList_caminho());
+																						 	 if(ploop != null){
+																						 	 	resultado.setRole(((Node)ploop).getRole());
+																						 	 	System.out.println("FRESQUIM " +((Node)ploop).caminhoToString());
+																						 	 	resultado.addAllCaminho(((Node)ploop).getList_caminho());
+																						 	 	if(((Node)ploop).getRole() == Semantica.Node.FUNCTION){
+																						 	 		resultado.addAllElements(((Node)ploop).getElements());
+																						 	 	}
+																						 	 }RESULT  = resultado;:} 
+																						 | {: RESULT = null; :} ;
 
 primaryExpression ::= literalCollection 
 					| literal:lit1 
 						{: 
 							RESULT = lit1; 
 						:} 
-					| propertyCall:p1 {: RESULT = new Node("Boolean","Boolean"); :}
+					| propertyCall:p1 {: RESULT = p1; :}
 					| LEFTPARENTHESIS expression:exp RIGHTPARENTHESIS 
 						{:
 							RESULT = exp;
@@ -409,7 +425,7 @@ primaryExpression ::= literalCollection
 propertyCallParameters ::= LEFTPARENTHESIS propertyCallParametersAux:pcpa propertyCallParametersAux2:prop1  RIGHTPARENTHESIS {: if(pcpa != null && prop1 == null) {
                                                                                                                                     throw new Exception("Expected expression after declarator.");
                                                                                                                                 } :}| 
-							LEFTPARENTHESIS propertyCallParametersAux2:prop2  RIGHTPARENTHESIS{: System.out.println(((Node)prop2).listToString()); RESULT = (Node)prop2;:};
+							LEFTPARENTHESIS propertyCallParametersAux2:prop2  RIGHTPARENTHESIS{: System.out.println("blaca baga"); RESULT = (Node)prop2;:};
 
 propertyCallParametersAux ::= declarator:d {: RESULT = d; :};
 
@@ -463,10 +479,13 @@ collectionItemAux ::= POINT POINT expression | ;
 /* propertyCall ::= pathName ( qualifiers )? ( propertyCallParameters )?; */
 
 propertyCall ::= pathName:pt propertyCallAux propertyCallAux2 propertyCallAux3:prop3 {: Node resultado = new Node();
-																						resultado.addCaminho((Node)pt);
+																						resultado.setRole(Semantica.Node.VARIABLE);
+																						resultado.addAllCaminho(((Node)pt).getElements());
 																						if(prop3 != null){
-																							resultado.addAllCaminho(((Node) prop3).getElements());
-																						}	 :};
+																							System.out.println("Passei aqui");
+																							resultado.setRole(Semantica.Node.FUNCTION);
+																							resultado.addAllElements(((Node) prop3).getElements());
+																						}RESULT = resultado;:};
 propertyCallAux ::= timeExpression | ;
 
 propertyCallAux2 ::= qualifiers:q1 {: RESULT = q1; :} 
@@ -474,8 +493,6 @@ propertyCallAux2 ::= qualifiers:q1 {: RESULT = q1; :}
 
 propertyCallAux3 ::= propertyCallParameters:prop1 {: RESULT = prop1; :}  
 					|{: RESULT = null; :} ;
-
-
 
 qualifiers ::= LEFTBRACK actualParameterList:a1 RIGHTBRACK {: RESULT = (Node)a1; :};
 
