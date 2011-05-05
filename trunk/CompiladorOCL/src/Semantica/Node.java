@@ -23,10 +23,18 @@ public class Node {
             this.list_caminho.addAll(0, list);
         }
         
+        public String caminhoToString(){
+        	String teste = "";
+        	for(Node d: list_caminho){
+        		teste += d.toString() + " ";
+        	}
+        	return teste;
+        }
+        
         public List<Node> getList_caminho() {
 			return list_caminho;
 		}
-
+        
 		public void setList_caminho(List<Node> list_caminho) {
 			this.list_caminho = list_caminho;
 		}
