@@ -6,15 +6,6 @@ import java.util.List;
 
 import xmi.ManipuladorXMI;
 
-/**
- * Classe que serve para guardar os atributos
- * da gramatica anotada.
- * 
- * @author Demontie Junior
- * @author Izabela Vanessa
- * @author Savyo Igor
- *
- */
 public class Node {
 
         private Object value;

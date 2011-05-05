@@ -129,7 +129,6 @@ public class XMIParser {
 		String n = null;
 		if(name!=null)
 			n = name.getNodeValue();
-		
 		Node visibility = operacaoMap.getNamedItem(VISIBILITY);
 		String v = null;
 		if(visibility!=null)

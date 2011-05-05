@@ -7,6 +7,7 @@ import java.util.Set;
 
 import xmi.ManipuladorXMI;
 import xmi.bean.Atributo;
+import xmi.bean.Entidade;
 import xmi.bean.OperacaoMaior;
 import xmi.bean.Parametro;
 
@@ -50,8 +51,15 @@ public class AnalisadorSemantico {
                 return contextClass;
         }
 
-        public void setContextClass(String contextClass) {
-                this.contextClass = contextClass;
+        private void setContextClass(String contextClass) {
+        		this.contextClass = contextClass;
+        }
+        
+        public void setContextClass(String contextClass, int line) throws Exception {
+    		if(ManipuladorXMI.contemClasse(contextClass))
+    			this.contextClass = contextClass;
+    		else
+    			semanticInexistentTypeError(contextClass, line);
         }
 
         public String getContextMethod() {
@@ -69,8 +77,42 @@ public class AnalisadorSemantico {
         public void setContextType(String contextType) {
                 this.contextType = contextType;
         }
+
+		public void setContextFunction(String opName, Node params, String returnType,int opNameleft) throws Exception {
+			OperacaoMaior op = ManipuladorXMI.contemFuncao(contextClass, contextClass, opName);
+			if(params==null || !comparaAtributos(op.getListaParametros(),params.getElements()) ){
+				semanticWrongParameters(opName,contextClass,opNameleft);
+			}
+			if(op.getReturnType().equals(returnType))
+				this.contextType = (returnType);
+			else
+				semanticWrongReturnTypeError(contextClass,op,returnType,opNameleft);
+		}
         
-        public void checkCollectionOperation(String operation, String parameterType, int line) throws Exception {
+		private boolean comparaAtributos(ArrayList<ArrayList<Parametro>> listaParametros,List<Node> elements) {
+			outside:for (ArrayList<Parametro> listaParam : listaParametros) {
+				if(listaParam.size() != elements.size() )
+					continue outside;
+				for (int i = 0; i < listaParam.size(); i++) {
+					Parametro pi = listaParam.get(i);
+					Node ni = elements.get(i);
+					if(!( ni.getType().equals(getParameterType(pi)) ) )
+						continue outside;
+				}
+				return true;
+			}
+			return false;
+		}
+
+		private String getParameterType(Parametro pi) {
+			Entidade e = pi.getTipo();
+			if(e==null)
+				return e.getName();
+			else
+				return pi.getIdTipo();
+		}
+
+		public void checkCollectionOperation(String operation, String parameterType, int line) throws Exception {
                 if (!checkCollectionOpName(operation))
                         error(line, operation + " nao eh uma operacao de collection " +
                         "definida pela linguagem");
@@ -469,9 +511,43 @@ public class AnalisadorSemantico {
 			}
 			return null;
         }
+        
+        public Object checkFormalParameterListAux2(Object idParam, Object typeSpec, Object loop){
+        	Node params = new Node();
+			Node param = new Node( ((String) idParam), ((String) typeSpec) );
+			params.addElement(param);
+			if(loop!=null)
+				params.addAllElements( ((Node) loop).getElements() );
+			return params;
+        }
+        
+        public Object checkFormalParameterListAux(Object idParam, Object typeSpec){
+        	Node param = new Node( ((String) idParam), ((String) typeSpec) );
+			return param;
+        }
+        
+        public Object checkFormalParameterListAuxLoop(Object param, Object loop){
+        	Node resultado = new Node();
+			resultado.addElement((Node) param);
+			if(loop!=null)
+				resultado.addAllElements(((Node) loop).getElements());
+			return resultado;
+        }
 
 		public String getContextReturn() {
 			return this.contextType;
+		}
+		
+		public void semanticWrongParameters(String operation, String classe, int line) throws Exception{
+			throw new Exception("Semantic ERROR: Wrong parameters for operation <"+classe+"."+operation+"> at line: "+(line+1));
+		}
+		
+		private void semanticWrongReturnTypeError(String classe,OperacaoMaior op, String returnType, int line) throws Exception {
+			throw new Exception("Semantic ERROR: Mismatch return type in <"+classe+"."+op.getNome()+">;\nExpected <"+op.getReturnType()+"> and got <"+returnType+"> at line: "+(line+1));
+		}
+		
+		public void semanticInexistentTypeError(String type, int line) throws Exception{
+			throw new Exception("Semantic ERROR: Inexistent type <"+type+"> at line: "+(line+1));
 		}
 		
 		public void semanticTypeError(String typeExpected, String typeGot, int line) throws Exception{
