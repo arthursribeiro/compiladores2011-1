@@ -48,7 +48,7 @@ public class ManipuladorXMI {
 		Atributo att = findAttFromList(classe.getAtributos(),idAtributo);
 		if(att!=null){
 			if(!context.getName().equals(classe.getName()) && att.getVisibilidade().equalsIgnoreCase("private")){
-				throw new Exception("Atribute: <"+idAtributo+"> doesn't come from inheritance <"+context.getName()+"> => <"+context.getName()+">.");
+				throw new Exception("Atribute: <"+idAtributo+"> doesn't come from inheritance <"+context.getName()+"> => <"+classe.getName()+">.");
 			}
 			return att;
 		}else{
@@ -209,13 +209,13 @@ public class ManipuladorXMI {
 		return hierarquiaNumbers.contains(type);
 	}
 
-	public static boolean contemClasse(String contextClass) {
+	public static Entidade contemClasse(String contextClass) {
 		for (Entidade e : classes) {
 			if(e.getName().equals(contextClass)){
-				return true;
+				return e;
 			}
 		}
-		return false;
+		return null;
 	}
 
 }

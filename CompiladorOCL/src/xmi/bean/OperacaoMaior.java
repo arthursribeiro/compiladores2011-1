@@ -28,7 +28,7 @@ public class OperacaoMaior {
 	}
 
 	public String getReturnType() {
-		return returnType;
+		return returnType!=null?returnType:"void";
 	}
 
 	public void setReturnType(String returnType) {
@@ -81,5 +81,13 @@ public class OperacaoMaior {
 
 	public void addListParams(ArrayList<Parametro> params) {
 		this.listaParametros.add(params);
+	}
+
+	public boolean hasParametros() {
+		for (ArrayList<Parametro> lista : listaParametros) {
+			if(lista.size()>0)
+				return true;
+		}
+		return false;
 	}
 }
