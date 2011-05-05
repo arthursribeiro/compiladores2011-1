@@ -117,7 +117,7 @@ non terminal            oclFile, packageName, oclExpressions,constraint,contextD
 					
 					propertyCallAux, propertyCallAux2, propertyCallAux3, 
 					
-					declaratorAux, declaratorAuxLoop, declaratorAux2, declaratorAux3, 
+					declaratorAux, declaratorAuxLoop, declaratorAux2,
 					
 					pathNameAux, pathNameAuxLoop, 
 					
@@ -347,11 +347,11 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 						if(postfexp==null){
 							RESULT = primexp;
 						}else{
-							//TO DO => Checagem com propertycall 
+							
 						}
 					:};
 
-postfixExpressionAux ::= POINT | ARROW;
+postfixExpressionAux ::= POINT {: RESULT = "point"; :} | ARROW {: RESULT = "arrow"; :};
 
 postfixExpressionAux2 ::= postfixExpressionAux propertyCall;
 
@@ -365,7 +365,7 @@ primaryExpression ::= literalCollection
 						{: 
 							RESULT = lit1; 
 						:} 
-					| propertyCall 
+					| propertyCall:p1 {: RESULT = new Node("Boolean","Boolean"); :}
 					| LEFTPARENTHESIS expression:exp RIGHTPARENTHESIS 
 						{:
 							RESULT = exp;
@@ -380,8 +380,9 @@ primaryExpression ::= literalCollection
 
 
 
-propertyCallParameters ::= LEFTPARENTHESIS propertyCallParametersAux propertyCallParametersAux2:prop1  RIGHTPARENTHESIS {: System.out.println("Tratar declarator"); :}| 
-							LEFTPARENTHESIS propertyCallParametersAux2:prop2  RIGHTPARENTHESIS{: RESULT = prop2;:};
+propertyCallParameters ::= LEFTPARENTHESIS propertyCallParametersAux propertyCallParametersAux2:prop1  RIGHTPARENTHESIS {: System.out.println(((Node)prop1).listToString());
+																																				RESULT = (Node)prop1; :}| 
+							LEFTPARENTHESIS propertyCallParametersAux2:prop2  RIGHTPARENTHESIS{: System.out.println(((Node)prop2).listToString()); RESULT = (Node)prop2;:};
 
 propertyCallParametersAux ::= declarator {: System.out.println("Tratar declarator"); :};
 
@@ -432,7 +433,7 @@ collectionItemAux ::= POINT POINT expression | ;
 
 /* propertyCall ::= pathName ( qualifiers )? ( propertyCallParameters )?; */
 
-propertyCall ::= pathName propertyCallAux propertyCallAux2 propertyCallAux3;
+propertyCall ::= pathName:pt propertyCallAux propertyCallAux2 propertyCallAux3;
 
 propertyCallAux ::= timeExpression | ;
 
@@ -450,23 +451,57 @@ qualifiers ::= LEFTBRACK actualParameterList:a1 RIGHTBRACK {: RESULT = (Node)a1;
 
 /* declarator ::= IDENTIFIER ( VIRGULA IDENTIFIER )* ( DOUBLEPOINT simpleTypeSpecifier )? ( POINT_VIRGULA IDENTIFIER POINT_VIRGULA typeSpecifier EQ expression )? PIPELINE ; */
 
-declarator ::= IDENTIFIER declaratorAuxLoop declaratorAux2 declaratorAux3 PIPELINE ;
+declarator ::= IDENTIFIER:id declaratorAuxLoop:dal declaratorAux2:da2 PIPELINE {: if(da2 == null) {
+                                                                                     DeclaratorNode decl = new DeclaratorNode(DeclaratorNode.NON_TYPE_DECLARATOR);
+                                                                                     decl.addNode(new Node(id.toString(), null));
+                                                                                     RESULT = decl;
+                                                                                 } else {
+                                                                                     DeclaratorNode decl = new DeclaratorNode(DeclaratorNode.TYPED_DECLARATOR);
+                                                                                     decl.setTipoConteudo(da2.getTipo());
+                                                                                     decl.addNode(new Node(id.toString(), null));
+                                                                                     decl.addNodes(da2.getElements());
+                                                                                     RESULT = decl;  
+                                                                                 } 
+                                                                              :} ;
 
-declaratorAux ::= VIRGULA IDENTIFIER;
+declaratorAux ::= VIRGULA IDENTIFIER {: RESULT = new Node(id.toString(), null); :};
 
-declaratorAuxLoop ::= declaratorAux declaratorAuxLoop | ;
+declaratorAuxLoop ::= declaratorAux:da declaratorAuxLoop:dal {: Node n = new Node();
+                                                                if(dal == null) {
+                                                                    n.addElement(da);
+                                                                } else {
+                                                                    n.addElement(da);
+                                                                    n.addAllElements(dal.getElements());
+                                                                } 
+                                                                RESULT = n;:} 
+                    | {: RESULT = null; :};
 
-declaratorAux2 ::= DOUBLEPOINT simpleTypeSpecifier | ;
-
-declaratorAux3 ::= POINT_VIRGULA IDENTIFIER POINT_VIRGULA typeSpecifier EQ expression | ;
-
+declaratorAux2 ::= DOUBLEPOINT simpleTypeSpecifier:sts {: RESULT = new Node(null, sts.toString()); :} 
+                 | {: RESULT = null; :}  ;
 
 
-pathName ::= IDENTIFIER pathNameAuxLoop;
+pathName ::= IDENTIFIER:id pathNameAuxLoop:ploop {: resultado = new Node();
+													Node identifier = new Node(id.toString(),"String");
+													if(ploop == null){
+														resultado = new Node();
+														resultado.addElement(identifier);
+														
+													}else{
+														resultado.addElement(identifier);
+														resultado.addAllElements(((Node) ploop).getElements());
+													}RESULT = resultado;   :};
 
-pathNameAux ::= DDOUBLEPOINT IDENTIFIER;
+pathNameAux ::= DDOUBLEPOINT IDENTIFIER:id1{: RESULT = new Node(id1.toString(),"String");:};
 
-pathNameAuxLoop ::= pathNameAux pathNameAuxLoop | ;
+pathNameAuxLoop ::= pathNameAux:paux pathNameAuxLoop:ploop {: Node resultado;
+															  resultado = new Node();
+																if(ploop == null){
+																	resultado.addElement((Node)paux);
+																}else{
+																	resultado.addElement((Node)paux);
+																	resultado.addAllElements(((Node) ploop).getElements());
+																}RESULT = resultado; :}
+				| {: RESULT = null; :} ;
 
 
 
@@ -474,24 +509,23 @@ timeExpression ::= ATPRE:atPre {: parser.semantico.checkStereotype("@pre",atPrel
 
 
 
-actualParameterList ::= expression:e1 actualParameterListAuxLoop:aloop {: Node resultado;
-																		if(aloop == null){
-																			resultado = (Node)e1;
-																		}
-																		else{
-																			resultado = new Node();
+actualParameterList ::= expression:e1 actualParameterListAuxLoop:aloop {: Node resultado = new Node();
+																		if(e1 == null && aloop == null){
+																			resultado = null; 
+																		else if(aloop == null){
+																			resultado.addElement((Node)e1);
+																		}else{
 																			resultado.addElement((Node)e1);
 																			resultado.addAllElements(((Node) aloop).getElements());}
-																			RESULT = resultado; :};
+																		RESULT = resultado; :};
 
 actualParameterListAux ::= VIRGULA expression:e1 {: RESULT = (Node)e1;:};
 
-actualParameterListAuxLoop ::= actualParameterListAux:a1 actualParameterListAuxLoop:aloop{: Node resultado; 
+actualParameterListAuxLoop ::= actualParameterListAux:a1 actualParameterListAuxLoop:aloop{: Node resultado = new Node();
 																							if(aloop == null) {
-																								resultado = (Node) a1;
+																								resultado.addElement((Node) a1);
 																							}
 																							else{
-																								resultado = new Node();
 																								resultado.addElement((Node)a1);
 																								resultado.addAllElements(((Node) aloop).getElements());}
 																							RESULT = resultado; :}																						} 
