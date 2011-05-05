@@ -72,6 +72,8 @@ terminal RIGHTBRACK;
 terminal LEFTBRACKET;
 terminal RIGHTBRACKET;
 terminal STRING_LITERAL;
+terminal OCL_PRIMITIVE;
+terminal OCL_SUPER_TYPE;
 
 
 /* Non terminals */
@@ -126,7 +128,7 @@ non terminal            oclFile, packageName, oclExpressions,constraint,contextD
 					
 					booleanLiteral, 
 					
-					ifExpression;
+					ifExpression,oclType;
 
 /* Precedences */
 
@@ -195,10 +197,10 @@ contextDeclarationAux ::= operationContext;
 
 /* operationContext ::= IDENTIFIER DDOUBLEPOINT operationName LEFTPARENTHESIS formalParameterList RIGHTPARENTHESIS ( DOUBLEPOINT returnType )?; */
 
-operationContext ::= IDENTIFIER:idCont DDOUBLEPOINT operationName LEFTPARENTHESIS formalParameterList RIGHTPARENTHESIS DOUBLEPOINT returnType:retorno
+operationContext ::= IDENTIFIER:idCont DDOUBLEPOINT operationName:opName LEFTPARENTHESIS formalParameterList:params RIGHTPARENTHESIS DOUBLEPOINT returnType:retorno
 					{:
-						parser.semantico.setContextClass( ((String) idCont) );
-						parser.semantico.setContextType( ((String) retorno) ); 
+						parser.semantico.setContextClass( ((String) idCont), idContleft );
+						parser.semantico.setContextFunction( ((String) opName), ((Node) params) ,((Node) retorno), opNameleft ); 
 					:};
 
 operationContextAux ::= DOUBLEPOINT returnType | ;
@@ -210,23 +212,38 @@ ifExpression ::= IF expression THEN expression ELSE expression ENDIF;
 
 
 
-operationName ::= IDENTIFIER | EQ | PLUS | MINUS | LESSTHAN | GREATEREQTHAN |
-					IMPLIES | NOT | OR | XOR | AND | LESSEQTHAN | GREATERTHAN | DIVIDE | MULTIPLY | NOTEQ | MOD;
+operationName ::= IDENTIFIER:idOp {: RESULT = ((String) idOp); :};
 					
 					
 /* formalParameterList ::= ( IDENTIFIER DOUBLEPOINT typeSpecifier (VIRGULA IDENTIFIER DOUBLEPOINT typeSpecifier )* )?; */
 					
-formalParameterList ::= formalParameterListAux2;
+formalParameterList ::= formalParameterListAux2:formLoop 
+						{:
+							RESULT = formLoop;
+						:};
 
-formalParameterListAux2 ::= IDENTIFIER DOUBLEPOINT typeSpecifier formalParameterListAuxLoop | ;
+formalParameterListAux2 ::= IDENTIFIER:idParam DOUBLEPOINT typeSpecifier:formTypeSpec formalParameterListAuxLoop:formLoop
+							{:
+								RESULT = parser.semantico.checkFormalParameterListAux2(idParam, formTypeSpec, formLoop,formTypeSpecleft);
+							:}
+							 | ;
 
-formalParameterListAux ::= VIRGULA IDENTIFIER DOUBLEPOINT typeSpecifier;
+formalParameterListAux ::= VIRGULA IDENTIFIER:idParam DOUBLEPOINT typeSpecifier:formTypeSpec
+							{:
+								RESULT = parser.semantico.checkFormalParameterListAux(idParam, formTypeSpec,formTypeSpecleft);
+							:};
 
-formalParameterListAuxLoop ::= formalParameterListAux formalParameterListAuxLoop | ;
+formalParameterListAuxLoop ::= formalParameterListAux:formParam formalParameterListAuxLoop:formLoop 
+							{:
+								RESULT = parser.semantico.checkFormalParameterListAuxLoop(formParam, formLoop);
+							:}| ;
 
 
 
-typeSpecifier ::= simpleTypeSpecifier | collectionType;
+typeSpecifier ::= simpleTypeSpecifier:simpTpSpec 
+				{: 
+					RESULT = simpTpSpec; 
+				:}  | collectionType:colTp;
 
 
 
@@ -234,15 +251,26 @@ collectionType ::= collectionKind LEFTPARENTHESIS simpleTypeSpecifier RIGHTPAREN
 
 
 
-oclExpression ::= expression;
+oclExpression ::= expression:exp {: RESULT = exp; :};
 
 
 
-returnType ::= typeSpecifier | VOID;
+returnType ::= typeSpecifier:typeSpec 
+			{: 
+				RESULT = typeSpec; 
+			:} 
+			| VOID:void1 
+			{: 
+				RESULT = new Node("void","void"); 
+			:};
 
 
 
-expression ::= logicalExpression;
+expression ::= logicalExpression:logexp 
+			{: 
+				//System.out.println( ((Node)logexp).getValue() );
+				RESULT = logexp; 
+			:};
 
 
 
@@ -404,7 +432,11 @@ literal ::= STRING_LITERAL:litString {: RESULT = new Node(litString,"String"); :
 
 
 
-simpleTypeSpecifier ::= pathName;
+simpleTypeSpecifier ::= pathName:path {: RESULT = path; :}
+						|oclType:oclT {: RESULT = oclT; :} ;
+
+oclType ::= OCL_SUPER_TYPE:super1 {: RESULT = new Node(super1, ((String) super1) ); :}
+		 | OCL_PRIMITIVE:basic1 {: RESULT = new Node(basic1, ((String) basic1)); :} ;
 
 
 
@@ -482,16 +514,17 @@ declaratorAux2 ::= DOUBLEPOINT simpleTypeSpecifier:sts {: RESULT = new Node(null
 
 
 pathName ::= IDENTIFIER:id pathNameAuxLoop:ploop {: Node resultado = new Node();
-													Node identifier = new Node(id.toString(),"String");
+													Node identifier = new Node(id.toString());
 													if(ploop == null){
 														resultado.addElement(identifier);
 														
 													}else{
 														resultado.addElement(identifier);
 														resultado.addAllElements(((Node) ploop).getElements());
-													}RESULT = resultado;   :};
+													}
+													RESULT = resultado;   :};
 
-pathNameAux ::= DDOUBLEPOINT IDENTIFIER:id1{: RESULT = new Node(id1.toString(),"String");:};
+pathNameAux ::= DDOUBLEPOINT IDENTIFIER:id1 {: RESULT = new Node(id1.toString());:};
 
 pathNameAuxLoop ::= pathNameAux:paux pathNameAuxLoop:ploop {: Node resultado;
 															  resultado = new Node();
@@ -502,6 +535,7 @@ pathNameAuxLoop ::= pathNameAux:paux pathNameAuxLoop:ploop {: Node resultado;
 																	resultado.addAllElements(((Node) ploop).getElements());
 																}RESULT = resultado; :}
 				| {: RESULT = null; :} ;
+
 
 
 
