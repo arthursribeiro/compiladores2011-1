@@ -60,13 +60,14 @@ public class Main {
 
 			try {
 				parse_tree = parser_obj.parse();
-				JOptionPane.showMessageDialog(null, "Análise Léxica e Sintática finalizadas com êxito.");
+//				JOptionPane.showMessageDialog(null, "Análise Léxica e Sintática finalizadas com êxito.");
 			}catch(Error er){ 
-				JOptionPane.showMessageDialog(null, er.getMessage());
+//				JOptionPane.showMessageDialog(null, er.getMessage());
 				System.err.println(er.getMessage());
 			}catch (Exception e) {
-				JOptionPane.showMessageDialog(null, e.getMessage());
+//				JOptionPane.showMessageDialog(null, e.getMessage());
 				System.err.println(e.getMessage());
+				e.printStackTrace();
 			}
 //			String[] params = new String[1];
 //			params[0] = "C:\\Users\\DAVI\\Documents\\workspace\\Java\\CompiladorOCL\\ocl.txt";

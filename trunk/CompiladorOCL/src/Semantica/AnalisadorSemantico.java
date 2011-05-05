@@ -7,6 +7,7 @@ import java.util.Set;
 
 import xmi.ManipuladorXMI;
 import xmi.bean.Atributo;
+import xmi.bean.Classe;
 import xmi.bean.Entidade;
 import xmi.bean.OperacaoMaior;
 import xmi.bean.Parametro;
@@ -56,7 +57,7 @@ public class AnalisadorSemantico {
         }
         
         public void setContextClass(String contextClass, int line) throws Exception {
-    		if(ManipuladorXMI.contemClasse(contextClass))
+    		if(ManipuladorXMI.contemClasse(contextClass)!=null)
     			this.contextClass = contextClass;
     		else
     			semanticInexistentTypeError(contextClass, line);
@@ -78,17 +79,40 @@ public class AnalisadorSemantico {
                 this.contextType = contextType;
         }
 
-		public void setContextFunction(String opName, Node params, String returnType,int opNameleft) throws Exception {
+		public void setContextFunction(String opName, Node params, Node node,int opNameleft) throws Exception {
+			String retorno = node.getType();
 			OperacaoMaior op = ManipuladorXMI.contemFuncao(contextClass, contextClass, opName);
-			if(params==null || !comparaAtributos(op.getListaParametros(),params.getElements()) ){
-				semanticWrongParameters(opName,contextClass,opNameleft);
+			if(op.hasParametros()){
+				if(params==null || !comparaAtributos(op.getListaParametros(),params.getElements()) ){
+					semanticWrongParameters(opName,contextClass,opNameleft);
+				}
+			}else{
+				if(params!=null){
+					semanticWrongParameters(opName,contextClass,opNameleft);
+				}
 			}
-			if(op.getReturnType().equals(returnType))
-				this.contextType = (returnType);
+			if(retorno!= null && retorno.equals(op.getReturnType()))
+				this.contextType = (retorno);
 			else
-				semanticWrongReturnTypeError(contextClass,op,returnType,opNameleft);
+				semanticWrongReturnTypeError(contextClass,op,retorno,opNameleft);
 		}
         
+		public Node getTypeFromTypeSpecifier(Node node,int line) throws Exception {
+			if(node.getType()!=null)
+				return node;
+			List<Node> elements = node.getElements();
+			if(elements!=null && elements.size()==1){
+				String idClasse = (String) elements.get(0).getValue();
+				Entidade e  = existeClasse(idClasse);
+				if(e!=null){
+					return new Node(e.getName(),e.getName());
+				}else{
+					semanticInexistentTypeError(idClasse, line);
+				}
+			}
+			return null;
+		}
+
 		private boolean comparaAtributos(ArrayList<ArrayList<Parametro>> listaParametros,List<Node> elements) {
 			outside:for (ArrayList<Parametro> listaParam : listaParametros) {
 				if(listaParam.size() != elements.size() )
@@ -106,7 +130,7 @@ public class AnalisadorSemantico {
 
 		private String getParameterType(Parametro pi) {
 			Entidade e = pi.getTipo();
-			if(e==null)
+			if(e!=null)
 				return e.getName();
 			else
 				return pi.getIdTipo();
@@ -153,6 +177,10 @@ public class AnalisadorSemantico {
         public void checkStereotype(String token, int line) throws Exception {
                 if (!stereotype.equals("post"))
                        throw new Exception("Syntax Error in '"+token + "' at line: "+(line+1) );
+                if(token.equals("result")){
+                	if(contextType.equals("void"))
+                		throw new Exception("Semantic ERROR: Operation return type is <void>, <result> can't be used.");
+                }
         }
         
         public String getStereotype() {
@@ -367,20 +395,14 @@ public class AnalisadorSemantico {
         
         public Object checkLogicalExpression(Object relexp, Object logexploop, int relexpleft, int logexploopleft) throws Exception{
         	String typeRelexp = ((Node) relexp).getType();
-			String typeLogexploop = null;
-			if( !( typeRelexp.equals("Boolean") ) ){
-				semanticTypeError("Boolean", typeRelexp, relexpleft);
-			}
-			else if(logexploop == null){
+			String typeLogexloop = null;
+			if(logexploop == null){
 				return relexp;
 			}else{
-				String typeLogexloop = ((Node) logexploop).getType(); 
-				if( !( typeLogexloop.equals("Boolean") ) ){
-					semanticTypeError("Boolean", typeLogexploop, logexploopleft);
-				}
+				typeLogexloop = ((Node) logexploop).getType(); 
+				maxType(typeRelexp, typeLogexloop, logexploopleft);
 				return new Node( "("+((Node)relexp).getValue()+" "+ ((Node)logexploop).getValue()+")","Boolean");
 			}
-			return null;
         }
         
         public Object checkLogicalExpressionAux(Object relexp2, Object logop, int relexp2left) throws Exception{
@@ -409,10 +431,9 @@ public class AnalisadorSemantico {
         	if(relexpaux3 == null){
 				return addexp;
 			}else{
-				String typeAddexp = ((Node)addexp).getType();
-				if( !((Node)addexp).isNumber() ){
-					semanticNumberTypeError("Number kind", typeAddexp, addexpleft);
-				}
+				String type1 = ((Node)relexpaux3).getType();
+				String type2 = ((Node)addexp).getType();
+				maxType(type1, type2, addexpleft);
 				return new Node( "(" + ((Node) addexp).getValue() + " " + ((Node) relexpaux3).getValue()+")", "Boolean"); 
 			}
         }
@@ -512,17 +533,17 @@ public class AnalisadorSemantico {
 			return null;
         }
         
-        public Object checkFormalParameterListAux2(Object idParam, Object typeSpec, Object loop){
+        public Object checkFormalParameterListAux2(Object idParam, Object typeSpec, Object loop,int line) throws Exception{
         	Node params = new Node();
-			Node param = new Node( ((String) idParam), ((String) typeSpec) );
+			Node param = new Node( ((String) idParam), getTypeFromTypeSpecifier(((Node)typeSpec),line).getType() );
 			params.addElement(param);
 			if(loop!=null)
 				params.addAllElements( ((Node) loop).getElements() );
 			return params;
         }
         
-        public Object checkFormalParameterListAux(Object idParam, Object typeSpec){
-        	Node param = new Node( ((String) idParam), ((String) typeSpec) );
+        public Object checkFormalParameterListAux(Object idParam, Object typeSpec,int line) throws Exception{
+        	Node param = new Node( ((String) idParam),  getTypeFromTypeSpecifier(((Node)typeSpec),line).getType());
 			return param;
         }
         
@@ -532,6 +553,10 @@ public class AnalisadorSemantico {
 			if(loop!=null)
 				resultado.addAllElements(((Node) loop).getElements());
 			return resultado;
+        }
+        
+        public Entidade existeClasse(String idClasse){
+        	return ManipuladorXMI.contemClasse(idClasse);
         }
 
 		public String getContextReturn() {

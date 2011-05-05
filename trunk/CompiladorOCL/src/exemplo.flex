@@ -39,8 +39,8 @@ WhiteSpace     = {LineTerminator} | [ \t\f]
 Identifier = ([:jletter:] | "_") ([:jletterdigit:] | "_")*
 
 DecIntegerLiteral = 0 | [0-9][0-9]*
-Integer = -? {DecIntegerLiteral}
-FloatLiteral = -? {DecIntegerLiteral} \. {DecIntegerLiteral}
+Integer = {DecIntegerLiteral}
+FloatLiteral = {DecIntegerLiteral} \. {DecIntegerLiteral}
 Number = ({Integer}|{FloatLiteral}) {exponencial}
 exponencial = ( ("e" | "E") ( "+" | "-" )? [0-9] ([0-9])* )
 
@@ -87,6 +87,11 @@ EndComent = ([\n\r])?
 <YYINITIAL> "Bag"             { return symbol(sym.COLLECTION, yytext()); }
 <YYINITIAL> "Sequence"             { return symbol(sym.COLLECTION, yytext()); }
 <YYINITIAL> "Collection"             { return symbol(sym.COLLECTION, yytext()); }
+<YYINITIAL> "Integer"             { return symbol(sym.OCL_PRIMITIVE, yytext()); }
+<YYINITIAL> "Float"             { return symbol(sym.OCL_PRIMITIVE, yytext()); }
+<YYINITIAL> "Real"             { return symbol(sym.OCL_PRIMITIVE, yytext()); }
+<YYINITIAL> "OclType"             { return symbol(sym.OCL_SUPER_TYPE, yytext()); }
+<YYINITIAL> "OclAny"             { return symbol(sym.OCL_SUPER_TYPE, yytext()); }
  <YYINITIAL> {
   /* literals */
   {Integer}            { return symbol(sym.INTEGER_LITERAL, new Integer(yytext())); }
