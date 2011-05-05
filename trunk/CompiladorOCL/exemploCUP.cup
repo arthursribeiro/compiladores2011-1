@@ -378,16 +378,15 @@ primaryExpression ::= literalCollection
 
 
 
-propertyCallParameters ::= LEFTPARENTHESIS propertyCallParametersAux propertyCallParametersAux2:prop1  RIGHTPARENTHESIS {: System.out.println(((Node)prop1).listToString());
-																																				RESULT = (Node)prop1; :}| 
+propertyCallParameters ::= LEFTPARENTHESIS propertyCallParametersAux:pcpa propertyCallParametersAux2:prop1  RIGHTPARENTHESIS {: if(pcpa != null && prop1 == null) {
+                                                                                                                                    throw new Exception("Expected expression after declarator.");
+                                                                                                                                } :}| 
 							LEFTPARENTHESIS propertyCallParametersAux2:prop2  RIGHTPARENTHESIS{: System.out.println(((Node)prop2).listToString()); RESULT = (Node)prop2;:};
 
-propertyCallParametersAux ::= declarator {: System.out.println("Tratar declarator"); :};
+propertyCallParametersAux ::= declarator:d {: RESULT = d; :};
 
 propertyCallParametersAux2 ::= actualParameterList:a1 {: RESULT = (Node)a1;:}
-								|{: Node resultado = new Node();
-									resultado.setType("void");
-									RESULT = resultado; :} ;
+								|{: RESULT = null; :} ;
 
 
 
@@ -458,27 +457,28 @@ declarator ::= IDENTIFIER:id declaratorAuxLoop:dal declaratorAux2:da2 PIPELINE {
                                                                                      RESULT = decl;
                                                                                  } else {
                                                                                      DeclaratorNode decl = new DeclaratorNode(DeclaratorNode.TYPED_DECLARATOR);
-                                                                                     decl.setTipoConteudo((Node)da2.getTipo());
+                                                                                     decl.setTipoConteudo(((Node)da2).getType());
                                                                                      decl.addNode(new Node(id.toString(), null));
-                                                                                     decl.addNodes((Node)da2.getElements());
+                                                                                     decl.addNodes(((Node)da2).getElements());
                                                                                      RESULT = decl;  
                                                                                  } 
                                                                               :} ;
 
-declaratorAux ::= VIRGULA IDENTIFIER {: RESULT = new Node(id.toString(), null); :};
+declaratorAux ::= VIRGULA IDENTIFIER:id {: RESULT = new Node(id.toString(), null); :};
 
 declaratorAuxLoop ::= declaratorAux:da declaratorAuxLoop:dal {: Node n = new Node();
                                                                 if(dal == null) {
-                                                                    n.addElement(da);
+                                                                    n.addElement((Node)da);
                                                                 } else {
-                                                                    n.addElement(da);
-                                                                    n.addAllElements(dal.getElements());
+                                                                    n.addElement((Node)da);
+                                                                    n.addAllElements(((Node)dal).getElements());
                                                                 } 
                                                                 RESULT = n;:} 
                     | {: RESULT = null; :};
 
 declaratorAux2 ::= DOUBLEPOINT simpleTypeSpecifier:sts {: RESULT = new Node(null, sts.toString()); :} 
                  | {: RESULT = null; :}  ;
+
 
 
 pathName ::= IDENTIFIER:id pathNameAuxLoop:ploop {: Node resultado = new Node();
