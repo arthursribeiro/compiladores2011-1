@@ -52,7 +52,7 @@ public class AnalisadorSemantico {
                 return contextClass;
         }
 
-        private void setContextClass(String contextClass) {
+        public void setContextClass(String contextClass) {
         		this.contextClass = contextClass;
         }
         
@@ -193,6 +193,19 @@ public class AnalisadorSemantico {
         
         public String maxType(String type1, String type2, int line) throws Exception{
                 return ManipuladorXMI.maxType(type1, type2, line);
+        }
+        /**
+         * Dada uma lista de nodes que representa o caminho, retornar um node com o tipo associado.
+         * Nodes que são apenas caminhos tem seus roles setados para VARIABLE, e nodes com parametros tem 
+         * seus roles setados para FUNCTION e seus parametros estarão armazenados em uma lista de nodes que podem ser acessados com "getElements()".
+         * @param rule1
+         * @param rule2
+         * @param line
+         * @return
+         * @throws Exception
+         */
+        public Node checkAllPathFunction(List<Node> lista_caminho){
+        	return null;
         }
         
         public Node checkTypesOpArithmetic(Node rule1, Node rule2, int line ) throws Exception{
