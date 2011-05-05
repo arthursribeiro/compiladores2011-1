@@ -16,11 +16,11 @@ public class Node {
         
         
         public void addCaminho(Node element){
-        	list_caminho.add(0, element);
+        	list_caminho.add(element);
         }
     
         public void addAllCaminho(List<Node> list){
-            this.list_caminho.addAll(0, list);
+            this.list_caminho.addAll(list);
         }
         
         public String caminhoToString(){
