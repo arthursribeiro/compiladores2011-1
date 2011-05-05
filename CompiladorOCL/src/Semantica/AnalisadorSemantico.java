@@ -378,7 +378,7 @@ public class AnalisadorSemantico {
         public Object checkRelationalExpressionAux(Object addexp2, Object relop, int addexp2left) throws Exception{
         	String operador = ((String) relop);
 			String typeAddexp2 = ((Node)addexp2).getType();
-			if( !((Node)addexp2).isNumber() ){
+			if( !((Node)addexp2).isNumber() && !((String) relop).equals("=") && !((String) relop).equals("<>")){
 				semanticNumberTypeError("Number kind", typeAddexp2, addexp2left);
 			}
 			return new Node( operador+" "+((Node)addexp2).getValue(),typeAddexp2);
