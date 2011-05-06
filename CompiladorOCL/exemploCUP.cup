@@ -374,14 +374,15 @@ unaryExpressionAux ::= unaryOperator:unop postfixExpression:postfexp
 postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfexp
 					{:
 						System.out.println("LOL");
-						if (postfexp != null) System.out.println("Esse bixim aqui: "+ ((Node)postfexp).listToString() + " caminho : " + ((Node)postfexp).caminhoToString());
-						Node resultado = new Node("Boolean","Boolean");
-						
-						if(postfexp==null){
-							RESULT = primexp;
-						}else{
-							RESULT = resultado;
+						Node aux = new Node();
+						aux.addCaminho((Node)primeexp);
+						if (postfexp != null){
+							aux.addAllCaminho(((Node)postfexp).getList_caminho());
+							System.out.println("Esse bixim aqui: "+ ((Node)postfexp).listToString() + " caminho : " + ((Node)postfexp).caminhoToString());
 						}
+						Node resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho());
+						RESULT = resultado;
+						
 					:};
 
 postfixExpressionAux ::= POINT {: RESULT = "point"; :} | ARROW {: RESULT = "arrow"; :};
@@ -396,12 +397,8 @@ postfixExpressionAux2Loop ::= postfixExpressionAux2:paux2 postfixExpressionAux2L
 																						 	 	resultado.setRole(((Node)ploop).getRole());
 																						 	 	System.out.println("FRESQUIM " +((Node)ploop).caminhoToString());
 																						 	 	resultado.addAllCaminho(((Node)ploop).getList_caminho());
-																						 	 	if(((Node)ploop).getRole() == Semantica.Node.FUNCTION){
-																						 	 		resultado.addAllElements(((Node)ploop).getElements());
-																						 	 	}
-																						 	 }RESULT  = resultado;:} 
+																						 }RESULT  = resultado;:}
 																						 | {: RESULT = null; :} ;
-
 primaryExpression ::= literalCollection 
 					| literal:lit1 
 						{: 
