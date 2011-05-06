@@ -87,7 +87,7 @@ public class AnalisadorSemantico {
 			}
 			OperacaoMaior op = ManipuladorXMI.contemFuncao(contextClass, contextClass, opName);
 			if(op.hasParametros()){
-				if(params==null || !comparaAtributos(op.getListaParametros(),params.getElements()) ){
+				if(params==null || !comparaAtributos(op.getListaParametros(),params.getElements(),opNameleft) ){
 					semanticWrongParameters(opName,contextClass,opNameleft);
 				}
 			}else{
@@ -95,9 +95,10 @@ public class AnalisadorSemantico {
 					semanticWrongParameters(opName,contextClass,opNameleft);
 				}
 			}
-			if(retorno!= null && retorno.equals(op.getReturnType()))
+			if(retorno!= null && retorno.equals(op.getReturnType())){
 				this.contextType = (retorno);
-			else
+				this.contextMethod = op.getNome();
+			}else
 				semanticWrongReturnTypeError(contextClass,op,retorno,opNameleft);
 		}
         
@@ -117,13 +118,21 @@ public class AnalisadorSemantico {
 			return null;
 		}
 
-		private boolean comparaAtributos(ArrayList<ArrayList<Parametro>> listaParametros, List<Node> elements) {
+		private boolean comparaAtributos(ArrayList<ArrayList<Parametro>> listaParametros, List<Node> elements,int line) {
 			outside:for (ArrayList<Parametro> listaParam : listaParametros) {
 				if(listaParam.size() != elements.size() )
 					continue outside;
 				for (int i = 0; i < listaParam.size(); i++) {
 					Parametro pi = listaParam.get(i);
 					Node ni = elements.get(i);
+					try {
+						String paramName = ((String)ni.getValue());
+						Atributo att = ManipuladorXMI.contemAtributo(contextClass, contextClass, paramName);
+						if(att!=null){
+							semanticParamNameError(paramName, contextClass, line);
+						}
+					} catch (Exception e) {
+					}
 					if(!( ni.getType().equals(getParameterType(pi)) ) )
 						continue outside;
 				}
@@ -206,10 +215,12 @@ public class AnalisadorSemantico {
          * @param rule2
          * @param line
          * @return
+         * @throws Exception 
          * @throws Exception
          */
-        public Node checkAllPathFunction(List<Node> lista_caminho, int line){
+        public Node checkAllPathFunction(List<Node> lista_caminho, int line) throws Exception{
         	String typeContext = contextClass;
+        	OperacaoMaior opCont = ManipuladorXMI.contemFuncao(contextClass, contextClass, contextMethod);
         	Node last = null;
         	try {
         		for (Node node : lista_caminho) {
@@ -224,7 +235,18 @@ public class AnalisadorSemantico {
             					typeContext = att.getTipo().getName();
             				}
         				}else{
-        					semanticInexistentAttError(typeContext, id, line);
+        					ArrayList<ArrayList<Parametro>> attsCont = opCont.getListaParametros();
+        					Parametro p = getAttFromLists(attsCont,id);
+        					if(lista_caminho.size()!=1 || p==null)
+        						semanticInexistentAttError(typeContext, id, line);
+        					else{
+        						String tipoParam = null;
+        						if(p.getTipo()==null)
+        							tipoParam = p.getIdTipo();
+        						else
+        							tipoParam = p.getTipo().getName();
+        						last = new Node(p.getNome(),tipoParam);
+        					}
         				}
         				last = new Node(id,typeContext);
         			}else if(node.getRole()==Node.FUNCTION){
@@ -246,6 +268,10 @@ public class AnalisadorSemantico {
         			}else if(node.getRole() == Node.VALUE){
         				if( ((String)node.getValue()).equals("self") )
         					last = node;
+        				else if(node.getType()==null){
+        					node.setRole(Node.VARIABLE);
+        					return checkAllPathFunction(lista_caminho, line);
+        				}
         				else
         					return node;
         			}
@@ -256,6 +282,18 @@ public class AnalisadorSemantico {
         	return last;
         }
         
+		private Parametro getAttFromLists(ArrayList<ArrayList<Parametro>> listaParametros, String id) {
+			for (ArrayList<Parametro> listaParam : listaParametros) {
+				for (int i = 0; i < listaParam.size(); i++) {
+					Parametro pi = listaParam.get(i);
+					if(pi.getNome().equals(id)){
+						return pi;
+					}
+				}
+			}
+			return null;
+		}
+
 		private boolean comparaAtributosChamada(ArrayList<ArrayList<Parametro>> listaParametros,List<Node> elements) {
 			outside:for (ArrayList<Parametro> listaParam : listaParametros) {
 				if(listaParam.size() != elements.size() )
@@ -660,6 +698,10 @@ public class AnalisadorSemantico {
 
 		public String getContextReturn() {
 			return this.contextType;
+		}
+		
+		private void semanticParamNameError(String paramName,String contextClass2, int line) throws Exception {
+			throw new Exception("Semantic ERROR: Parameter name <"+paramName+"> already used in class <"+contextClass2+"> at line: "+(line+1));
 		}
 		
 		private void semanticInexistentOpError(String typeContext, String id,
