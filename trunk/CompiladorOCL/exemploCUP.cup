@@ -380,8 +380,9 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 							aux.addAllCaminho(((Node)postfexp).getList_caminho());
 							System.out.println("Esse bixim aqui: "+ ((Node)postfexp).listToString() + " caminho : " + ((Node)postfexp).caminhoToString());
 						}
-						Node resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho());
-						RESULT = resultado;
+						System.out.println("Teste Parametros: " + ((Node)aux).printAllParamethrs() );
+						Node resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft);
+						RESULT = new Node("Boolean","Boolean");
 						
 					:};
 
