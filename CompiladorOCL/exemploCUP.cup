@@ -279,6 +279,8 @@ returnType ::= typeSpecifier:typeSpec
 expression ::= logicalExpression:logexp 
 			{: 
 				//System.out.println( ((Node)logexp).getValue() );
+				if( ! ((Node)logexp).getType().equals("Boolean") )
+					throw new Exception("Semantic ERROR: Must have a <Boolean> inside <"+parser.semantico.getStereotype().toUpperCase()+"> and got <"+((Node)logexp).getType()+"> at line: "+logexpleft);
 				RESULT = logexp; 
 			:};
 

@@ -183,7 +183,7 @@ public class XMIParser {
 		Parametro p = new Parametro(name,type);
 		return p;
 	}
-
+	
 	private Node getNodeTypeFromParameter(Node attChild) {
 		NodeList nl = attChild.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
