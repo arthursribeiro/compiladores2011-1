@@ -12,13 +12,13 @@ import Semantica.DeclaratorNode;
 /** CUP v0.10k generated parser.
   * @version Fri May 06 09:27:38 BRT 2011
   */
-public class parser extends java_cup.runtime.lr_parser {
+public class AnalisadorSintatico extends java_cup.runtime.lr_parser {
 
   /** Default constructor. */
-  public parser() {super();}
+  public AnalisadorSintatico() {super();}
 
   /** Constructor which sets the default scanner. */
-  public parser(java_cup.runtime.Scanner s) {super(s);}
+  public AnalisadorSintatico(java_cup.runtime.Scanner s) {super(s);}
 
   /** Production table. */
   protected static final short _production_table[][] = 
@@ -684,10 +684,10 @@ public class parser extends java_cup.runtime.lr_parser {
 
 /** Cup generated class to encapsulate user supplied action code.*/
 class CUP$parser$actions {
-  private final parser parser;
+  private final AnalisadorSintatico parser;
 
   /** Constructor */
-  CUP$parser$actions(parser parser) {
+  CUP$parser$actions(AnalisadorSintatico parser) {
     this.parser = parser;
   }
 
