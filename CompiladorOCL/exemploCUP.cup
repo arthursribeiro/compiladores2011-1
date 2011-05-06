@@ -208,11 +208,16 @@ operationContextAux ::= DOUBLEPOINT returnType | ;
 
 
 ifExpression ::= IF expression:e1 THEN expression:e2 ELSE expression:e3 ENDIF
-				{: if(((Node) e1).getType().equalsIgnoreCase("Boolean")){
-						
+				{:  if(((Node) e1).getType().equalsIgnoreCase("Boolean")){
+						if(((Node)e2).getType().equalsIgnoreCase(((Node)e3).getType())) {
+						    System.out.println("tipo eh: " + ((Node)e2).getType());
+						    RESULT = new Node("if", ((Node)e2).getType());
+						} else {
+						    throw new Exception("Semantic Error: If expression is returning different type values.");
+						}
 					}else{
 						throw new Exception("Semantic Error: No Boolean Expression on if parameter");
-					}RESULT = new Node("Boolean","Boolean"); :};
+					} :};
 
 
 
@@ -349,7 +354,7 @@ multiplicativeExpressionAuxLoop ::= multiplicativeExpressionAux:addexpa multipli
 									{:
 										RESULT  = parser.semantico.checkMultiplicativeExpressionAuxLoop(addexpaloop, addexpa, addexpaloopleft, addexpaleft);
 									:} 
-							
+									
 									| ;
 
 
@@ -421,7 +426,7 @@ primaryExpression ::= literalCollection
 						:} 
 					| SELF {: RESULT = new Node("self",parser.semantico.getContextClass()); :}
 					| SELF timeExpression   {: RESULT = new Node("self",parser.semantico.getContextClass()); :}
-					| ifExpression;
+					| ifExpression:ifStmt {: System.out.println("tipo na primary " + ((Node)ifStmt).getType()); RESULT = (Node)ifStmt; :};
 
 
 
@@ -586,8 +591,8 @@ actualParameterListAuxLoop ::= actualParameterListAux:a1 actualParameterListAuxL
 																							else{
 																								resultado.addElement((Node)a1);
 																								resultado.addAllElements(((Node) aloop).getElements());}
-																							RESULT = resultado; :}																						} 
-								|{: RESULT = null; :} ;
+																							RESULT = resultado; :}
+                              |{: RESULT = null; :} ;
 
 collectionKind ::= COLLECTION;
 
