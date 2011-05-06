@@ -381,7 +381,11 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 						Node resultado;
 						System.out.println("LOL");
 						Node aux = new Node();
-						aux.addAllCaminho(((Node)primexp).getList_caminho());
+						if( ((Node)primexp).getList_caminho().size() < 1 ){
+							aux.addCaminho(((Node)primexp));
+						}else{
+							aux.addAllCaminho(((Node)primexp).getList_caminho());
+						}
 						if (postfexp != null){
 							aux.addAllCaminho(((Node)postfexp).getList_caminho());
 						}
@@ -390,8 +394,9 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 							//System.out.println("Teste Parametros: " + ((Node)aux).printAllParamethrs() );
 							resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft);
 							RESULT = resultado;
+						}else{
+							RESULT = primexp;
 						}
-						RESULT = primexp;
 					:};
 
 postfixExpressionAux ::= POINT {: RESULT = "point"; :} | ARROW {: RESULT = "arrow"; :};
