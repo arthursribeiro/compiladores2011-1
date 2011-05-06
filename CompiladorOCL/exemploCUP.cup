@@ -375,12 +375,12 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 					{:
 						System.out.println("LOL");
 						Node aux = new Node();
-						aux.addCaminho((Node)primexp);
+						aux.addAllCaminho(((Node)primexp).getList_caminho());
 						if (postfexp != null){
 							aux.addAllCaminho(((Node)postfexp).getList_caminho());
-							System.out.println("Esse bixim aqui: "+ ((Node)postfexp).listToString() + " caminho : " + ((Node)postfexp).caminhoToString());
 						}
-						System.out.println("Teste Parametros: " + ((Node)aux).printAllParamethrs() );
+						System.out.println("Esse bixim aqui: "+ (" caminho : " + ((Node)aux).caminhoToString());
+						//System.out.println("Teste Parametros: " + ((Node)aux).printAllParamethrs() );
 						Node resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft);
 						RESULT = new Node("Boolean","Boolean");
 						
@@ -388,15 +388,11 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 
 postfixExpressionAux ::= POINT {: RESULT = "point"; :} | ARROW {: RESULT = "arrow"; :};
 
-postfixExpressionAux2 ::= postfixExpressionAux:paux propertyCall:pc {: System.out.println("BALLS "+((Node)pc).caminhoToString() + " 2 " +((Node)pc).listToString() ); RESULT = (Node)pc; :};
+postfixExpressionAux2 ::= postfixExpressionAux:paux propertyCall:pc {: RESULT = (Node)pc; :};
 
 postfixExpressionAux2Loop ::= postfixExpressionAux2:paux2 postfixExpressionAux2Loop:ploop {: Node resultado = new Node();
-																							 resultado.setRole(((Node)paux2).getRole());
-																							 System.out.println("GERAL "+((Node)paux2).caminhoToString());
 																							 resultado.addAllCaminho(((Node)paux2).getList_caminho());
 																						 	 if(ploop != null){
-																						 	 	resultado.setRole(((Node)ploop).getRole());
-																						 	 	System.out.println("FRESQUIM " +((Node)ploop).caminhoToString());
 																						 	 	resultado.addAllCaminho(((Node)ploop).getList_caminho());
 																						 }RESULT  = resultado;:}
 																						 | {: RESULT = null; :} ;
