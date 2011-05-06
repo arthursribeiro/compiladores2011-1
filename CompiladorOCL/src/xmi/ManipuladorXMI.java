@@ -14,6 +14,8 @@ public class ManipuladorXMI {
 	
 	private static ArrayList<Entidade> classes;
 	private static ArrayList<String> hierarquiaNumbers;
+	private static ArrayList<String> primitiveTypes;
+	private static ArrayList<String> collectionTypes;
 	
 	private ManipuladorXMI() {
 	}
@@ -27,7 +29,17 @@ public class ManipuladorXMI {
 		hierarquiaNumbers.add("Integer");
 		hierarquiaNumbers.add("Long");
 		hierarquiaNumbers.add("Float");
+		hierarquiaNumbers.add("Real");
 		hierarquiaNumbers.add("Double");
+		
+		primitiveTypes = new ArrayList<String>();
+		primitiveTypes.add("String");
+		primitiveTypes.add("Integer");
+		primitiveTypes.add("Float");
+		primitiveTypes.add("Real" );
+		primitiveTypes.add("Boolean" );
+		primitiveTypes.add("OclType");
+		primitiveTypes.add("OclAny");
 	}
 	
 	private static Classe getClasse(String idClasse) throws Exception{
@@ -40,6 +52,27 @@ public class ManipuladorXMI {
 				}
 			}
 		}
+		
+		for (String str : primitiveTypes) {
+			if(str.equals(idClasse)){
+				Classe c = new Classe(idClasse,"public");
+				return c;
+			}
+		}
+		
+		for (String str : collectionTypes) {
+			if(idClasse.startsWith(str+"<") && idClasse.endsWith(">")){
+				int firstI = idClasse.indexOf("<");
+				int lastI = idClasse.lastIndexOf(">");
+				String subIdClass = idClasse.substring(firstI, lastI);
+				Entidade subC = contemClasse(subIdClass);
+				if(subC!=null){
+					Classe ret = new Classe(idClasse,"public");
+					return ret;
+				}
+			}
+		}
+		
 		throw new Exception("Type: <"+idClasse+"> doesn't exists.");
 	}
 	
@@ -48,7 +81,7 @@ public class ManipuladorXMI {
 		Atributo att = findAttFromList(classe.getAtributos(),idAtributo);
 		if(att!=null){
 			if(!context.getName().equals(classe.getName()) && att.getVisibilidade().equalsIgnoreCase("private")){
-				throw new Exception("Atribute: <"+idAtributo+"> doesn't come from inheritance <"+context.getName()+"> => <"+classe.getName()+">.");
+				throw new Exception("Atribute: <"+idAtributo+"> isn't visible to <"+context.getName()+"> .");
 			}
 			return att;
 		}else{
@@ -209,10 +242,30 @@ public class ManipuladorXMI {
 		return hierarquiaNumbers.contains(type);
 	}
 
-	public static Entidade contemClasse(String contextClass) {
+	public static Entidade contemClasse(String idClasse) {
 		for (Entidade e : classes) {
-			if(e.getName().equals(contextClass)){
+			if(e.getName().equals(idClasse)){
 				return e;
+			}
+		}
+		
+		for (String str : primitiveTypes) {
+			if(str.equals(idClasse)){
+				Classe c = new Classe(idClasse,"public");
+				return c;
+			}
+		}
+		
+		for (String str : collectionTypes) {
+			if(idClasse.startsWith(str+"<") && idClasse.endsWith(">")){
+				int firstI = idClasse.indexOf("<");
+				int lastI = idClasse.lastIndexOf(">");
+				String subIdClass = idClasse.substring(firstI, lastI);
+				Entidade subC = contemClasse(subIdClass);
+				if(subC!=null){
+					Classe ret = new Classe(idClasse,"public");
+					return ret;
+				}
 			}
 		}
 		return null;
