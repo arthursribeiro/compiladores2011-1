@@ -90,6 +90,7 @@ EndComent = ([\n\r])?
 <YYINITIAL> "Integer"             { return symbol(sym.OCL_PRIMITIVE, yytext()); }
 <YYINITIAL> "Float"             { return symbol(sym.OCL_PRIMITIVE, yytext()); }
 <YYINITIAL> "Real"             { return symbol(sym.OCL_PRIMITIVE, yytext()); }
+<YYINITIAL> "Boolean"             { return symbol(sym.OCL_PRIMITIVE, yytext()); }
 <YYINITIAL> "OclType"             { return symbol(sym.OCL_SUPER_TYPE, yytext()); }
 <YYINITIAL> "OclAny"             { return symbol(sym.OCL_SUPER_TYPE, yytext()); }
  <YYINITIAL> {

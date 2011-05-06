@@ -45,7 +45,7 @@ public class Main {
 			
 //			parser p = new parser();
 //			p.parse();
-			File xmi = new File("C:\\Users\\DAVI\\Documents\\workspace\\Java\\CompiladorOCL\\src\\Profe.xml");
+			File xmi = new File("C:\\Users\\DAVI\\Documents\\workspace\\Java\\CompiladorOCL\\src\\seg-xmi-compil.xml");
 			XMIParser xmiP = new XMIParser(xmi);
 			xmiP.readXMI();
 			Collection<Entidade> ents = xmiP.getArrayClasses();

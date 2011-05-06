@@ -79,9 +79,7 @@ public class XMIParser {
 		NodeList elements = xmiRoot.getChildNodes();
 		for (int i = 0; i < elements.getLength(); i++) {
 			Node ownedElement = elements.item(i);
-			if(ownedElement.getNodeName().startsWith(OWNED_MEMBER)){
-				salvaEntidade(ownedElement);
-			}
+			salvaEntidade(ownedElement);
 		}
 		mapeiaIdsClasses();
 	}
@@ -238,7 +236,10 @@ public class XMIParser {
 		NamedNodeMap attChildNodeMap = attChild.getAttributes();
 		Node value = attChildNodeMap.getNamedItem(VALUE);
 		if(value!=null){
-			return new Integer(value.getNodeValue());
+			String valueStr = value.getNodeValue().toString();
+			if(valueStr.equalsIgnoreCase("*"))
+				valueStr = "-1";
+			return new Integer(valueStr);
 		}else
 			return -1;
 	}
@@ -265,14 +266,18 @@ public class XMIParser {
 
 	private void salvaEntidade(Node ownedElement) {
 		NamedNodeMap nodeMap = ownedElement.getAttributes();
-		Node n = nodeMap.getNamedItem(XMI_TYPE);
-		String type = n.getNodeValue();
-		if(type.equalsIgnoreCase(UML_CLASS)){
-			salvaClasse(ownedElement,nodeMap);
-		}else if(type.equalsIgnoreCase(UML_ENUMERATION)){
-			salvaEnumeration(ownedElement,nodeMap);
-		}else if(type.equalsIgnoreCase(UML_ASSOCIATION)){
-			
+		if(nodeMap!=null){
+			Node n = nodeMap.getNamedItem(XMI_TYPE);
+			if(n!=null){
+				String type = n.getNodeValue();
+				if(type.equalsIgnoreCase(UML_CLASS)){
+					salvaClasse(ownedElement,nodeMap);
+				}else if(type.equalsIgnoreCase(UML_ENUMERATION)){
+					salvaEnumeration(ownedElement,nodeMap);
+				}else if(type.equalsIgnoreCase(UML_ASSOCIATION)){
+
+				}
+			}
 		}
 	}
 
