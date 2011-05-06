@@ -208,15 +208,15 @@ operationContextAux ::= DOUBLEPOINT returnType | ;
 
 
 ifExpression ::= IF expression:e1 THEN expression:e2 ELSE expression:e3 ENDIF
-				{:  if(((Node) e1).getType().equalsIgnoreCase("Boolean")){
-				        if(((Node) e2).getType().equalsIgnoreCase(((Node)e3).getType())) {
-						    RESULT = new Node("if", ((Node) e2).getType());
-						} else {
-						    throw new Exception("Semantic Error: If expression is returning different type values.");
-						}
-					} else {
-						throw new Exception("Semantic Error: No Boolean Expression on if parameter");
-					} :};
+                               {:  if(((Node) e1).getType().equalsIgnoreCase("Boolean")){
+                                       if(((Node) e2).getType().equalsIgnoreCase(((Node)e3).getType())) {
+                                                   RESULT = new Node("if", ((Node) e2).getType());
+                                               } else {
+                                                   throw new Exception("Semantic Error: If expression is returning different type values.");
+                                               }
+                                       } else {
+                                               throw new Exception("Semantic Error: No Boolean Expression on if parameter");
+                                       } :};
 
 
 
@@ -260,12 +260,7 @@ collectionType ::= collectionKind LEFTPARENTHESIS simpleTypeSpecifier RIGHTPAREN
 
 
 
-oclExpression ::= expression:exp 
-				{: 
-					if( ! ((Node)exp).getType().equals("Boolean") )
-						throw new Exception("Semantic ERROR: Must have a <Boolean> inside <"+parser.semantico.getStereotype().toUpperCase()+"> and got <"+((Node)exp).getType()+"> at line: "+expleft);
-					RESULT = exp; 
-				:};
+oclExpression ::= expression:exp {: RESULT = exp; :};
 
 
 
@@ -283,6 +278,8 @@ returnType ::= typeSpecifier:typeSpec
 expression ::= logicalExpression:logexp 
 			{: 
 				//System.out.println( ((Node)logexp).getValue() );
+				//if( ! ((Node)logexp).getType().equals("Boolean") )
+				//	throw new Exception("Semantic ERROR: Must have a <Boolean> inside <"+parser.semantico.getStereotype().toUpperCase()+"> and got <"+((Node)logexp).getType()+"> at line: "+logexpleft);
 				RESULT = logexp; 
 			:};
 
@@ -398,9 +395,9 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 						if (postfexp != null){
 							aux.addAllCaminho(((Node)postfexp).getList_caminho());
 						}
-						if( postfexp != null || ((Node)primexp).getRole() == Node.VARIABLE || ((Node)primexp).getRole() == Node.FUNCTION){
-						    System.out.println("Esse bixim aqui: "+ " caminho : " + ((Node)aux).caminhoToString());
-							//System.out.println("Teste Parametros: " + ((Node)aux).printAllParamethrs() );
+						if( postfexp != null || ((Node)primexp).getRole() == Node.VARIABLE ){
+						    System.out.println("Esse bixim aqui: "+ ((Node)aux).getList_caminho().get(((Node)aux).getList_caminho().size()-1)+ " caminho : " + ((Node)aux).caminhoToString());
+							System.out.println("Teste Parametros: " + ((Node)aux).printAllParamethrs() );
 							resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft);
 							RESULT = resultado;
 						}else{
@@ -410,10 +407,16 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 
 postfixExpressionAux ::= POINT {: RESULT = "point"; :} | ARROW {: RESULT = "arrow"; :};
 
-postfixExpressionAux2 ::= postfixExpressionAux:paux propertyCall:pc {: RESULT = (Node)pc; :};
+postfixExpressionAux2 ::= postfixExpressionAux:paux propertyCall:pc {: System.out.println("ROle : " +((Node)pc).getRole() + " Value :"+((Node)pc).getValue()); RESULT = (Node)pc; :};
 
 postfixExpressionAux2Loop ::= postfixExpressionAux2:paux2 postfixExpressionAux2Loop:ploop {: Node resultado = new Node();
-																							 resultado.addAllCaminho(((Node)paux2).getList_caminho());
+																							 Node aux = (Node)paux2;
+																							 if( aux.getRole() == Semantica.Node.FUNCTION ){
+																							 	System.out.println("MACONHA Result: " + ((Node) aux).listToString() );
+																							 	resultado.addCaminho(aux);
+																							 }else{
+																							 	resultado.addAllCaminho(((Node)paux2).getList_caminho());
+																							 }
 																						 	 if(ploop != null){
 																						 	 	resultado.addAllCaminho(((Node)ploop).getList_caminho());
 																						 }RESULT  = resultado;:}
@@ -441,7 +444,15 @@ primaryExpression ::= literalCollection
 propertyCallParameters ::= LEFTPARENTHESIS propertyCallParametersAux:pcpa propertyCallParametersAux2:prop1  RIGHTPARENTHESIS {: if(pcpa != null && prop1 == null) {
                                                                                                                                     throw new Exception("Expected expression after declarator." + pcpaleft);
                                                                                                                                 } :}| 
-							LEFTPARENTHESIS propertyCallParametersAux2:prop2  RIGHTPARENTHESIS{: System.out.println("blaca baga"); RESULT = (Node)prop2;:};
+							LEFTPARENTHESIS propertyCallParametersAux2:prop2  RIGHTPARENTHESIS{: 
+																								 if(prop2!= null){
+																									 System.out.println("blaca baga :" + ((Node)prop2).listToString());
+																									 
+																								  	RESULT = (Node)prop2;
+																								 }else{
+																								 	RESULT = new Node();
+																								 }
+																								 :};
 
 propertyCallParametersAux ::= declarator:d {: RESULT = d; :};
 
@@ -495,11 +506,13 @@ collectionItemAux ::= POINT POINT expression | ;
 /* propertyCall ::= pathName ( qualifiers )? ( propertyCallParameters )?; */
 
 propertyCall ::= pathName:pt propertyCallAux propertyCallAux2 propertyCallAux3:prop3 {: Node resultado = new Node();
-																						resultado.setRole(Semantica.Node.VARIABLE);
-																						resultado.addAllCaminho(((Node)pt).getElements());
-																						if(prop3 != null){
-																							System.out.println("Passei aqui");
+																						if(prop3 == null){
+																							resultado.setRole(Semantica.Node.VARIABLE);
+																							resultado.addAllCaminho(((Node)pt).getElements());
+																						}else{
 																							resultado.setRole(Semantica.Node.FUNCTION);
+																							resultado.setValue(((Node)pt).getElements().get(((Node)pt).getElements().size()-1).getValue());
+																							System.out.println("Value :" + resultado.getValue());
 																							resultado.addAllElements(((Node) prop3).getElements());
 																						}RESULT = resultado;:};
 propertyCallAux ::= timeExpression | ;
