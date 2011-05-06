@@ -222,63 +222,64 @@ public class AnalisadorSemantico {
         	String typeContext = contextClass;
         	OperacaoMaior opCont = ManipuladorXMI.contemFuncao(contextClass, contextClass, contextMethod);
         	Node last = null;
-        	try {
-        		for (Node node : lista_caminho) {
-        			node = getNodeFromListValue(node);
-        			if(node.getRole()==Node.VARIABLE){
-        				String id = (String) node.getValue();
-        				Atributo att = ManipuladorXMI.contemAtributo(contextClass, typeContext, id );
-        				if(att!=null){
-        					if(att.getTipo()==null){
-            					typeContext = att.getIdTipo();
-            				}else{
-            					typeContext = att.getTipo().getName();
-            				}
-        				}else{
-        					ArrayList<ArrayList<Parametro>> attsCont = opCont.getListaParametros();
-        					Parametro p = getAttFromLists(attsCont,id);
-        					if(lista_caminho.size()!=1 || p==null)
-        						semanticInexistentAttError(typeContext, id, line);
-        					else{
-        						String tipoParam = null;
-        						if(p.getTipo()==null)
-        							tipoParam = p.getIdTipo();
-        						else
-        							tipoParam = p.getTipo().getName();
-        						last = new Node(p.getNome(),tipoParam);
-        					}
-        				}
-        				last = new Node(id,typeContext);
-        			}else if(node.getRole()==Node.FUNCTION){
-        				String id = (String) node.getValue();
-        				OperacaoMaior op = ManipuladorXMI.contemFuncao(contextClass, typeContext, id);
-        				if(op!=null){
-        					if(op.getReturnClass()==null){
-        						typeContext = op.getReturnType();
-        					}else{
-        						typeContext = op.getReturnClass().getName();
-        					}
-        					if( !comparaAtributosChamada(op.getListaParametros(), node.getElements()) ){
-	        					semanticWrongParameters(id, typeContext, line);
-        					}
-        				}else{
-        					semanticInexistentOpError(typeContext, id, line);
-        				}
-        				last = new Node(id,typeContext);
-        			}else if(node.getRole() == Node.VALUE){
-        				if( ((String)node.getValue()).equals("self") )
-        					last = node;
-        				else if(node.getType()==null){
-        					node.setRole(Node.VARIABLE);
-        					return checkAllPathFunction(lista_caminho, line);
-        				}
-        				else
-        					return node;
+        	for (Node node : lista_caminho) {
+        		node = getNodeFromListValue(node);
+        		if(node.getRole()==Node.VARIABLE){
+        			String id = (String) node.getValue();
+        			Atributo att = null;
+        			try{
+        				att = ManipuladorXMI.contemAtributo(contextClass, typeContext, id );
+        			}catch(Exception e){
         			}
+        			if(att!=null){
+        				if(att.getTipo()==null){
+        					typeContext = att.getIdTipo();
+        				}else{
+        					typeContext = att.getTipo().getName();
+        				}
+        			}else{
+        				ArrayList<ArrayList<Parametro>> attsCont = opCont.getListaParametros();
+        				Parametro p = getAttFromLists(attsCont,id);
+        				if(lista_caminho.get(0) == node && p==null)
+        					semanticInexistentAttError(typeContext, id, line);
+        				else{
+        					String tipoParam = null;
+        					if(p.getTipo()==null)
+        						tipoParam = p.getIdTipo();
+        					else
+        						tipoParam = p.getTipo().getName();
+        					typeContext = tipoParam;
+        					last = new Node(p.getNome(),tipoParam);
+        				}
+        			}
+        			last = new Node(id,typeContext);
+        		}else if(node.getRole()==Node.FUNCTION){
+        			String id = (String) node.getValue();
+        			OperacaoMaior op = ManipuladorXMI.contemFuncao(contextClass, typeContext, id);
+        			if(op!=null){
+        				if(op.getReturnClass()==null){
+        					typeContext = op.getReturnType();
+        				}else{
+        					typeContext = op.getReturnClass().getName();
+        				}
+        				if( !comparaAtributosChamada(op.getListaParametros(), node.getElements()) ){
+        					semanticWrongParameters(id, typeContext, line);
+        				}
+        			}else{
+        				semanticInexistentOpError(typeContext, id, line);
+        			}
+        			last = new Node(id,typeContext);
+        		}else if(node.getRole() == Node.VALUE){
+        			if( ((String)node.getValue()).equals("self") )
+        				last = node;
+        			else if(node.getType()==null){
+        				node.setRole(Node.VARIABLE);
+        				return checkAllPathFunction(lista_caminho, line);
+        			}
+        			else
+        				return node;
         		}
-        	} catch (Exception e) {
-				e.printStackTrace();
-			}
+        	}
         	return last;
         }
         

@@ -216,7 +216,7 @@ public class ManipuladorXMI {
 					return type1;
 				}
 			}catch(Exception e){
-				if(hierarquiaNumbers.indexOf(type1)>=0){
+				if(hierarquiaNumbers.indexOf(type1)>=0 && hierarquiaNumbers.indexOf(type2)>=0){
 					return hierarquiaNumbers.indexOf(type1)>=hierarquiaNumbers.indexOf(type2)?
 							hierarquiaNumbers.get( hierarquiaNumbers.indexOf(type1) ) : 
 								hierarquiaNumbers.get( hierarquiaNumbers.indexOf(type2) );
