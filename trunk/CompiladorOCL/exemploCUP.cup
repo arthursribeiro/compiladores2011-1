@@ -211,6 +211,7 @@ ifExpression ::= IF expression:e1 THEN expression:e2 ELSE expression:e3 ENDIF
 				{:  if(((Node) e1).getType().equalsIgnoreCase("Boolean")){
 				        try {
 				            String tipo = parser.semantico.maxType(((Node) e2).getType(), ((Node)e3).getType(), e2left);
+				            System.out.println("tipo do if eh: " + tipo);
 						    RESULT = new Node("if", tipo);
 						} catch(Exception e) {
 						    System.out.println(e.getMessage());
