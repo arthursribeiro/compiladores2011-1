@@ -260,7 +260,12 @@ collectionType ::= collectionKind LEFTPARENTHESIS simpleTypeSpecifier RIGHTPAREN
 
 
 
-oclExpression ::= expression:exp {: RESULT = exp; :};
+oclExpression ::= expression:exp 
+				{: 
+					if( ! ((Node)exp).getType().equals("Boolean") )
+						throw new Exception("Semantic ERROR: Must have a <Boolean> inside <"+parser.semantico.getStereotype().toUpperCase()+"> and got <"+((Node)exp).getType()+"> at line: "+expleft);
+					RESULT = exp; 
+				:};
 
 
 

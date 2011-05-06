@@ -93,11 +93,11 @@ public class Node {
         }
         
         public void addElement(Node element){
-                list.add(0, element);
+                list.add(element);
         }
         
         public void addAllElements(List<Node> list){
-                this.list.addAll(0, list);
+                this.list.addAll(list);
         }
         
         public Iterator<Node> iterator(){
@@ -123,6 +123,14 @@ public class Node {
 
 		public boolean isNumber() {
 			return ManipuladorXMI.isNumber(this.type);
+		}
+
+		public String printAllParamethrs() {
+			String teste = "";
+        	for(Node d: list_caminho){
+        		teste += d.listToString() + " ";
+        	}
+			return teste;
 		}
         
 }

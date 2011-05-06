@@ -85,7 +85,12 @@ public class AnalisadorSemantico {
 				Node node = getTypeFromTypeSpecifier(ret, opNameleft);
 				retorno = node.getType();
 			}
-			OperacaoMaior op = ManipuladorXMI.contemFuncao(contextClass, contextClass, opName);
+			OperacaoMaior op = null;
+			try{
+				 op = ManipuladorXMI.contemFuncao(contextClass, contextClass, opName);
+			}catch(Exception e){
+				
+			}
 			if(op.hasParametros()){
 				if(params==null || !comparaAtributos(op.getListaParametros(),params.getElements(),opNameleft) ){
 					semanticWrongParameters(opName,contextClass,opNameleft);
@@ -95,7 +100,12 @@ public class AnalisadorSemantico {
 					semanticWrongParameters(opName,contextClass,opNameleft);
 				}
 			}
-			if(retorno!= null && retorno.equals(op.getReturnType())){
+			String comp = null;
+			if(op.getReturnClass()!=null)
+				comp = op.getReturnClass().getName();
+			else
+				comp = op.getReturnType();
+			if(retorno!= null && retorno.equals(comp)){
 				this.contextType = (retorno);
 				this.contextMethod = op.getNome();
 			}else
@@ -127,7 +137,12 @@ public class AnalisadorSemantico {
 					Node ni = elements.get(i);
 					try {
 						String paramName = ((String)ni.getValue());
-						Atributo att = ManipuladorXMI.contemAtributo(contextClass, contextClass, paramName);
+						Atributo att = null;
+						try{
+							att = ManipuladorXMI.contemAtributo(contextClass, contextClass, paramName);
+						}catch(Exception e){
+							
+						}
 						if(att!=null){
 							semanticParamNameError(paramName, contextClass, line);
 						}
@@ -149,44 +164,6 @@ public class AnalisadorSemantico {
 				return pi.getIdTipo();
 		}
 
-		public void checkCollectionOperation(String operation, String parameterType, int line) throws Exception {
-                if (!checkCollectionOpName(operation))
-                        error(line, operation + " nao eh uma operacao de collection " +
-                        "definida pela linguagem");
-                if (!checkCollectionOpParams(operation, parameterType))
-                        error(line, "tipo de parametro errado para a operacao " + operation);
-        }
-        
-        private boolean checkCollectionOpName(String operation) {
-                for (String op : collectionOperations)
-                        if (op.equals(operation))
-                                return true;
-                return false;
-        }
-        
-        private boolean checkCollectionOpParams(String operation, String parameterType) {
-                if (operation.equals("size") || operation.equals("empty") || operation.equals("first")){
-                        return parameterType.equals("void");
-                }
-                else if (operation.equals("forAll") || operation.equals("exists")){
-                        return parameterType.equals("Boolean");
-                        //BOOLEAN
-                        //Collection -> forAll (v: Type | expressão booleana com v)
-                }else if (operation.equals("select")){
-                        return parameterType.equals("Boolean");
-                    //collection -> select (expressão booleana)
-                }else if (operation.equals("includes") || operation.equals("excludes")){
-                   //TODO       
-                   //Collection::includes(object : T) : Boolean 
-                   //Collection::excludes(object : T) : Boolean
-                }else if (operation.equals("including") || operation.equals("excluding")){
-                   //TODO
-                   //including(object : T) -> retorna o mesmo tipo da colecao
-                   //excluding(object : T) -> retorna o mesmo tipo da colecao
-                }
-                return false;
-        }
-        
         public void checkStereotype(String token, int line) throws Exception {
                 if (!stereotype.equals("post"))
                        throw new Exception("Syntax Error in '"+token + "' at line: "+(line+1) );
@@ -220,66 +197,84 @@ public class AnalisadorSemantico {
          */
         public Node checkAllPathFunction(List<Node> lista_caminho, int line) throws Exception{
         	String typeContext = contextClass;
-        	OperacaoMaior opCont = ManipuladorXMI.contemFuncao(contextClass, contextClass, contextMethod);
-        	Node last = null;
-        	for (Node node : lista_caminho) {
-        		node = getNodeFromListValue(node);
-        		if(node.getRole()==Node.VARIABLE){
-        			String id = (String) node.getValue();
-        			Atributo att = null;
-        			try{
-        				att = ManipuladorXMI.contemAtributo(contextClass, typeContext, id );
-        			}catch(Exception e){
-        			}
-        			if(att!=null){
-        				if(att.getTipo()==null){
-        					typeContext = att.getIdTipo();
-        				}else{
-        					typeContext = att.getTipo().getName();
-        				}
-        			}else{
-        				ArrayList<ArrayList<Parametro>> attsCont = opCont.getListaParametros();
-        				Parametro p = getAttFromLists(attsCont,id);
-        				if(lista_caminho.get(0) == node && p==null)
-        					semanticInexistentAttError(typeContext, id, line);
-        				else{
-        					String tipoParam = null;
-        					if(p.getTipo()==null)
-        						tipoParam = p.getIdTipo();
-        					else
-        						tipoParam = p.getTipo().getName();
-        					typeContext = tipoParam;
-        					last = new Node(p.getNome(),tipoParam);
-        				}
-        			}
-        			last = new Node(id,typeContext);
-        		}else if(node.getRole()==Node.FUNCTION){
-        			String id = (String) node.getValue();
-        			OperacaoMaior op = ManipuladorXMI.contemFuncao(contextClass, typeContext, id);
-        			if(op!=null){
-        				if(op.getReturnClass()==null){
-        					typeContext = op.getReturnType();
-        				}else{
-        					typeContext = op.getReturnClass().getName();
-        				}
-        				if( !comparaAtributosChamada(op.getListaParametros(), node.getElements()) ){
-        					semanticWrongParameters(id, typeContext, line);
-        				}
-        			}else{
-        				semanticInexistentOpError(typeContext, id, line);
-        			}
-        			last = new Node(id,typeContext);
-        		}else if(node.getRole() == Node.VALUE){
-        			if( ((String)node.getValue()).equals("self") )
-        				last = node;
-        			else if(node.getType()==null){
-        				node.setRole(Node.VARIABLE);
-        				return checkAllPathFunction(lista_caminho, line);
-        			}
-        			else
-        				return node;
-        		}
+        	OperacaoMaior opCont = null;
+        	try{
+        		opCont = ManipuladorXMI.contemFuncao(contextClass, contextClass, contextMethod);
+        	}catch(Exception e){
+        		
         	}
+        	Node last = null;
+        	try {
+        		for (Node node : lista_caminho) {
+        			node = getNodeFromListValue(node);
+        			if(node.getRole()==Node.VARIABLE){
+        				String id = (String) node.getValue();
+        				Atributo att = null;
+        				try{
+        					att = ManipuladorXMI.contemAtributo(contextClass, typeContext, id );
+        				}catch(Exception e){
+        					
+        				}
+        				if(att!=null){
+        					if(att.getTipo()==null){
+            					typeContext = att.getIdTipo();
+            				}else{
+            					typeContext = att.getTipo().getName();
+            				}
+        				}else{
+        					ArrayList<ArrayList<Parametro>> attsCont = opCont.getListaParametros();
+        					Parametro p = getAttFromLists(attsCont,id);
+        					if(p==null)
+        						semanticInexistentAttError(typeContext, id, line);
+        					else{
+        						String tipoParam = null;
+        						if(p.getTipo()==null)
+        							tipoParam = p.getIdTipo();
+        						else
+        							tipoParam = p.getTipo().getName();
+        						typeContext = tipoParam;
+        						last = new Node(p.getNome(),tipoParam);
+        					}
+        				}
+        				last = new Node(id,typeContext);
+        			}else if(node.getRole()==Node.FUNCTION){
+        				String id = (String) node.getValue();
+        				OperacaoMaior op = null;
+        				try{
+        					op = ManipuladorXMI.contemFuncao(contextClass, typeContext, id);
+        				}catch(Exception e){
+        					
+        				}
+        				if(op!=null){
+        					if( !comparaAtributosChamada(op.getListaParametros(), node.getElements()) ){
+        						for(Node d : node.getElements()){
+        							System.out.println("AQUIIII :" + d);
+        						}
+	        					semanticWrongParameters(id, typeContext, line);
+        					}
+        					if(op.getReturnClass()==null){
+        						typeContext = op.getReturnType();
+        					}else{
+        						typeContext = op.getReturnClass().getName();
+        					}
+        				}else{
+        					semanticInexistentOpError(typeContext, id, line);
+        				}
+        				last = new Node(id,typeContext);
+        			}else if(node.getRole() == Node.VALUE){
+        				if( ((String)node.getValue()).equals("self") )
+        					last = node;
+        				else if(node.getType()==null){
+        					node.setRole(Node.VARIABLE);
+        					return checkAllPathFunction(lista_caminho, line);
+        				}
+        				else
+        					return node;
+        			}
+        		}
+        	} catch (Exception e) {
+				e.printStackTrace();
+			}
         	return last;
         }
         
@@ -302,7 +297,7 @@ public class AnalisadorSemantico {
 				for (int i = 0; i < listaParam.size(); i++) {
 					Parametro pi = listaParam.get(i);
 					Node ni = elements.get(i);
-					if(ni.getType()!=null)
+					if(ni.getType()== null)
 						continue outside;
 					if(ni.getRole()==Node.VALUE){
 						boolean igual = ni.getType().equals(getParameterType(pi));
@@ -333,143 +328,7 @@ public class AnalisadorSemantico {
 			return null;
 		}
 
-		public Node checkTypesOpArithmetic(Node rule1, Node rule2, int line ) throws Exception{
-                Node node = new Node(); 
-                if (rule2 == null || ((Node)rule2).getType()==null)
-                	node = (Node)rule1;
-                else{
-                	Object value;
-                	String type = maxType(((Node)rule1).getType(), ((Node)rule2).getType(), line);
-                	if (type == null){
-                		type = ((Node)rule2).getType();
-                		value = ((Node)rule2).getValue(); //TODO: testar isso
-                	}else{
-                		value = calcArithmeticValue((Node)rule1, (Node)rule2, rule2.getOperation(), type);
-                		System.err.println("value no aux: " + value + "  " + value.getClass());
-                	}
-                	node.setType(type);
-                	node.setValue(value);
-                }
-                return node;
-        }
         
-        public Node checkTypesOpArithmeticAux(Node rule1, Node rule2, String operator, int line) throws Exception {
-                Node node = new Node();
-                String type;
-                if (rule2 == null || ((Node)rule2).getType()==null) {
-                        type = ((Node) rule1).getType();
-                        if (!(type.equals("Float") || type.equals("Integer"))) {
-                                error(line, "operador ' " + operator
-                                                + " ' indefinido para o tipo " + type);
-
-                        }
-                        node.setType(type);
-                        node.setValue(((Node) rule1).getValue());
-                } else {
-                        Object value;
-                        type = maxType(((Node) rule1).getType(), ((Node) rule2).getType(),
-                                        line);
-                        if (type == null) {
-                                type = ((Node) rule2).getType();
-                                value = ((Node) rule2).getValue(); // TODO: testar isso
-                        } else {
-                                value = calcArithmeticValue((Node) rule1, (Node) rule2,
-                                                rule2.getOperation(), type);
-                        }
-                        node.setType(type);
-                        node.setValue(value);
-                }
-                node.setOperation(operator);
-                System.err.println(node.getValue().getClass());
-                return node;
-        }
-        
-        /**
-         * TODO: extender para aceitar double e long
-         */
-        private Object calcArithmeticValue(Node rule1, Node rule2, String operator, String type) {
-                Float v1 = 0f, v2 = 0f, result = 0f;
-                if (rule1.getType().equals("Float"))
-                        v1 = (Float) rule1.getValue();
-                else if (rule1.getType().equals("Integer"))
-                        v1 = ((Integer) rule1.getValue()).floatValue();
-
-                if (rule2.getType().equals("Float"))
-                        v2 = (Float) rule2.getValue();
-                else if (rule2.getType().equals("Integer"))
-                        v2 = ((Integer) rule2.getValue()).floatValue();
-
-                //calculando as expressoes
-                if (operator.equals("+"))
-                        result = v1 + v2;
-                else if (operator.equals("-"))
-                        result = v1 - v2;
-                else if (operator.equals("/"))
-                        result = v1/v2;
-                else if (operator.equals("*"))
-                        result = v1 * v2;
-                
-                if (type.equals("Float"))
-                        return result;
-                else
-                        return (Integer)result.intValue();
-        }
-        
-        public Boolean calcRelationalValue(Node rule1, Node rule2, String operator, String type) throws Exception {
-                if (type == null)
-                        return false;
-                if (rule1.getValue() == null || rule2.getValue() == null)
-                        return true; //TODO: olhar se eh a melhor forma
-                if (type.equals("Boolean") || type.equals("String")){
-                        Object v1 = rule1.getValue();
-                        Object v2 = rule2.getValue();
-                        if (operator.equals("="))
-                                return v1.equals(v2);
-                        else if (operator.equals("<>"))
-                                return !v1.equals(v2);
-                        else
-                                throw new Exception("o operador " + operator + " nao pode ser usado para comparar valores do tipo " + type);
-                }
-                if (type.equals("Float") || type.equals("Integer")) {
-                        Float v1 = 0f, v2 = 0f;
-                        if (rule1.getType().equals("Float"))
-                                v1 = (Float) rule1.getValue();
-                        else if (rule1.getType().equals("Integer"))
-                                v1 = ((Integer) rule1.getValue()).floatValue();
-                        if (rule2.getType().equals("Float"))
-                                v2 = (Float) rule2.getValue();
-                        else if (rule2.getType().equals("Integer"))
-                                v2 = ((Integer) rule2.getValue()).floatValue();
-                        
-                        if (operator.equals("="))
-                                return v1.equals(v2);
-                        else if (operator.equals(">"))
-                                return v1 > v2;
-                        else if (operator.equals("<"))
-                                return v1 < v2;
-                        else if (operator.equals(">="))
-                                return v1 >= v2;
-                        else if (operator.equals("<="))
-                                return v1 <= v2;
-                        else if (operator.equals("<>"))
-                                return !(v1.equals(v2));
-                }
-                return false;
-        }
-        
-        public Boolean calcLogicalValue(Boolean value1, Boolean value2, String operator) {
-                if (value1 == null || value2 == null)
-                        return true; //TODO: olhar se eh a melhor forma
-                if(operator.equals("and"))
-                        return value1 && value2;
-                else if(operator.equals("or"))
-                        return value1 || value2;
-                else if(operator.equals("implies"))
-                        return !value1 || value2;
-                else // xor
-                        return value1 ^ value2;
-                
-        }
         
         public void setContext(String exp) throws Exception {
                 String[] separate = exp.split("::");
@@ -488,47 +347,11 @@ public class AnalisadorSemantico {
                         setContextMethod(metodo);
                         String type = op.getReturnType();
                         if (type == null)
-                                type = "Void";
+                                type = "void";
                         setContextType(type);
                 } catch (Exception e) {
-                        throw new Exception(e.getMessage());
+                        throw new Exception("Semantic ERRO: "+e.getMessage());
                 }
-        }
-        
-        public Node checkFeatureCall(String classe, Node elemento, int role, int line){
-                Node node = new Node();
-                try {
-                        String type = null;
-                        if (role == Node.FUNCTION){
-                                OperacaoMaior op = ManipuladorXMI.contemFuncao(classe,classe,(String)elemento.getValue());
-                                type = op.getReturnType();
-                                checkParams(op, elemento.getElements(), line);
-                        } else if (role == Node.VARIABLE){
-                                Atributo at = ManipuladorXMI.contemAtributo(classe, classe, (String)elemento.getValue());
-                                type = at.getIdTipo();
-                        }
-                        if (type == null)
-                                type = "Void";
-                        node.setType(type);
-                } catch (Exception e){
-                        error(line, e.getMessage());
-                }
-                return node;
-        }
-
-        private void checkParams(OperacaoMaior op, List<Node> elements, int line) {
-                ArrayList<ArrayList<Parametro>> listaPrams = op.getListaParametros();
-                for (ArrayList<Parametro> params : listaPrams) {
-                    if (params.size() != elements.size())
-                        error(line, "numero errado de parametros na chamada a funcao " + op.getNome() + ".\nDevem ser passados " +
-                                        params.size() + " parametros, mas foram passados " + elements.size());
-	                for (int i=0; i<params.size(); i++){
-	                        if (!params.get(i).getIdTipo().equals(elements.get(i).getType()))
-	                                error(line, "tipo de parametro errado na chamada a funcao " + op.getNome() + ".\nO " + (i+1) + "º parametro"
-	                                        + " deveria ser um " + params.get(i).getIdTipo() + ", mas foi passado um " + elements.get(i).getType());
-	                }
-
-				}
         }
         
         public Object checkLogicalExpression(Object relexp, Object logexploop, int relexpleft, int logexploopleft) throws Exception{
