@@ -207,7 +207,12 @@ operationContextAux ::= DOUBLEPOINT returnType | ;
 
 
 
-ifExpression ::= IF expression THEN expression ELSE expression ENDIF;
+ifExpression ::= IF expression:e1 THEN expression:e2 ELSE expression:e3 ENDIF
+				{: if(((Node) e1).getType().equalsIgnoreCase("Boolean")){
+						
+					}else{
+						throw new Exception("Semantic Error: No Boolean Expression on if parameter");
+					}RESULT = new Node("Boolean","Boolean"); :};
 
 
 
@@ -373,15 +378,20 @@ unaryExpressionAux ::= unaryOperator:unop postfixExpression:postfexp
 
 postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfexp
 					{:
+						Node resultado;
 						System.out.println("LOL");
 						Node aux = new Node();
 						aux.addAllCaminho(((Node)primexp).getList_caminho());
 						if (postfexp != null){
 							aux.addAllCaminho(((Node)postfexp).getList_caminho());
 						}
-						System.out.println("Esse bixim aqui: "+ " caminho : " + ((Node)aux).caminhoToString());
-						//System.out.println("Teste Parametros: " + ((Node)aux).printAllParamethrs() );
-						Node resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft);
+						
+						if( ((Node)aux).getList_caminho().size() > 0 ){
+						    System.out.println("Esse bixim aqui: "+ " caminho : " + ((Node)aux).caminhoToString());
+							//System.out.println("Teste Parametros: " + ((Node)aux).printAllParamethrs() );
+							resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft);
+						}
+						resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft);
 						RESULT = new Node("Boolean","Boolean");
 						
 					:};
@@ -417,7 +427,7 @@ primaryExpression ::= literalCollection
 
 
 propertyCallParameters ::= LEFTPARENTHESIS propertyCallParametersAux:pcpa propertyCallParametersAux2:prop1  RIGHTPARENTHESIS {: if(pcpa != null && prop1 == null) {
-                                                                                                                                    throw new Exception("Expected expression after declarator.");
+                                                                                                                                    throw new Exception("Expected expression after declarator." + pcpaleft);
                                                                                                                                 } :}| 
 							LEFTPARENTHESIS propertyCallParametersAux2:prop2  RIGHTPARENTHESIS{: System.out.println("blaca baga"); RESULT = (Node)prop2;:};
 
