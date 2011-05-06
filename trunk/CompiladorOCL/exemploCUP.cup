@@ -379,7 +379,7 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 						if (postfexp != null){
 							aux.addAllCaminho(((Node)postfexp).getList_caminho());
 						}
-						System.out.println("Esse bixim aqui: "+ (" caminho : " + ((Node)aux).caminhoToString());
+						System.out.println("Esse bixim aqui: "+ " caminho : " + ((Node)aux).caminhoToString());
 						//System.out.println("Teste Parametros: " + ((Node)aux).printAllParamethrs() );
 						Node resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft);
 						RESULT = new Node("Boolean","Boolean");
@@ -406,8 +406,8 @@ primaryExpression ::= literalCollection
 						{:
 							RESULT = exp;
 						:} 
-					| SELF 
-					| SELF timeExpression  
+					| SELF {: RESULT = new Node("self",parser.semantico.getContextClass()); :}
+					| SELF timeExpression   {: RESULT = new Node("self",parser.semantico.getContextClass()); :}
 					| ifExpression;
 
 
