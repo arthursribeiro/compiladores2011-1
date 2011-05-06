@@ -375,7 +375,7 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 					{:
 						System.out.println("LOL");
 						Node aux = new Node();
-						aux.addCaminho((Node)primeexp);
+						aux.addCaminho((Node)primexp);
 						if (postfexp != null){
 							aux.addAllCaminho(((Node)postfexp).getList_caminho());
 							System.out.println("Esse bixim aqui: "+ ((Node)postfexp).listToString() + " caminho : " + ((Node)postfexp).caminhoToString());
