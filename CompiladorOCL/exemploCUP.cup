@@ -262,7 +262,12 @@ collectionType ::= collectionKind LEFTPARENTHESIS simpleTypeSpecifier RIGHTPAREN
 
 
 
-oclExpression ::= expression:exp {: RESULT = exp; :};
+oclExpression ::= expression:exp 
+				{: 
+					if( ! ((Node)exp).getType().equals("Boolean") )
+						throw new Exception("Semantic ERROR: Must have a <Boolean> inside <"+parser.semantico.getStereotype().toUpperCase()+"> and got <"+((Node)exp).getType()+"> at line: "+expleft);
+					RESULT = exp; 
+				:};
 
 
 
@@ -280,8 +285,6 @@ returnType ::= typeSpecifier:typeSpec
 expression ::= logicalExpression:logexp 
 			{: 
 				//System.out.println( ((Node)logexp).getValue() );
-				if( ! ((Node)logexp).getType().equals("Boolean") )
-					throw new Exception("Semantic ERROR: Must have a <Boolean> inside <"+parser.semantico.getStereotype().toUpperCase()+"> and got <"+((Node)logexp).getType()+"> at line: "+logexpleft);
 				RESULT = logexp; 
 			:};
 
@@ -397,7 +400,7 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 						if (postfexp != null){
 							aux.addAllCaminho(((Node)postfexp).getList_caminho());
 						}
-						if( postfexp != null || ((Node)primexp).getRole() == Node.VARIABLE ){
+						if( postfexp != null || ((Node)primexp).getRole() == Node.VARIABLE || ((Node)primexp).getRole() == Node.FUNCTION){
 						    System.out.println("Esse bixim aqui: "+ " caminho : " + ((Node)aux).caminhoToString());
 							//System.out.println("Teste Parametros: " + ((Node)aux).printAllParamethrs() );
 							resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft);
