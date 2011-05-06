@@ -390,7 +390,7 @@ unaryExpressionAux ::= unaryOperator:unop postfixExpression:postfexp
 postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfexp
 					{:
 						Node resultado;
-						System.out.println("LOL");
+						//System.out.println("LOL");
 						Node aux = new Node();
 						if( ((Node)primexp).getList_caminho().size() < 1 ){
 							aux.addCaminho(((Node)primexp));
@@ -401,9 +401,9 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 							aux.addAllCaminho(((Node)postfexp).getList_caminho());
 						}
 						if( postfexp != null || ((Node)primexp).getRole() == Node.VARIABLE ){
-						    System.out.println("Esse bixim aqui: "+ ((Node)aux).getList_caminho().get(((Node)aux).getList_caminho().size()-1)+ " caminho : " + ((Node)aux).caminhoToString());
-							System.out.println("Teste Parametros: " + ((Node)aux).printAllParamethrs() );
-							resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft);
+						    //System.out.println("Esse bixim aqui: "+ ((Node)aux).getList_caminho().get(((Node)aux).getList_caminho().size()-1)+ " caminho : " + ((Node)aux).caminhoToString());
+							//System.out.println("Teste Parametros: " + ((Node)aux).printAllParamethrs() );
+							resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft,null,null);
 							RESULT = resultado;
 						}else{
 							RESULT = primexp;
@@ -412,12 +412,19 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 
 postfixExpressionAux ::= POINT {: RESULT = "point"; :} | ARROW {: RESULT = "arrow"; :};
 
-postfixExpressionAux2 ::= postfixExpressionAux:paux propertyCall:pc {: System.out.println("ROle : " +((Node)pc).getRole() + " Value :"+((Node)pc).getValue()); RESULT = (Node)pc; :};
+postfixExpressionAux2 ::= postfixExpressionAux:paux propertyCall:pc {: //System.out.println("ROle : " +((Node)pc).getRole() + " Value :"+((Node)pc).getValue()); 
+																	  if(((String) paux).equalsIgnoreCase("arrow")){
+																	  	parser.semantico.checkCollection( ((String) ((Node)pc).getValue() ), pcleft );
+																	  	((Node)pc).setRole(Semantica.Node.FUNCTION_COLLECTION);
+																	  	RESULT = ((Node)pc);
+																	  }else{
+																	  	RESULT = (Node)pc;
+																	  } :};
 
 postfixExpressionAux2Loop ::= postfixExpressionAux2:paux2 postfixExpressionAux2Loop:ploop {: Node resultado = new Node();
 																							 Node aux = (Node)paux2;
-																							 if( aux.getRole() == Semantica.Node.FUNCTION ){
-																							 	System.out.println("MACONHA Result: " + ((Node) aux).listToString() );
+																							 if( aux.getRole() == Semantica.Node.FUNCTION || aux.getRole() == Semantica.Node.FUNCTION_COLLECTION){
+																							 	//System.out.println("MACONHA Result: " + ((Node) aux).listToString() );
 																							 	resultado.addCaminho(aux);
 																							 }else{
 																							 	resultado.addAllCaminho(((Node)paux2).getList_caminho());
@@ -438,7 +445,8 @@ primaryExpression ::= literalCollection
 						:} 
 					| SELF {: RESULT = new Node("self",parser.semantico.getContextClass()); :}
 					| SELF timeExpression   {: RESULT = new Node("self",parser.semantico.getContextClass()); :}
-					| ifExpression:ifStmt {: System.out.println("tipo na primary " + ((Node)ifStmt).getType()); RESULT = (Node)ifStmt; :};
+					| ifExpression:ifStmt {: //System.out.println("tipo na primary " + ((Node)ifStmt).getType()); 
+												RESULT = (Node)ifStmt; :};
 
 
 
@@ -451,7 +459,7 @@ propertyCallParameters ::= LEFTPARENTHESIS propertyCallParametersAux:pcpa proper
                                                                                                                                 } :}| 
 							LEFTPARENTHESIS propertyCallParametersAux2:prop2  RIGHTPARENTHESIS{: 
 																								 if(prop2!= null){
-																									 System.out.println("blaca baga :" + ((Node)prop2).listToString());
+																									 //System.out.println("blaca baga :" + ((Node)prop2).listToString());
 																									 
 																								  	RESULT = (Node)prop2;
 																								 }else{
@@ -517,7 +525,7 @@ propertyCall ::= pathName:pt propertyCallAux propertyCallAux2 propertyCallAux3:p
 																						}else{
 																							resultado.setRole(Semantica.Node.FUNCTION);
 																							resultado.setValue(((Node)pt).getElements().get(((Node)pt).getElements().size()-1).getValue());
-																							System.out.println("Value :" + resultado.getValue());
+																							//System.out.println("Value :" + resultado.getValue());
 																							resultado.addAllElements(((Node) prop3).getElements());
 																						}RESULT = resultado;:};
 propertyCallAux ::= timeExpression | ;

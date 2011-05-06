@@ -554,7 +554,7 @@ class AnalisadorLexico implements java_cup.runtime.Scanner {
     return new Symbol(type, yyline, yycolumn);
   }
   private Symbol symbol(int type, Object value) {
-    System.out.println("Type: "+type+" Value: "+value);
+//    System.out.println("Type: "+type+" Value: "+value);
     return new Symbol(type, yyline, yycolumn, value);
   }
   

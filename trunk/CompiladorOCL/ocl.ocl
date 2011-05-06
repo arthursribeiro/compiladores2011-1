@@ -1,2 +1,2 @@
 context ProgramaFidelidade::cadastrar( c:Cliente ):void
-pre: socio.socio
+pre: socio.socio->including(c)

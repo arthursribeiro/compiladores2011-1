@@ -28,9 +28,13 @@ public class AnalisadorSemantico {
 
         private String stereotype;
         private String[] collectionOperations = {"forAll", "exists", "includes", "excludes",
-                        "including", "size", "excluding", "select", "empty", "first"};
+                        "including", "size", "excluding", "select", "empty", "first", "last"};
+        
+        private String[] collectionReturn = {"void","Boolean","Boolean","Boolean","SELF","Integer","SELF","SELF2","Boolean","SELF3","SELF3"};
+        
         private String opID;
         private Set<String> logErros = new HashSet<String>();
+		private String[] collectionTypes = {"Set", "Bag", "Sequence", "Collection"};
         
         public Set<String> getLogErros() {
                 return logErros;
@@ -78,6 +82,23 @@ public class AnalisadorSemantico {
         public void setContextType(String contextType) {
                 this.contextType = contextType;
         }
+        
+        public void checkCollection(Object idFunc, int line) throws Exception{
+        	String id = (String) idFunc;
+        	if(!ehColecaoOp(idFunc)){
+        		throw new Exception("Sintax ERROR: After '->' must have a collection operation operation and got <"+idFunc+"> at line: "+(line+1)+".");
+        	}
+        }
+
+		private boolean ehColecaoOp(Object idFunc) {
+			boolean temCol = false;
+        	for (String colOp : collectionOperations) {
+				if(colOp.equals(idFunc)){
+					temCol = true;
+				}
+			}
+        	return temCol;
+		}
 
 		public void setContextFunction(String opName, Node params, Node ret,int opNameleft) throws Exception {
 			String retorno = ret.getType();
@@ -191,13 +212,24 @@ public class AnalisadorSemantico {
          * @param rule1
          * @param rule2
          * @param line
+         * @param last2 
          * @return
          * @throws Exception 
          * @throws Exception
          */
-        public Node checkAllPathFunction(List<Node> lista_caminho, int line) throws Exception{
-        	String typeContext = contextClass;
+        public Node checkAllPathFunction(List<Node> lista_caminho, int line, String teveCol, Node last2) throws Exception{
+        	String typeContext = null;
+        	String typeCol = null;
+        	if(last2 ==null)
+        		typeContext = contextClass;
+        	else{
+        		typeContext = last2.getType();
+        		if(ehColFromTypeDef(last2.getType())){
+        			typeCol = teveCol;
+        		}
+        	}
         	OperacaoMaior opCont = null;
+        	
         	try{
         		opCont = ManipuladorXMI.contemFuncao(contextClass, contextClass, contextMethod);
         	}catch(Exception e){
@@ -211,7 +243,10 @@ public class AnalisadorSemantico {
         				String id = (String) node.getValue();
         				Atributo att = null;
         				try{
-        					att = ManipuladorXMI.contemAtributo(contextClass, typeContext, id );
+        					if(!ehColFromTypeDef(typeContext))
+        						att = ManipuladorXMI.contemAtributo(contextClass, typeContext, id );
+        					else
+        						att = ManipuladorXMI.contemAtributo(contextClass, typeCol, id );
         				}catch(Exception e){
         					
         				}
@@ -221,11 +256,20 @@ public class AnalisadorSemantico {
             				}else{
             					typeContext = att.getTipo().getName();
             				}
+        					if(att.ehColecao()){
+        						String aux = typeContext;
+        						if(typeCol==null)
+        							typeContext = "Set<"+typeContext+">";
+        						else
+        							typeContext = "Bag<"+typeContext+">";
+        						typeCol = aux;
+        					}
         				}else{
         					ArrayList<ArrayList<Parametro>> attsCont = opCont.getListaParametros();
         					Parametro p = getAttFromLists(attsCont,id);
-        					if(p==null)
+        					if(p==null){
         						semanticInexistentAttError(typeContext, id, line);
+        					}
         					else{
         						String tipoParam = null;
         						if(p.getTipo()==null)
@@ -247,9 +291,6 @@ public class AnalisadorSemantico {
         				}
         				if(op!=null){
         					if( !comparaAtributosChamada(op.getListaParametros(), node.getElements()) ){
-        						for(Node d : node.getElements()){
-        							System.out.println("AQUIIII :" + d);
-        						}
 	        					semanticWrongParameters(id, typeContext, line);
         					}
         					if(op.getReturnClass()==null){
@@ -266,18 +307,64 @@ public class AnalisadorSemantico {
         					last = node;
         				else if(node.getType()==null){
         					node.setRole(Node.VARIABLE);
-        					return checkAllPathFunction(lista_caminho, line);
+        					return checkAllPathFunction(lista_caminho, line,typeCol,last);
         				}
         				else
         					return node;
+        			}else if(node.getRole() == Node.FUNCTION_COLLECTION){
+        				String id = (String) node.getValue();
+        				if(!ehColecaoOp(id) && !ehColFromTypeDef(typeContext)){
+        					throw new Exception("Semantic ERROR: Before '->' must have a collection kind at line: "+(line+1)+".");
+        				}
+        				last = getReturnFromCol(typeContext,typeCol,node);
         			}
         		}
         	} catch (Exception e) {
-				e.printStackTrace();
+				throw new Exception(e.getMessage());
 			}
+        	last.setRole(Node.VALUE);
         	return last;
         }
         
+		private Node getReturnFromCol(String typeContext, String typeCol, Node node) {
+			int index = 0;
+			String id = (String) node.getValue();
+			for (String colOp : collectionOperations) {
+				if(colOp.equals(id)){
+					break;
+				}else
+					index++;
+			}
+			String ret = collectionReturn[index];
+			if(ret.equals("SELF"))
+				node.setType("Collection<"+typeCol+">");
+			else if(ret.equals("SELF2"))
+				node.setType("Set<"+typeCol+">");
+			else if(ret.equals("SELF3"))
+				node.setType(typeCol);
+			else
+				node.setType(ret);
+			return node;
+		}
+
+		private String getTypeCol(String type) {
+			if(ehColecaoOp(type)){
+				int firstI = type.indexOf("<");
+				int lastI = type.lastIndexOf(">");
+				return type.substring(firstI, lastI);
+			}
+			return null;
+		}
+
+		private boolean ehColFromTypeDef(String typeContext) {
+			for (String colType : collectionTypes ) {
+				if(typeContext.startsWith(colType+"<") && typeContext.endsWith(">")){
+					return true;
+				}
+			}
+			return false;
+		}
+
 		private Parametro getAttFromLists(ArrayList<ArrayList<Parametro>> listaParametros, String id) {
 			for (ArrayList<Parametro> listaParam : listaParametros) {
 				for (int i = 0; i < listaParam.size(); i++) {
@@ -337,8 +424,8 @@ public class AnalisadorSemantico {
 
                 String metodo = separate[separate.length-1];
 
-                System.out.println("Classe: "+classe);
-                System.out.println("Método: "+metodo);
+                //System.out.println("Classe: "+classe);
+                //System.out.println("Método: "+metodo);
                 
                 setContextClass(classe);
                 
