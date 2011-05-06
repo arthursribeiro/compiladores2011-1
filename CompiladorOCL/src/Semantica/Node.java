@@ -42,6 +42,7 @@ public class Node {
 		public static final int VALUE = 0;
         public static final int VARIABLE = 1;
         public static final int FUNCTION = 2;
+        public static final int FUNCTION_COLLECTION = 3;
         
         private int role;
 
