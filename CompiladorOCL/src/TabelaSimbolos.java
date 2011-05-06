@@ -5,7 +5,7 @@
 //----------------------------------------------------
 
 /** CUP generated class containing symbol constants. */
-public class sym {
+public class TabelaSimbolos {
   /* terminals */
   public static final int GREATERTHAN = 46;
   public static final int LEFTBRACKET = 55;

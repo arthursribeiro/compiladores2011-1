@@ -12,14 +12,7 @@ import xmi.bean.Entidade;
 import xmi.bean.OperacaoMaior;
 import xmi.bean.Parametro;
 
-/**
- * Classe com funcoes uteis para a analise semantica.
- * 
- * @author Demontie Junior
- * @author Izabela Vanessa
- * @author Savyo Igor
- *
- */
+
 public class AnalisadorSemantico {
 
         private String contextClass;
