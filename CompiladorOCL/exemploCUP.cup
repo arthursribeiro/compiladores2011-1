@@ -385,15 +385,13 @@ postfixExpression ::= primaryExpression:primexp postfixExpressionAux2Loop:postfe
 						if (postfexp != null){
 							aux.addAllCaminho(((Node)postfexp).getList_caminho());
 						}
-						
-						if( ((Node)aux).getList_caminho().size() > 0 ){
+						if( postfexp != null || ((Node)primexp).getRole() == Node.VARIABLE ){
 						    System.out.println("Esse bixim aqui: "+ " caminho : " + ((Node)aux).caminhoToString());
 							//System.out.println("Teste Parametros: " + ((Node)aux).printAllParamethrs() );
 							resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft);
+							RESULT = resultado;
 						}
-						resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft);
-						RESULT = new Node("Boolean","Boolean");
-						
+						RESULT = primexp;
 					:};
 
 postfixExpressionAux ::= POINT {: RESULT = "point"; :} | ARROW {: RESULT = "arrow"; :};

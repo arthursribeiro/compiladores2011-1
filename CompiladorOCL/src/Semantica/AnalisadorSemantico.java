@@ -79,8 +79,12 @@ public class AnalisadorSemantico {
                 this.contextType = contextType;
         }
 
-		public void setContextFunction(String opName, Node params, Node node,int opNameleft) throws Exception {
-			String retorno = node.getType();
+		public void setContextFunction(String opName, Node params, Node ret,int opNameleft) throws Exception {
+			String retorno = ret.getType();
+			if(retorno==null){
+				Node node = getTypeFromTypeSpecifier(ret, opNameleft);
+				retorno = node.getType();
+			}
 			OperacaoMaior op = ManipuladorXMI.contemFuncao(contextClass, contextClass, opName);
 			if(op.hasParametros()){
 				if(params==null || !comparaAtributos(op.getListaParametros(),params.getElements()) ){
@@ -113,7 +117,7 @@ public class AnalisadorSemantico {
 			return null;
 		}
 
-		private boolean comparaAtributos(ArrayList<ArrayList<Parametro>> listaParametros,List<Node> elements) {
+		private boolean comparaAtributos(ArrayList<ArrayList<Parametro>> listaParametros, List<Node> elements) {
 			outside:for (ArrayList<Parametro> listaParam : listaParametros) {
 				if(listaParam.size() != elements.size() )
 					continue outside;
@@ -204,13 +208,92 @@ public class AnalisadorSemantico {
          * @return
          * @throws Exception
          */
-        public Node checkAllPathFunction(List<Node> lista_caminho){
-        	return null;
+        public Node checkAllPathFunction(List<Node> lista_caminho, int line){
+        	String typeContext = contextClass;
+        	Node last = null;
+        	try {
+        		for (Node node : lista_caminho) {
+        			node = getNodeFromListValue(node);
+        			if(node.getRole()==Node.VARIABLE){
+        				String id = (String) node.getValue();
+        				Atributo att = ManipuladorXMI.contemAtributo(contextClass, typeContext, id );
+        				if(att!=null){
+        					if(att.getTipo()==null){
+            					typeContext = att.getIdTipo();
+            				}else{
+            					typeContext = att.getTipo().getName();
+            				}
+        				}else{
+        					semanticInexistentAttError(typeContext, id, line);
+        				}
+        				last = new Node(id,typeContext);
+        			}else if(node.getRole()==Node.FUNCTION){
+        				String id = (String) node.getValue();
+        				OperacaoMaior op = ManipuladorXMI.contemFuncao(contextClass, typeContext, id);
+        				if(op!=null){
+        					if(op.getReturnClass()==null){
+        						typeContext = op.getReturnType();
+        					}else{
+        						typeContext = op.getReturnClass().getName();
+        					}
+        					if( !comparaAtributosChamada(op.getListaParametros(), node.getElements()) ){
+	        					semanticWrongParameters(id, typeContext, line);
+        					}
+        				}else{
+        					semanticInexistentOpError(typeContext, id, line);
+        				}
+        				last = new Node(id,typeContext);
+        			}else if(node.getRole() == Node.VALUE){
+        				return node;
+        			}
+        		}
+        	} catch (Exception e) {
+				e.printStackTrace();
+			}
+        	return last;
         }
         
-        public Node checkTypesOpArithmetic(Node rule1, Node rule2, int line ) throws Exception{
+		private boolean comparaAtributosChamada(ArrayList<ArrayList<Parametro>> listaParametros,List<Node> elements) {
+			outside:for (ArrayList<Parametro> listaParam : listaParametros) {
+				if(listaParam.size() != elements.size() )
+					continue outside;
+				for (int i = 0; i < listaParam.size(); i++) {
+					Parametro pi = listaParam.get(i);
+					Node ni = elements.get(i);
+					if(ni.getType()!=null)
+						continue outside;
+					if(ni.getRole()==Node.VALUE){
+						boolean igual = ni.getType().equals(getParameterType(pi));
+						boolean ehFilho = false;
+						Entidade e1 = existeClasse(ni.getType());
+						Entidade e2 = existeClasse(getParameterType(pi));
+						if(e1 instanceof Classe && e2 instanceof Classe){
+							((Classe) e1).ehFilho( ((Classe)e2) );
+						}
+						if(!igual && !ehFilho)
+							continue outside;
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+
+		private Node getNodeFromListValue(Node node) {
+			List<Node> listCam = node.getList_caminho();
+			while(node.getValue()==null && listCam!=null && listCam.size()==1){
+				Node aux = listCam.get(0);
+				aux.setRole(node.getRole());
+				node = aux;
+			}
+			if(node.getValue()!=null)
+				return node;
+			return null;
+		}
+
+		public Node checkTypesOpArithmetic(Node rule1, Node rule2, int line ) throws Exception{
                 Node node = new Node(); 
-                if (rule2 == null)
+                if (rule2 == null || ((Node)rule2).getType()==null)
                 	node = (Node)rule1;
                 else{
                 	Object value;
@@ -231,7 +314,7 @@ public class AnalisadorSemantico {
         public Node checkTypesOpArithmeticAux(Node rule1, Node rule2, String operator, int line) throws Exception {
                 Node node = new Node();
                 String type;
-                if (rule2 == null) {
+                if (rule2 == null || ((Node)rule2).getType()==null) {
                         type = ((Node) rule1).getType();
                         if (!(type.equals("Float") || type.equals("Integer"))) {
                                 error(line, "operador ' " + operator
@@ -409,7 +492,7 @@ public class AnalisadorSemantico {
         public Object checkLogicalExpression(Object relexp, Object logexploop, int relexpleft, int logexploopleft) throws Exception{
         	String typeRelexp = ((Node) relexp).getType();
 			String typeLogexloop = null;
-			if(logexploop == null){
+			if(logexploop == null || ((Node)logexploop).getType()==null){
 				return relexp;
 			}else{
 				typeLogexloop = ((Node) logexploop).getType(); 
@@ -441,7 +524,7 @@ public class AnalisadorSemantico {
         }
         
         public Object checkRelationalExpression(Object relexpaux3, Object addexp,int addexpleft) throws Exception{
-        	if(relexpaux3 == null){
+        	if(relexpaux3 == null || ((Node)relexpaux3).getType()==null){
 				return addexp;
 			}else{
 				String type1 = ((Node)relexpaux3).getType();
@@ -461,7 +544,7 @@ public class AnalisadorSemantico {
         }
         
         public Object checkAdditiveExpression(Object addexpaloop, Object multexp, int addexpaloopleft, int multexpleft) throws Exception{
-        	if(addexpaloop == null){
+        	if(addexpaloop == null || ((Node)addexpaloop).getType()==null){
 				return multexp;
 			}else{
 				String typeAddexpaloop = ((Node) addexpaloop).getType();
@@ -487,7 +570,7 @@ public class AnalisadorSemantico {
         }
         
         public Object checkAdditiveExpressionAuxLoop(Object addexpa, Object addexpaloop, int addexpaloopleft, int addexpaleft) throws Exception{
-        	if(addexpaloop == null){
+        	if(addexpaloop == null || ((Node)addexpaloop).getType()==null){
 				return addexpa;
 			}else{
 				String typeAddexpaloop = ((Node) addexpaloop).getType();
@@ -504,7 +587,7 @@ public class AnalisadorSemantico {
         }
         
         public Object checkMultiplicativeExpression(Object multexpaloop, Object unexp, int multexpaloopleft, int unexpleft) throws Exception{
-        	if(multexpaloop == null){
+        	if(multexpaloop == null || ((Node)multexpaloop).getType()==null){
 				return unexp;
 			}else{
 				String typeMultexpaloop = ((Node) multexpaloop).getType();
@@ -530,7 +613,7 @@ public class AnalisadorSemantico {
         }
         
         public Object checkMultiplicativeExpressionAuxLoop(Object addexpaloop, Object addexpa, int addexpaloopleft, int addexpaleft) throws Exception{
-        	if(addexpaloop == null){
+        	if(addexpaloop == null || ((Node)addexpaloop).getType()==null){
 				return addexpa;
 			}else{
 				String typeAddexpaloop = ((Node) addexpaloop).getType();
@@ -574,6 +657,15 @@ public class AnalisadorSemantico {
 
 		public String getContextReturn() {
 			return this.contextType;
+		}
+		
+		private void semanticInexistentOpError(String typeContext, String id,
+				int line) throws Exception {
+			throw new Exception("Semantic ERROR: Type <"+typeContext+"> don't have operation <"+id+"> or is not acessible from type <"+contextClass+"> at line: "+(line+1));
+		}
+		
+		private void semanticInexistentAttError(String typeContext, String id,int line) throws Exception {
+			throw new Exception("Semantic ERROR: Type <"+typeContext+"> don't have attribute <"+id+"> or is not acessible from type <"+contextClass+"> at line: "+(line+1));
 		}
 		
 		public void semanticWrongParameters(String operation, String classe, int line) throws Exception{
