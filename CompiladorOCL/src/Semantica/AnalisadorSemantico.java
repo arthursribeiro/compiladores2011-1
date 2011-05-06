@@ -244,7 +244,10 @@ public class AnalisadorSemantico {
         				}
         				last = new Node(id,typeContext);
         			}else if(node.getRole() == Node.VALUE){
-        				return node;
+        				if( ((String)node.getValue()).equals("self") )
+        					last = node;
+        				else
+        					return node;
         			}
         		}
         	} catch (Exception e) {
