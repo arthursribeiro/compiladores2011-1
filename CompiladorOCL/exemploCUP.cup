@@ -209,10 +209,11 @@ operationContextAux ::= DOUBLEPOINT returnType | ;
 
 ifExpression ::= IF expression:e1 THEN expression:e2 ELSE expression:e3 ENDIF
 				{:  if(((Node) e1).getType().equalsIgnoreCase("Boolean")){
-						if(((Node)e2).getType().equalsIgnoreCase(((Node)e3).getType())) {
-						    System.out.println("tipo eh: " + ((Node)e2).getType());
-						    RESULT = new Node("if", ((Node)e2).getType());
-						} else {
+				        try {
+				            String tipo = parser.semantico.maxType(((Node) e2).getType(), ((Node)e3).getType(), e2left);
+						    RESULT = new Node("if", tipo);
+						} catch(Exception e) {
+						    System.out.println(e.getMessage());
 						    throw new Exception("Semantic Error: If expression is returning different type values.");
 						}
 					}else{
