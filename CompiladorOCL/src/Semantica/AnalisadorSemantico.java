@@ -20,14 +20,97 @@ public class AnalisadorSemantico {
         private String contextType;
 
         private String stereotype;
-        private String[] collectionOperations = {"forAll", "exists", "includes", "excludes",
-                        "including", "size", "excluding", "select", "empty", "first", "last"};
         
-        private String[] collectionReturn = {"void","Boolean","Boolean","Boolean","SELF","Integer","SELF","SELF2","Boolean","SELF3","SELF3"};
+        private ArrayList<OperacaoMaior> collOperations = new ArrayList<OperacaoMaior>();
+        
+//        private String[] collectionOperations = {"forAll", "exists", "includes", "excludes",
+//                        "including", "size", "excluding", "select", "empty", "first", "last"};
+//        
+//        private String[] collectionReturn = {"Boolean","Boolean","Boolean","Boolean","SELF","Integer","SELF","SELF2","Boolean","SELF3","SELF3"};
         
         private String opID;
         private Set<String> logErros = new HashSet<String>();
 		private String[] collectionTypes = {"Set", "Bag", "Sequence", "Collection"};
+		
+		public AnalisadorSemantico() {
+			Parametro p = new Parametro("exp","Boolean");
+			Parametro p2 = new Parametro("exp2","SELF3");
+			
+			ArrayList<ArrayList<Parametro>> paramList = new ArrayList<ArrayList<Parametro>>();
+			ArrayList<Parametro> params = new ArrayList<Parametro>();
+			params.add(p);
+			paramList.add(params);
+			OperacaoMaior forAll = new OperacaoMaior("forAll","Boolean","public",paramList);
+			collOperations.add(forAll);
+			
+			ArrayList<ArrayList<Parametro>> paramList2 = new ArrayList<ArrayList<Parametro>>();
+			params = new ArrayList<Parametro>();
+			params.add(p);
+			paramList2.add(params);
+			OperacaoMaior exists = new OperacaoMaior("exists","Boolean","public",paramList2);
+			collOperations.add(exists);
+
+			ArrayList<ArrayList<Parametro>> paramList3 = new ArrayList<ArrayList<Parametro>>();
+			params = new ArrayList<Parametro>();
+			params.add(p2);
+			paramList3.add(params);
+			OperacaoMaior includes = new OperacaoMaior("includes","Boolean","public",paramList3);
+			collOperations.add(includes);
+			
+			ArrayList<ArrayList<Parametro>> paramList4 = new ArrayList<ArrayList<Parametro>>();
+			params = new ArrayList<Parametro>();
+			params.add(p2);
+			paramList4.add(params);
+			OperacaoMaior excludes = new OperacaoMaior("excludes","Boolean","public",paramList4);
+			collOperations.add(excludes);
+			
+			ArrayList<ArrayList<Parametro>> paramList5 = new ArrayList<ArrayList<Parametro>>();
+			params = new ArrayList<Parametro>();
+			params.add(p2);
+			paramList5.add(params);
+			OperacaoMaior including = new OperacaoMaior("including","SELF","public",paramList5);
+			collOperations.add(including);
+			
+			ArrayList<ArrayList<Parametro>> paramList6 = new ArrayList<ArrayList<Parametro>>();
+			params = new ArrayList<Parametro>();
+			paramList6.add(params);
+			OperacaoMaior size = new OperacaoMaior("size","Integer","public",paramList6);
+			collOperations.add(size);
+			
+			ArrayList<ArrayList<Parametro>> paramList7 = new ArrayList<ArrayList<Parametro>>();
+			params = new ArrayList<Parametro>();
+			params.add(p2);
+			paramList7.add(params);
+			OperacaoMaior excluding = new OperacaoMaior("excluding","SELF","public",paramList7);
+			collOperations.add(excluding);
+			
+			ArrayList<ArrayList<Parametro>> paramList8 = new ArrayList<ArrayList<Parametro>>();
+			params = new ArrayList<Parametro>();
+			params.add(p);
+			paramList8.add(params);
+			OperacaoMaior select = new OperacaoMaior("select","SELF","public",paramList8);
+			collOperations.add(select);
+			
+			ArrayList<ArrayList<Parametro>> paramList9 = new ArrayList<ArrayList<Parametro>>();
+			params = new ArrayList<Parametro>();
+			paramList9.add(params);
+			OperacaoMaior empty = new OperacaoMaior("isEmpty","Boolean","public",paramList9);
+			collOperations.add(empty);
+			
+			ArrayList<ArrayList<Parametro>> paramList10 = new ArrayList<ArrayList<Parametro>>();
+			params = new ArrayList<Parametro>();
+			paramList10.add(params);
+			OperacaoMaior first = new OperacaoMaior("first","SELF3","public",paramList10);
+			collOperations.add(first);
+			
+			ArrayList<ArrayList<Parametro>> paramList11 = new ArrayList<ArrayList<Parametro>>();
+			params = new ArrayList<Parametro>();
+			paramList11.add(params);
+			OperacaoMaior last = new OperacaoMaior("last","SELF3","public",paramList11);
+			collOperations.add(last);
+			
+			
+		}
         
         public Set<String> getLogErros() {
                 return logErros;
@@ -54,9 +137,9 @@ public class AnalisadorSemantico {
         }
         
         public void setContextClass(String contextClass, int line) throws Exception {
-    		if(ManipuladorXMI.contemClasse(contextClass)!=null)
+    		if(ManipuladorXMI.contemClasse(contextClass)!=null){
     			this.contextClass = contextClass;
-    		else
+    		}else
     			semanticInexistentTypeError(contextClass, line);
         }
 
@@ -85,8 +168,8 @@ public class AnalisadorSemantico {
 
 		private boolean ehColecaoOp(Object idFunc) {
 			boolean temCol = false;
-        	for (String colOp : collectionOperations) {
-				if(colOp.equals(idFunc)){
+        	for (OperacaoMaior colOp : collOperations) {
+				if(colOp.getNome().equals(idFunc)){
 					temCol = true;
 				}
 			}
@@ -309,6 +392,17 @@ public class AnalisadorSemantico {
         				if(!ehColecaoOp(id) && !ehColFromTypeDef(typeContext)){
         					throw new Exception("Semantic ERROR: Before '->' must have a collection kind at line: "+(line+1)+".");
         				}
+        				OperacaoMaior op = getCollOp(id);
+        				for (ArrayList<Parametro> params : op.getListaParametros()) {
+							for (Parametro parametro : params) {
+								if(parametro.getIdTipo().startsWith("SELF")){
+									parametro.setIdTipo(typeCol);
+								}
+							}
+						}
+        				if(op!=null && !comparaAtributosChamada(op.getListaParametros(), node.getElements()) ){
+        					semanticWrongParameters(id, typeContext, line);
+    					}
         				last = getReturnFromCol(typeContext,typeCol,node);
         			}
         		}
@@ -319,16 +413,28 @@ public class AnalisadorSemantico {
         	return last;
         }
         
-		private Node getReturnFromCol(String typeContext, String typeCol, Node node) {
-			int index = 0;
-			String id = (String) node.getValue();
-			for (String colOp : collectionOperations) {
-				if(colOp.equals(id)){
+
+		private OperacaoMaior getCollOp(String id) {
+			OperacaoMaior op = null;
+			for (OperacaoMaior colOp : collOperations) {
+				if(colOp.getNome().equals(id)){
+					op = colOp;
 					break;
-				}else
-					index++;
+				}
 			}
-			String ret = collectionReturn[index];
+			return op;
+		}
+
+		private Node getReturnFromCol(String typeContext, String typeCol, Node node) {
+			String id = (String) node.getValue();
+			OperacaoMaior op = null;
+			for (OperacaoMaior colOp : collOperations) {
+				if(colOp.getNome().equals(id)){
+					op = colOp;
+					break;
+				}
+			}
+			String ret = op.getReturnType();
 			if(ret.equals("SELF"))
 				node.setType("Collection<"+typeCol+">");
 			else if(ret.equals("SELF2"))
@@ -605,32 +711,32 @@ public class AnalisadorSemantico {
 		}
 		
 		private void semanticParamNameError(String paramName,String contextClass2, int line) throws Exception {
-			throw new Exception("Semantic ERROR: Parameter name <"+paramName+"> already used in class <"+contextClass2+"> at line: "+(line+1));
+			throw new Exception("Semantic ERROR: Parameter name < "+paramName+" > already used in class < "+contextClass2+" > at line: "+(line+1));
 		}
 		
 		private void semanticInexistentOpError(String typeContext, String id,
 				int line) throws Exception {
-			throw new Exception("Semantic ERROR: Type <"+typeContext+"> don't have operation <"+id+"> or is not acessible from type <"+contextClass+"> at line: "+(line+1));
+			throw new Exception("Semantic ERROR: Type < "+typeContext+" > don't have operation < "+id+" > or is not acessible from type < "+contextClass+" > at line: "+(line+1));
 		}
 		
 		private void semanticInexistentAttError(String typeContext, String id,int line) throws Exception {
-			throw new Exception("Semantic ERROR: Type <"+typeContext+"> don't have attribute <"+id+"> or is not acessible from type <"+contextClass+"> at line: "+(line+1));
+			throw new Exception("Semantic ERROR: Type < "+typeContext+" > don't have attribute < "+id+" > or is not acessible from type < "+contextClass+" > at line: "+(line+1));
 		}
 		
 		public void semanticWrongParameters(String operation, String classe, int line) throws Exception{
-			throw new Exception("Semantic ERROR: Wrong parameters for operation <"+classe+"."+operation+"> at line: "+(line+1));
+			throw new Exception("Semantic ERROR: Wrong parameters for operation < "+classe+"."+operation+" > at line: "+(line+1));
 		}
 		
 		private void semanticWrongReturnTypeError(String classe,OperacaoMaior op, String returnType, int line) throws Exception {
-			throw new Exception("Semantic ERROR: Mismatch return type in <"+classe+"."+op.getNome()+">;\nExpected <"+op.getReturnType()+"> and got <"+returnType+"> at line: "+(line+1));
+			throw new Exception("Semantic ERROR: Mismatch return type in < "+classe+"."+op.getNome()+" >;\nExpected < "+op.getReturnType()+" > and got <"+returnType+"> at line: "+(line+1));
 		}
 		
 		public void semanticInexistentTypeError(String type, int line) throws Exception{
-			throw new Exception("Semantic ERROR: Inexistent type <"+type+"> at line: "+(line+1));
+			throw new Exception("Semantic ERROR: Inexistent type < "+type+" > at line: "+(line+1));
 		}
 		
 		public void semanticTypeError(String typeExpected, String typeGot, int line) throws Exception{
-			throw new Exception("Semantic ERROR: Expected <"+typeExpected+"> and got <"+typeGot+"> at line: "+(line+1));
+			throw new Exception("Semantic ERROR: Expected < "+typeExpected+" > and got < "+typeGot+" > at line: "+(line+1));
 		}
 		
 		public void semanticNumberTypeError(String typeExpected, String typeGot, int line) throws Exception{
