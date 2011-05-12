@@ -159,9 +159,9 @@ public class AnalisadorSemantico {
                 this.contextType = contextType;
         }
         
-        public void checkCollection(Object idFunc, int line) throws Exception{
-        	String id = (String) idFunc;
-        	if(!ehColecaoOp(idFunc)){
+        public void checkCollection(Node idFunc, int line) throws Exception{
+//        	String id = (String) idFunc;
+        	if(!ehColecaoOp(idFunc.getValue().toString())){
         		throw new Exception("Sintax ERROR: After '->' must have a collection operation operation and got <"+idFunc+"> at line: "+(line+1)+".");
         	}
         }
@@ -383,13 +383,13 @@ public class AnalisadorSemantico {
         					last = node;
         				else if(node.getType()==null){
         					node.setRole(Node.VARIABLE);
-        					return checkAllPathFunction(lista_caminho, line,typeCol,last);
+        					return checkAllPathFunction(lista_caminho, line,null,null);
         				}
         				else
         					return node;
         			}else if(node.getRole() == Node.FUNCTION_COLLECTION){
         				String id = (String) node.getValue();
-        				if(!ehColecaoOp(id) && !ehColFromTypeDef(typeContext)){
+        				if(ehColecaoOp(id) && !ehColFromTypeDef(typeContext)){
         					throw new Exception("Semantic ERROR: Before '->' must have a collection kind at line: "+(line+1)+".");
         				}
         				OperacaoMaior op = getCollOp(id);

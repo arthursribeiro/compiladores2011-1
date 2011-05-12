@@ -1633,7 +1633,7 @@ class CUP$parser$actions {
 		Object pc = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-0)).value;
 		 //System.out.println("ROle : " +((Node)pc).getRole() + " Value :"+((Node)pc).getValue()); 
 																	  if(((String) paux).equalsIgnoreCase("arrow")){
-																	  	parser.semantico.checkCollection( ((String) ((Node)pc).getValue() ), pcleft );
+																	  	parser.semantico.checkCollection( ((Node)pc), pcleft );
 																	  	((Node)pc).setRole(Semantica.Node.FUNCTION_COLLECTION);
 																	  	RESULT = ((Node)pc);
 																	  }else{
