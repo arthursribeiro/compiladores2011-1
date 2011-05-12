@@ -40,6 +40,12 @@ public class ManipuladorXMI {
 		primitiveTypes.add("Boolean" );
 		primitiveTypes.add("OclType");
 		primitiveTypes.add("OclAny");
+		
+		collectionTypes = new ArrayList<String>();
+		String[] aux = {"forAll", "exists", "includes", "excludes","including", "size", "excluding", "select", "empty", "first", "last"};
+		for (String string : aux) {
+			collectionTypes.add(string);
+		}
 	}
 	
 	private static Classe getClasse(String idClasse) throws Exception{
