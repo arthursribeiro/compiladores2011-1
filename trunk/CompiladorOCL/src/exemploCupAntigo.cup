@@ -1,0 +1,518 @@
+import java_cup.runtime.*;
+
+/* Definindo alguns trechos de código que será utilizado no Analisador Sintático  */
+scan with {: return scanner.next_token(); :};
+
+parser code{: 	public void report_error(String message, Object info){
+					Symbol sym = (Symbol) info;
+					throw new Error("Syntax ERROR in '"+sym.value+"' at line: "+(sym.left+1));
+			  	} :};
+
+/* Terminals (tokens returned by the scanner). */
+terminal SELF;
+terminal VOID;
+terminal RESULT;
+terminal AND;
+terminal BODYCONTEXT;
+terminal CONTEXT;
+terminal DEF;
+terminal DERIVE;
+terminal ELSE;
+terminal ENDIF;
+terminal ENDPACKAGE;
+terminal IF;
+terminal IMPLIES;
+terminal IN;
+terminal INIT;
+terminal INV;
+terminal LET;
+terminal NOT;
+terminal OR;
+terminal PACKAGE;
+terminal POST;
+terminal PRE;
+terminal ATPRE;
+terminal THEN;
+terminal XOR;
+terminal TRUE;
+terminal FALSE;
+terminal DOUBLEPOINT;
+terminal POINT_VIRGULA;
+terminal DDOUBLEPOINT;
+terminal VIRGULA;
+terminal ARROW;
+terminal PIPELINE;
+terminal COLLECTION;
+terminal IDENTIFIER;
+terminal INTEGER_LITERAL;
+terminal FLOAT_LITERAL;
+terminal POINT;
+terminal EQ;
+terminal MINUS;
+terminal MULTIPLY;
+terminal DIVIDE;
+terminal MOD;
+terminal LESSTHAN;
+terminal GREATERTHAN;
+terminal NOTEQ;
+terminal LESSEQTHAN;
+terminal GREATEREQTHAN;
+terminal PLUS;
+terminal LEFTPARENTHESIS;
+terminal RIGHTPARENTHESIS;
+terminal LEFTBRACK;
+terminal RIGHTBRACK;
+terminal LEFTBRACKET;
+terminal RIGHTBRACKET;
+terminal STRING_LITERAL;
+
+/* Non terminals */
+non terminal            oclFile, packageName, oclExpressions,constraint,contextDeclaration,classifierContext,
+					operationContext, operationName, formalParameterList, typeSpecifier,
+					collectionType, oclExpression, returnType, expression, logicalExpression, 
+					relationalExpression, additiveExpression, multiplicativeExpression, qualifiers, 
+					unaryExpression, postfixExpression, primaryExpression, propertyCall, propertyCallParameters, 
+					literal, simpleTypeSpecifier, literalCollection, collectionItem, declarator, 
+					pathName, timeExpression, actualParameterList, collectionKind, relationalOperator, 
+					addOperator, multiplyOperator, unaryOperator, logicalOperator, number, 
+					
+					oclFileAux, oclFileAuxLoopWithOne, oclFileAuxLoop, 
+					
+					oclExpressionsAux, 
+					
+					constraintAux, constraintAux2, constraintAux3, constraintAux2LoopWithOne, constraintAux2Loop, 
+					
+					contextDeclarationAux, 
+					
+					classifierContextAux, 
+					
+					operationContextAux, 
+					
+					formalParameterListAux2, formalParameterListAux, formalParameterListAuxLoop, 
+					
+					logicalExpressionAux, logicalExpressionAuxLoop, 
+					
+					relationalExpressionAux, 
+					
+					additiveExpressionAux, additiveExpressionAuxLoop, 
+					
+					multiplicativeExpressionAux, multiplicativeExpressionAuxLoop, 
+					
+					unaryExpressionAux, 
+					
+					postfixExpressionAux, postfixExpressionAux2, postfixExpressionAux2Loop, 
+					
+					propertyCallParametersAux, propertyCallParametersAux2, 
+					
+					literalCollectionAux, literalCollectionAux2, literalCollectionAuxLoop, 
+					
+					collectionItemAux, 
+					
+					propertyCallAux, propertyCallAux2, propertyCallAux3, 
+					
+					declaratorAux, declaratorAuxLoop, declaratorAux2, declaratorAux3, 
+					
+					pathNameAux, pathNameAuxLoop, 
+					
+					actualParameterListAux, actualParameterListAuxLoop, 
+					
+					booleanLiteral, 
+					
+					ifExpression, 
+					
+					oclExpressionPost, expressionPost, logicalExpressionPost, logicalExpressionAuxPost, logicalExpressionAuxLoopPost, relationalExpressionPost, 
+					relationalExpressionAuxPost, additiveExpressionPost, additiveExpressionAuxPost, additiveExpressionAuxLoopPost,
+					multiplicativeExpressionPost, multiplicativeExpressionAuxPost, multiplicativeExpressionAuxLoopPost, 
+					propertyCallPost, propertyCallAuxPost, propertyCallAux2Post, propertyCallAux3Post, qualifiersPost, 
+					propertyCallParametersPost, propertyCallParametersAuxPost, propertyCallParametersAux2Post, 
+					declaratorPost, declaratorAuxPost, declaratorAuxLoopPost, declaratorAux2Post, declaratorAux3Post, 
+					actualParameterListPost, actualParameterListAuxPost, actualParameterListAuxLoopPost,
+					collectionItemPost, collectionItemAuxPost, ifExpressionPost, 
+					literalCollectionPost, literalCollectionAuxPost, literalCollectionAux2Post, literalCollectionAuxLoopPost, 
+					unaryExpressionPost, unaryExpressionAuxPost, postfixExpressionPost, postfixExpressionAux2Post, postfixExpressionAux2LoopPost, primaryExpressionPost, literalPost;
+
+
+/* Precedences */
+
+precedence left VIRGULA;
+precedence left IMPLIES;
+precedence left NOT;
+precedence left AND;
+precedence left OR;
+precedence left XOR;
+precedence left EQ, NOTEQ;
+precedence left LESSTHAN, GREATERTHAN, GREATEREQTHAN, LESSEQTHAN;
+precedence left IF, THEN, ELSE, ENDIF;
+precedence left PLUS, MINUS;
+precedence left MULTIPLY, DIVIDE, MOD;
+precedence left NOT;
+precedence left POINT, ARROW, IDENTIFIER;
+precedence left ATPRE;
+
+
+/* The grammar */
+
+/* oclFile ::= ( PACKAGE packageName oclExpressions ENDPACKAGE )+; */
+
+oclFile ::= oclFileAuxLoopWithOne | oclExpressions;
+
+oclFileAux ::= PACKAGE packageName oclExpressions ENDPACKAGE;
+
+oclFileAuxLoopWithOne ::= oclFileAux oclFileAuxLoop;
+
+oclFileAuxLoop ::= oclFileAux oclFileAuxLoop | ;
+
+
+
+packageName ::= pathName;
+
+
+
+/* oclExpressions ::= ( constraint )*; */
+
+oclExpressions ::= oclExpressionsAux;
+
+oclExpressionsAux ::= constraint oclExpressionsAux | ;
+
+
+/* constraint ::= contextDeclaration( (PRE|POST) IDENTIFIER? DOUBLEPOINT oclExpression)+; */
+
+constraint ::= contextDeclaration constraintAux2LoopWithOne;
+
+constraintAux2 ::= PRE constraintAux3 DOUBLEPOINT oclExpression | POST constraintAux3 DOUBLEPOINT oclExpressionPost;
+
+constraintAux2LoopWithOne ::= constraintAux2 constraintAux2Loop;
+
+constraintAux2Loop ::= constraintAux2 constraintAux2Loop | ;
+
+constraintAux3 ::= IDENTIFIER | ;
+
+
+/* contextDeclaration ::= CONTEXT ( operationContext ); */
+
+contextDeclaration ::= CONTEXT contextDeclarationAux;
+
+contextDeclarationAux ::= operationContext;
+
+
+/* operationContext ::= IDENTIFIER DDOUBLEPOINT operationName LEFTPARENTHESIS formalParameterList RIGHTPARENTHESIS ( DOUBLEPOINT returnType )?; */
+
+operationContext ::= IDENTIFIER DDOUBLEPOINT operationName LEFTPARENTHESIS formalParameterList RIGHTPARENTHESIS operationContextAux;
+
+operationContextAux ::= DOUBLEPOINT returnType | ;
+
+
+
+ifExpression ::= IF expression THEN expression ELSE expression ENDIF;
+
+ifExpressionPost ::= IF expressionPost THEN expressionPost ELSE expressionPost ENDIF;
+
+
+
+
+operationName ::= IDENTIFIER | EQ | PLUS | MINUS | LESSTHAN | GREATEREQTHAN |
+					IMPLIES | NOT | OR | XOR | AND | LESSEQTHAN | GREATERTHAN | DIVIDE | MULTIPLY | NOTEQ | MOD;
+					
+					
+/* formalParameterList ::= ( IDENTIFIER DOUBLEPOINT typeSpecifier (VIRGULA IDENTIFIER DOUBLEPOINT typeSpecifier )* )?; */
+					
+formalParameterList ::= formalParameterListAux2;
+
+formalParameterListAux2 ::= IDENTIFIER DOUBLEPOINT typeSpecifier formalParameterListAuxLoop | ;
+
+formalParameterListAux ::= VIRGULA IDENTIFIER DOUBLEPOINT typeSpecifier;
+
+formalParameterListAuxLoop ::= formalParameterListAux formalParameterListAuxLoop | ;
+
+
+
+typeSpecifier ::= simpleTypeSpecifier | collectionType;
+
+
+
+collectionType ::= collectionKind LEFTPARENTHESIS simpleTypeSpecifier RIGHTPARENTHESIS;
+
+
+
+oclExpression ::= expression;
+
+oclExpressionPost ::= expressionPost;
+
+
+
+returnType ::= typeSpecifier | VOID;
+
+
+
+expression ::= logicalExpression;
+
+expressionPost ::= logicalExpressionPost;
+
+
+
+/* logicalExpression ::= relationalExpression ( logicalOperator relationalExpression )*; */
+
+logicalExpression ::= relationalExpression logicalExpressionAuxLoop;
+
+logicalExpressionAux ::= logicalOperator relationalExpression;
+
+logicalExpressionAuxLoop ::= logicalExpressionAux logicalExpressionAuxLoop | ;
+
+
+logicalExpressionPost ::= relationalExpressionPost logicalExpressionAuxLoopPost;
+
+logicalExpressionAuxPost ::= logicalOperator relationalExpressionPost;
+
+logicalExpressionAuxLoopPost ::= logicalExpressionAuxPost logicalExpressionAuxLoopPost | ;
+
+
+/* relationalExpression ::= additiveExpression ( relationalOperator additiveExpression )?; */
+
+relationalExpression ::= additiveExpression relationalExpressionAux;
+
+relationalExpressionAux ::= relationalOperator additiveExpression | ;
+
+
+relationalExpressionPost ::= additiveExpressionPost relationalExpressionAuxPost;
+
+relationalExpressionAuxPost ::= relationalOperator additiveExpressionPost | ;
+
+
+/* additiveExpression ::= multiplicativeExpression ( addOperator multiplicativeExpression )*; */
+
+additiveExpression ::= multiplicativeExpression additiveExpressionAuxLoop;
+
+additiveExpressionAux ::= addOperator multiplicativeExpression;
+
+additiveExpressionAuxLoop ::= additiveExpressionAux additiveExpressionAuxLoop | ;
+
+
+additiveExpressionPost ::= multiplicativeExpressionPost additiveExpressionAuxLoopPost;
+
+additiveExpressionAuxPost ::= addOperator multiplicativeExpressionPost;
+
+additiveExpressionAuxLoopPost ::= additiveExpressionAuxPost additiveExpressionAuxLoopPost | ;
+
+
+/* multiplicativeExpression ::= unaryExpression ( multiplyOperator unaryExpression )*; */
+
+multiplicativeExpression ::= unaryExpression multiplicativeExpressionAuxLoop;
+
+multiplicativeExpressionAux ::= multiplyOperator unaryExpression;
+
+multiplicativeExpressionAuxLoop ::= multiplicativeExpressionAux multiplicativeExpressionAuxLoop | ;
+
+
+multiplicativeExpressionPost ::= unaryExpressionPost multiplicativeExpressionAuxLoopPost;
+
+multiplicativeExpressionAuxPost ::= multiplyOperator unaryExpressionPost;
+
+multiplicativeExpressionAuxLoopPost ::= multiplicativeExpressionAuxPost multiplicativeExpressionAuxLoopPost | ;
+
+
+
+/* unaryExpression ::= ( unaryOperator postfixExpression ) | postfixExpression; */
+
+unaryExpression ::= unaryExpressionAux | postfixExpression;
+
+unaryExpressionAux ::= unaryOperator postfixExpression;
+
+
+unaryExpressionPost ::= unaryExpressionAuxPost | postfixExpressionPost;
+
+unaryExpressionAuxPost ::= unaryOperator postfixExpressionPost;
+
+
+
+/* postfixExpression ::= primaryExpression ( (POINT | ARROW) propertyCall )*; */
+
+postfixExpression ::= primaryExpression postfixExpressionAux2Loop;
+
+postfixExpressionAux ::= POINT | ARROW;
+
+postfixExpressionAux2 ::= postfixExpressionAux propertyCall;
+
+postfixExpressionAux2Loop ::= postfixExpressionAux2 postfixExpressionAux2Loop | ;
+
+
+
+postfixExpressionPost ::= primaryExpressionPost postfixExpressionAux2LoopPost;
+
+postfixExpressionAux2Post ::= postfixExpressionAux propertyCallPost;
+
+postfixExpressionAux2LoopPost ::= postfixExpressionAux2Post postfixExpressionAux2LoopPost | ;
+
+
+
+primaryExpression ::= literalCollection | literal | propertyCall | LEFTPARENTHESIS expression RIGHTPARENTHESIS | SELF | ifExpression;
+
+primaryExpressionPost ::= literalCollectionPost | literalPost | propertyCallPost | LEFTPARENTHESIS expressionPost RIGHTPARENTHESIS | SELF | SELF ATPRE | ifExpressionPost;
+
+
+
+/* propertyCallParameters := LEFTPARENTHESIS ( declarator )? ( actualParameterList )? RIGHTPARENTHESIS; */
+
+
+
+propertyCallParameters ::= LEFTPARENTHESIS propertyCallParametersAux propertyCallParametersAux2  RIGHTPARENTHESIS | LEFTPARENTHESIS propertyCallParametersAux2  RIGHTPARENTHESIS;
+
+propertyCallParametersAux ::= declarator;
+
+propertyCallParametersAux2 ::= actualParameterList | ;
+
+
+propertyCallParametersPost ::= LEFTPARENTHESIS propertyCallParametersAuxPost propertyCallParametersAux2Post  RIGHTPARENTHESIS | LEFTPARENTHESIS propertyCallParametersAux2Post  RIGHTPARENTHESIS;
+
+propertyCallParametersAuxPost ::= declaratorPost;
+
+propertyCallParametersAux2Post ::= actualParameterListPost | ;
+
+
+
+booleanLiteral ::= TRUE | FALSE;
+
+literal ::= STRING_LITERAL | FLOAT_LITERAL | INTEGER_LITERAL | booleanLiteral;
+
+literalPost ::= STRING_LITERAL | FLOAT_LITERAL | INTEGER_LITERAL | booleanLiteral | RESULT;
+
+
+
+simpleTypeSpecifier ::= pathName;
+
+
+
+/* literalCollection ::= collectionKind LEFTBRACKET ( collectionItem (VIRGULA collectionItem )* )? RIGHTBRACKET; */
+
+literalCollection ::= collectionKind LEFTBRACKET literalCollectionAux2 RIGHTBRACKET;
+
+literalCollectionAux ::= VIRGULA collectionItem;
+
+literalCollectionAuxLoop ::= literalCollectionAux literalCollectionAuxLoop | ;
+
+literalCollectionAux2 ::= collectionItem literalCollectionAuxLoop | ;
+
+
+literalCollectionPost ::= collectionKind LEFTBRACKET literalCollectionAux2Post RIGHTBRACKET;
+
+literalCollectionAuxPost ::= VIRGULA collectionItemPost;
+
+literalCollectionAuxLoopPost ::= literalCollectionAuxPost literalCollectionAuxLoopPost | ;
+
+literalCollectionAux2Post ::= collectionItemPost literalCollectionAuxLoopPost | ;
+
+
+/* collectionItem ::= expression (POINT POINT expression )?; */
+
+collectionItem ::= expression collectionItemAux;
+
+collectionItemAux ::= POINT POINT expression | ;
+
+
+collectionItemPost ::= expressionPost collectionItemAuxPost;
+
+collectionItemAuxPost ::= POINT POINT expressionPost | ;
+
+
+/* propertyCall ::= pathName ( qualifiers )? ( propertyCallParameters )?; */
+
+propertyCall ::= pathName propertyCallAux2 propertyCallAux3;
+
+propertyCallAux2 ::= qualifiers | ;
+
+propertyCallAux3 ::= propertyCallParameters | ;
+
+
+propertyCallPost ::= pathName propertyCallAuxPost propertyCallAux2Post propertyCallAux3Post;
+
+propertyCallAuxPost ::= timeExpression | ;
+
+propertyCallAux2Post ::= qualifiersPost | ;
+
+propertyCallAux3Post ::= propertyCallParametersPost | ;
+
+
+
+qualifiers ::= LEFTBRACK actualParameterList RIGHTBRACK;
+
+qualifiersPost ::= LEFTBRACK actualParameterListPost RIGHTBRACK;
+
+
+
+/* declarator ::= IDENTIFIER ( VIRGULA IDENTIFIER )* ( DOUBLEPOINT simpleTypeSpecifier )? ( POINT_VIRGULA IDENTIFIER POINT_VIRGULA typeSpecifier EQ expression )? PIPELINE ; */
+
+declarator ::= IDENTIFIER declaratorAuxLoop declaratorAux2 declaratorAux3 PIPELINE ;
+
+declaratorAux ::= VIRGULA IDENTIFIER;
+
+declaratorAuxLoop ::= declaratorAux declaratorAuxLoop | ;
+
+declaratorAux2 ::= DOUBLEPOINT simpleTypeSpecifier | ;
+
+declaratorAux3 ::= POINT_VIRGULA IDENTIFIER POINT_VIRGULA typeSpecifier EQ expression | ;
+
+
+declaratorPost ::= IDENTIFIER declaratorAuxLoopPost declaratorAux2Post declaratorAux3Post PIPELINE ;
+
+declaratorAuxPost ::= VIRGULA IDENTIFIER;
+
+declaratorAuxLoopPost ::= declaratorAuxPost declaratorAuxLoopPost | ;
+
+declaratorAux2Post ::= DOUBLEPOINT simpleTypeSpecifier | ;
+
+declaratorAux3Post ::= POINT_VIRGULA IDENTIFIER POINT_VIRGULA typeSpecifier EQ expressionPost | ;
+
+
+
+
+pathName ::= IDENTIFIER pathNameAuxLoop;
+
+pathNameAux ::= DDOUBLEPOINT IDENTIFIER;
+
+pathNameAuxLoop ::= pathNameAux pathNameAuxLoop | ;
+
+
+
+timeExpression ::= ATPRE;
+
+
+
+actualParameterList ::= expression actualParameterListAuxLoop;
+
+actualParameterListAux ::= VIRGULA expression;
+
+actualParameterListAuxLoop ::= actualParameterListAux actualParameterListAuxLoop | ;
+
+
+actualParameterListPost ::= expressionPost actualParameterListAuxLoopPost;
+
+actualParameterListAuxPost ::= VIRGULA expressionPost;
+
+actualParameterListAuxLoopPost ::= actualParameterListAuxPost actualParameterListAuxLoopPost | ;
+
+
+
+collectionKind ::= COLLECTION;
+
+
+
+relationalOperator ::= EQ | GREATERTHAN | LESSTHAN | GREATEREQTHAN | LESSEQTHAN | NOTEQ;
+
+
+
+addOperator ::= PLUS | MINUS | MOD;
+
+
+
+multiplyOperator ::= MULTIPLY | DIVIDE | MOD;
+
+
+
+unaryOperator ::= MINUS | NOT;
+
+
+
+logicalOperator ::= AND | OR | XOR | IMPLIES;
+
+
+
+number ::= INTEGER_LITERAL | FLOAT_LITERAL;
