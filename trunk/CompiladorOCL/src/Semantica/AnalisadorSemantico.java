@@ -613,7 +613,7 @@ public class AnalisadorSemantico {
 				}else if(!((Node) multexp).isNumber()){
 					semanticNumberTypeError("Number kind", typeMultexp, multexpleft);
 				}else{
-					return new Node( ((Node) multexp).getValue() +" "+((Node) addexpaloop).getValue(),maxType(typeAddexpaloop,typeMultexp,multexpleft));
+					return new Node( ((Node) multexp).getValue() +" "+((Node) addexpaloop).getValue(),maxType(typeAddexpaloop,typeMultexp,multexpleft), "("+ ((Node) multexp).getCode() +" "+((Node) addexpaloop).getCode() +")");
 				}
 			}
 			return null;
@@ -625,7 +625,7 @@ public class AnalisadorSemantico {
 			if( !((Node)multexp2).isNumber() ){
 				semanticNumberTypeError("Number kind", typeMultexp2, multexp2left);
 			}
-			return new Node( operador+" "+((Node)multexp2).getValue(),typeMultexp2);
+			return new Node( operador+" "+((Node)multexp2).getValue(),typeMultexp2, operador+" "+((Node)multexp2).getCode());
         }
         
         public Object checkAdditiveExpressionAuxLoop(Object addexpa, Object addexpaloop, int addexpaloopleft, int addexpaleft) throws Exception{
@@ -639,7 +639,7 @@ public class AnalisadorSemantico {
 				}else if(!((Node) addexpa).isNumber()){
 					semanticNumberTypeError("Number kind", typeAddexpa, addexpaleft);
 				}else{
-					return new Node( ((Node) addexpa).getValue() +" "+((Node) addexpaloop).getValue(),maxType(typeAddexpaloop,typeAddexpa,addexpaleft));
+					return new Node( ((Node) addexpa).getValue() +" "+((Node) addexpaloop).getValue(),maxType(typeAddexpaloop,typeAddexpa,addexpaleft), ((Node) addexpa).getCode() + " " + ((Node) addexpaloop).getCode());
 				}
 			}
 			return null;
@@ -668,7 +668,7 @@ public class AnalisadorSemantico {
     		if( !((Node)unexp).isNumber() ){
     			semanticNumberTypeError("Number kind", typeUnexp, unexpleft);
     		}
-    		return new Node( operador+" "+((Node)unexp).getValue(),typeUnexp, operador+" ("+((Node)unexp).getCode()+")");
+    		return new Node( operador+" "+((Node)unexp).getValue(),typeUnexp, operador + " " +((Node)unexp).getCode());
         }
         
         public Object checkMultiplicativeExpressionAuxLoop(Object addexpaloop, Object addexpa, int addexpaloopleft, int addexpaleft) throws Exception{
@@ -682,7 +682,7 @@ public class AnalisadorSemantico {
 				}else if(!((Node) addexpa).isNumber()){
 					semanticNumberTypeError("Number kind", typeAddexpa, addexpaleft);
 				}else{
-					return new Node( ((Node) addexpa).getValue() +" "+((Node) addexpaloop).getValue(),maxType(typeAddexpaloop,typeAddexpa,addexpaleft), ((Node) addexpa).getCode() + " (" + ((Node) addexpaloop).getCode()+")");
+					return new Node( ((Node) addexpa).getValue() +" "+((Node) addexpaloop).getValue(),maxType(typeAddexpaloop,typeAddexpa,addexpaleft), ((Node) addexpa).getCode() + " " + ((Node) addexpaloop).getCode());
 				}
 			}
 			return null;
