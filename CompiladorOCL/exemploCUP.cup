@@ -475,10 +475,10 @@ propertyCallParametersAux2 ::= actualParameterList:a1 {: RESULT = (Node)a1;:}
 
 
 
-booleanLiteral ::= TRUE:boolTrue {: RESULT = new Node(boolTrue,"Boolean"); :} 
-					| FALSE:boolFalse {: RESULT = new Node(boolFalse,"Boolean"); :};
+booleanLiteral ::= TRUE:boolTrue {: RESULT = new Node(boolTrue,"Boolean", "True"); :} 
+					| FALSE:boolFalse {: RESULT = new Node(boolFalse,"Boolean", "False"); :};
 
-literal ::= STRING_LITERAL:litString {: RESULT = new Node(litString,"String"); :} 
+literal ::= STRING_LITERAL:litString {: RESULT = new Node(litString,"String", litString); :} 
 			| number:litNum {: RESULT = litNum; :} 
 			| booleanLiteral:litBool {: RESULT = litBool; :} 
 			| RESULT:litResult 
@@ -660,4 +660,4 @@ logicalOperator ::= AND {: RESULT = "and"; :}
 
 
 
-number ::= INTEGER_LITERAL:numbInt {: RESULT = new Node(numbInt, "Integer"); :} | FLOAT_LITERAL:numbFloat {: RESULT = new Node(numbFloat, "Float"); :};
+number ::= INTEGER_LITERAL:numbInt {: Node n = RESULT = new Node(numbInt, "Integer", numbInt); System.out.println(numbInt); :} | FLOAT_LITERAL:numbFloat {: RESULT = new Node(numbFloat, "Float", numbFloat); :};

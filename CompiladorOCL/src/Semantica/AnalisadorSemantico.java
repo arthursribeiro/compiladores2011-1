@@ -581,17 +581,25 @@ public class AnalisadorSemantico {
 				String type1 = ((Node)relexpaux3).getType();
 				String type2 = ((Node)addexp).getType();
 				maxType(type1, type2, addexpleft);
-				return new Node( "(" + ((Node) addexp).getValue() + " " + ((Node) relexpaux3).getValue()+")", "Boolean"); 
+				return new Node( "(" + ((Node) addexp).getValue() + " " + ((Node) relexpaux3).getValue()+")", "Boolean", "(" + ((Node)addexp).getCode() + " " + ((Node) relexpaux3).getCode() + ")"); 
 			}
         }
         
         public Object checkRelationalExpressionAux(Object addexp2, Object relop, int addexp2left) throws Exception{
         	String operador = ((String) relop);
 			String typeAddexp2 = ((Node)addexp2).getType();
+			String code = "";
+			if(operador.equals("=")) {
+				code = "==";
+			} else if(operador.equals("<>")) {
+				code = "!=";
+			} else {
+				code = operador;
+			}
 			if( !((Node)addexp2).isNumber() && !((String) relop).equals("=") && !((String) relop).equals("<>")){
 				semanticNumberTypeError("Number kind", typeAddexp2, addexp2left);
 			}
-			return new Node( operador+" "+((Node)addexp2).getValue(),typeAddexp2);
+			return new Node( operador+" "+((Node)addexp2).getValue(),typeAddexp2, code+" "+((Node)addexp2).getCode());
         }
         
         public Object checkAdditiveExpression(Object addexpaloop, Object multexp, int addexpaloopleft, int multexpleft) throws Exception{
