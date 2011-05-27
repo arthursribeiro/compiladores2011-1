@@ -548,16 +548,17 @@ public class AnalisadorSemantico {
 			}else{
 				typeLogexloop = ((Node) logexploop).getType(); 
 				maxType(typeRelexp, typeLogexloop, logexploopleft);
-				return new Node( "("+((Node)relexp).getValue()+" "+ ((Node)logexploop).getValue()+")","Boolean");
+				return new Node( "("+((Node)relexp).getValue()+" "+ ((Node)logexploop).getValue()+")","Boolean","( "+((Node)relexp).getCode()+" "+((Node)logexploop).getCode()+" )");
 			}
         }
         
         public Object checkLogicalExpressionAux(Object relexp2, Object logop, int relexp2left) throws Exception{
         	String typeRelexp2 = ( (Node) relexp2 ).getType();
+        	String operator = (String) logop;
 			if( !typeRelexp2.equals("Boolean") ){
 				semanticTypeError("Boolean", typeRelexp2, relexp2left);
 			}else{
-				return new Node( ((String) logop)+" "+((Node)relexp2).getValue(),"Boolean");
+				return new Node( ((String) logop)+" "+((Node)relexp2).getValue(),"Boolean",operator +" ("+((Node)relexp2).getCode()+")");
 			}
 			return null;
         }
@@ -570,7 +571,7 @@ public class AnalisadorSemantico {
 				if(!typeLogexpaloop.equals("Boolean")){
 					semanticTypeError("Boolean", typeLogexpaloop, logexpaloopleft);
 				}
-				return new Node( ((Node)logexpa).getValue()+" "+ ((Node)logexpaloop).getValue(),"Boolean");
+				return new Node( ((Node)logexpa).getValue()+" "+ ((Node)logexpaloop).getValue(),"Boolean","( "+((Node)logexpa).getCode() + " " + ((Node)logexpaloop).getCode() + " )");
 			}
         }
         
