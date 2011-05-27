@@ -210,7 +210,7 @@ operationContextAux ::= DOUBLEPOINT returnType | ;
 ifExpression ::= IF expression:e1 THEN expression:e2 ELSE expression:e3 ENDIF
                                {:  if(((Node) e1).getType().equalsIgnoreCase("Boolean")){
                                        if(((Node) e2).getType().equalsIgnoreCase(((Node)e3).getType())) {
-                                                   RESULT = new Node("if", ((Node) e2).getType());
+                                                   RESULT = new Node("if", ((Node) e2).getType(), "(" + ((Node)e2).getCode() + ") if (" + ((Node)e1).getCode() + ") else (" + ((Node)e3).getCode() + ")" );
                                                } else {
                                                    throw new Exception("Semantic Error: If expression is returning different type values.");
                                                }
