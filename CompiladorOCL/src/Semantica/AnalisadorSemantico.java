@@ -599,7 +599,7 @@ public class AnalisadorSemantico {
 			if( !((Node)addexp2).isNumber() && !((String) relop).equals("=") && !((String) relop).equals("<>")){
 				semanticNumberTypeError("Number kind", typeAddexp2, addexp2left);
 			}
-			return new Node( operador+" "+((Node)addexp2).getValue(),typeAddexp2, code+" "+((Node)addexp2).getCode());
+			return new Node( operador+" "+((Node)addexp2).getValue(),typeAddexp2, code+" ("+((Node)addexp2).getCode()+")");
         }
         
         public Object checkAdditiveExpression(Object addexpaloop, Object multexp, int addexpaloopleft, int multexpleft) throws Exception{
@@ -656,7 +656,7 @@ public class AnalisadorSemantico {
 				}else if(!((Node) unexp).isNumber()){
 					semanticNumberTypeError("Number kind", typeUnexp, unexpleft);
 				}else{
-					return new Node( ((Node) unexp).getValue() +" "+((Node) multexpaloop).getValue(),maxType(typeMultexpaloop,typeUnexp,unexpleft));
+					return new Node( ((Node) unexp).getValue() +" "+((Node) multexpaloop).getValue(),maxType(typeMultexpaloop,typeUnexp,unexpleft), "("+ ((Node) unexp).getCode() + " " + ((Node) multexpaloop).getCode() +")");
 				}
 			}
 			return null;
@@ -668,7 +668,7 @@ public class AnalisadorSemantico {
     		if( !((Node)unexp).isNumber() ){
     			semanticNumberTypeError("Number kind", typeUnexp, unexpleft);
     		}
-    		return new Node( operador+" "+((Node)unexp).getValue(),typeUnexp);
+    		return new Node( operador+" "+((Node)unexp).getValue(),typeUnexp, operador+" ("+((Node)unexp).getCode()+")");
         }
         
         public Object checkMultiplicativeExpressionAuxLoop(Object addexpaloop, Object addexpa, int addexpaloopleft, int addexpaleft) throws Exception{
@@ -682,7 +682,7 @@ public class AnalisadorSemantico {
 				}else if(!((Node) addexpa).isNumber()){
 					semanticNumberTypeError("Number kind", typeAddexpa, addexpaleft);
 				}else{
-					return new Node( ((Node) addexpa).getValue() +" "+((Node) addexpaloop).getValue(),maxType(typeAddexpaloop,typeAddexpa,addexpaleft));
+					return new Node( ((Node) addexpa).getValue() +" "+((Node) addexpaloop).getValue(),maxType(typeAddexpaloop,typeAddexpa,addexpaleft), ((Node) addexpa).getCode() + " (" + ((Node) addexpaloop).getCode()+")");
 				}
 			}
 			return null;
