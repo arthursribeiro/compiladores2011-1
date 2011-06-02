@@ -285,6 +285,7 @@ expression ::= logicalExpression:logexp
 				//System.out.println( ((Node)logexp).getValue() );
 				//if( ! ((Node)logexp).getType().equals("Boolean") )
 				//	throw new Exception("Semantic ERROR: Must have a <Boolean> inside <"+parser.semantico.getStereotype().toUpperCase()+"> and got <"+((Node)logexp).getType()+"> at line: "+logexpleft);
+				System.out.println(logexp.getCode());
 				RESULT = logexp; 
 			:};
 
@@ -379,6 +380,8 @@ unaryExpression ::= unaryExpressionAux:unexp
 
 unaryExpressionAux ::= unaryOperator:unop postfixExpression:postfexp 
 						{:
+							String op = (String) unop;
+							((Node)postfexp).setCode("( " + op + " " +((Node)postfexp).getCode()+ " )");
 							RESULT = postfexp;
 						:};
 
@@ -443,8 +446,8 @@ primaryExpression ::= literalCollection
 						{:
 							RESULT = exp;
 						:} 
-					| SELF {: RESULT = new Node("self",parser.semantico.getContextClass()); :}
-					| SELF timeExpression   {: RESULT = new Node("self",parser.semantico.getContextClass()); :}
+					| SELF {: RESULT = new Node("self",parser.semantico.getContextClass(),"self"); :}
+					| SELF timeExpression   {: RESULT = new Node("self",parser.semantico.getContextClass(),"",true); :}
 					| ifExpression:ifStmt {: RESULT = (Node)ifStmt; :};
 
 
@@ -659,4 +662,4 @@ logicalOperator ::= AND {: RESULT = "and"; :}
 
 
 
-number ::= INTEGER_LITERAL:numbInt {: RESULT = new Node(numbInt, "Integer", (String)numbInt); :} | FLOAT_LITERAL:numbFloat {: RESULT = new Node(numbFloat, "Float", (String)numbFloat); :};
+number ::= INTEGER_LITERAL:numbInt {: RESULT = new Node(numbInt, "Integer", String.valueof(numbInt)); :} | FLOAT_LITERAL:numbFloat {: RESULT = new Node(numbFloat, "Float", String.valueOf(numbFloat)); :};
