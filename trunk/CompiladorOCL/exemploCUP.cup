@@ -445,8 +445,7 @@ primaryExpression ::= literalCollection
 						:} 
 					| SELF {: RESULT = new Node("self",parser.semantico.getContextClass()); :}
 					| SELF timeExpression   {: RESULT = new Node("self",parser.semantico.getContextClass()); :}
-					| ifExpression:ifStmt {: //System.out.println("tipo na primary " + ((Node)ifStmt).getType()); 
-												RESULT = (Node)ifStmt; :};
+					| ifExpression:ifStmt {: RESULT = (Node)ifStmt; :};
 
 
 
