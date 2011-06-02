@@ -414,7 +414,7 @@ postfixExpressionAux ::= POINT {: RESULT = "point"; :} | ARROW {: RESULT = "arro
 
 postfixExpressionAux2 ::= postfixExpressionAux:paux propertyCall:pc {: //System.out.println("ROle : " +((Node)pc).getRole() + " Value :"+((Node)pc).getValue()); 
 																	  if(((String) paux).equalsIgnoreCase("arrow")){
-																	  	parser.semantico.checkCollection( ((String) ((Node)pc).getValue() ), pcleft );
+																	  	parser.semantico.checkCollection( ((Node)pc), pcleft );
 																	  	((Node)pc).setRole(Semantica.Node.FUNCTION_COLLECTION);
 																	  	RESULT = ((Node)pc);
 																	  }else{
@@ -478,7 +478,7 @@ propertyCallParametersAux2 ::= actualParameterList:a1 {: RESULT = (Node)a1;:}
 booleanLiteral ::= TRUE:boolTrue {: RESULT = new Node(boolTrue,"Boolean", "True"); :} 
 					| FALSE:boolFalse {: RESULT = new Node(boolFalse,"Boolean", "False"); :};
 
-literal ::= STRING_LITERAL:litString {: RESULT = new Node(litString,"String", litString); :} 
+literal ::= STRING_LITERAL:litString {: RESULT = new Node(litString,"String", (String)litString); :} 
 			| number:litNum {: RESULT = litNum; :} 
 			| booleanLiteral:litBool {: RESULT = litBool; :} 
 			| RESULT:litResult 
@@ -660,4 +660,4 @@ logicalOperator ::= AND {: RESULT = "and"; :}
 
 
 
-number ::= INTEGER_LITERAL:numbInt {: Node n = RESULT = new Node(numbInt, "Integer", numbInt); System.out.println(numbInt); :} | FLOAT_LITERAL:numbFloat {: RESULT = new Node(numbFloat, "Float", numbFloat); :};
+number ::= INTEGER_LITERAL:numbInt {: RESULT = new Node(numbInt, "Integer", (String)numbInt); :} | FLOAT_LITERAL:numbFloat {: RESULT = new Node(numbFloat, "Float", (String)numbFloat); :};
