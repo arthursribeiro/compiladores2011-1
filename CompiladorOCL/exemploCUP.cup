@@ -285,7 +285,7 @@ expression ::= logicalExpression:logexp
 				//System.out.println( ((Node)logexp).getValue() );
 				//if( ! ((Node)logexp).getType().equals("Boolean") )
 				//	throw new Exception("Semantic ERROR: Must have a <Boolean> inside <"+parser.semantico.getStereotype().toUpperCase()+"> and got <"+((Node)logexp).getType()+"> at line: "+logexpleft);
-				System.out.println(logexp.getCode());
+				System.out.println(((Node)logexp).getCode());
 				RESULT = logexp; 
 			:};
 
@@ -443,11 +443,11 @@ primaryExpression ::= literalCollection
 						:} 
 					| propertyCall:p1 {: RESULT = p1; :}
 					| LEFTPARENTHESIS expression:exp RIGHTPARENTHESIS 
-						{:
+						{:	((Node)exp).setCode("( " + ((Node)exp).getCode() + " )"); 
 							RESULT = exp;
 						:} 
-					| SELF {: RESULT = new Node("self",parser.semantico.getContextClass(),"self"); :}
-					| SELF timeExpression   {: RESULT = new Node("self",parser.semantico.getContextClass(),"",true); :}
+					| SELF {: RESULT = new Node("self",parser.semantico.getContextClass()); :}
+					| SELF timeExpression   {: RESULT = new Node("self",parser.semantico.getContextClass(),"Por enquanto assim"); :}
 					| ifExpression:ifStmt {: RESULT = (Node)ifStmt; :};
 
 
@@ -662,4 +662,4 @@ logicalOperator ::= AND {: RESULT = "and"; :}
 
 
 
-number ::= INTEGER_LITERAL:numbInt {: RESULT = new Node(numbInt, "Integer", String.valueof(numbInt)); :} | FLOAT_LITERAL:numbFloat {: RESULT = new Node(numbFloat, "Float", String.valueOf(numbFloat)); :};
+number ::= INTEGER_LITERAL:numbInt {: RESULT = new Node(numbInt, "Integer", String.valueOf(numbInt)); :} | FLOAT_LITERAL:numbFloat {: RESULT = new Node(numbFloat, "Float", String.valueOf(numbFloat)); :};
