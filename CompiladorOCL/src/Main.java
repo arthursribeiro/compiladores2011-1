@@ -21,65 +21,67 @@ public class Main {
 //		String file = sc.nextLine();
 		try {
 //			JOptionPane.showMessageDialog(null, "Escolha o arquivo .ocl");
-			boolean escolheu = false;
-			File filePath = null;
-			File filePath2 = null;
-			
-			JOptionPane.showMessageDialog(null, "Escolha arquivo OCL.", "Choose OCL File",JOptionPane.INFORMATION_MESSAGE);
-			
-			while(!escolheu){
-				JFileChooser fileChooser = new JFileChooser(new File ("."));
-				
-				int answer  = fileChooser.showOpenDialog(null);
-				
-				if (answer == JFileChooser.APPROVE_OPTION){
-					
-					if (fileChooser.getSelectedFile().getAbsolutePath().endsWith(".ocl")){
-						filePath = fileChooser.getSelectedFile();	
-						escolheu = true;
-					} else {
-						JOptionPane.showMessageDialog(null, "Arquivo errado. Escolha novamente", "Erro!", JOptionPane.ERROR_MESSAGE);
-					}
-
-				} else {
-					JOptionPane.showMessageDialog(null, "Arquivo não selecionado. Análise Léxica, Sintática e Semântica abortada.", "Choose OCL File",JOptionPane.INFORMATION_MESSAGE);
-					return;
-				}
-			}
-			
-			JOptionPane.showMessageDialog(null, "Escolha o XMI.", "Seleção do XMI",JOptionPane.INFORMATION_MESSAGE);
-			escolheu = false;
-			
-			while(!escolheu){
-				JFileChooser fileChooser = new JFileChooser(new File ("."));
-				
-				int answer  = fileChooser.showOpenDialog(null);
-				
-				if (answer == JFileChooser.APPROVE_OPTION){
-					
-					if (fileChooser.getSelectedFile().getAbsolutePath().endsWith(".xml")){
-						filePath2 = fileChooser.getSelectedFile();	
-						escolheu = true;
-					} else {
-						JOptionPane.showMessageDialog(null, "Arquivo errado. Escolha novamente", "Erro!", JOptionPane.ERROR_MESSAGE);
-					}
-
-				} else {
-					JOptionPane.showMessageDialog(null, "Arquivo não selecionado. Análise Léxica, Sintática e Semântica abortada.", "Choose OCL File",JOptionPane.INFORMATION_MESSAGE);
-					return;
-				}
-			}
+//			boolean escolheu = false;
+//			File filePath = null;
+//			File filePath2 = null;
+//			
+//			JOptionPane.showMessageDialog(null, "Escolha arquivo OCL.", "Choose OCL File",JOptionPane.INFORMATION_MESSAGE);
+//			
+//			while(!escolheu){
+//				JFileChooser fileChooser = new JFileChooser(new File ("."));
+//				
+//				int answer  = fileChooser.showOpenDialog(null);
+//				
+//				if (answer == JFileChooser.APPROVE_OPTION){
+//					
+//					if (fileChooser.getSelectedFile().getAbsolutePath().endsWith(".ocl")){
+//						filePath = fileChooser.getSelectedFile();	
+//						escolheu = true;
+//					} else {
+//						JOptionPane.showMessageDialog(null, "Arquivo errado. Escolha novamente", "Erro!", JOptionPane.ERROR_MESSAGE);
+//					}
+//
+//				} else {
+//					JOptionPane.showMessageDialog(null, "Arquivo não selecionado. Análise Léxica, Sintática e Semântica abortada.", "Choose OCL File",JOptionPane.INFORMATION_MESSAGE);
+//					return;
+//				}
+//			}
+//			
+//			JOptionPane.showMessageDialog(null, "Escolha o XMI.", "Seleção do XMI",JOptionPane.INFORMATION_MESSAGE);
+//			escolheu = false;
+//			
+//			while(!escolheu){
+//				JFileChooser fileChooser = new JFileChooser(new File ("."));
+//				
+//				int answer  = fileChooser.showOpenDialog(null);
+//				
+//				if (answer == JFileChooser.APPROVE_OPTION){
+//					
+//					if (fileChooser.getSelectedFile().getAbsolutePath().endsWith(".xml")){
+//						filePath2 = fileChooser.getSelectedFile();	
+//						escolheu = true;
+//					} else {
+//						JOptionPane.showMessageDialog(null, "Arquivo errado. Escolha novamente", "Erro!", JOptionPane.ERROR_MESSAGE);
+//					}
+//
+//				} else {
+//					JOptionPane.showMessageDialog(null, "Arquivo não selecionado. Análise Léxica, Sintática e Semântica abortada.", "Choose OCL File",JOptionPane.INFORMATION_MESSAGE);
+//					return;
+//				}
+//			}
 			
 //			parser p = new parser();
 //			p.parse();
 
-			File xmi = filePath2;
+//			File xmi = filePath2;
+			File xmi = new File("C:\\Users\\DAVI\\Documents\\workspace\\Java\\CompiladorOCLMeu\\src\\Profe.xml");
 
 			XMIParser xmiP = new XMIParser(xmi);
 			xmiP.readXMI();
 			Collection<Entidade> ents = xmiP.getArrayClasses();
 			ManipuladorXMI.setStaticClasses(ents);
 			/* create a parsing object */
+			String filePath = "C:\\Users\\DAVI\\Documents\\workspace\\Java\\CompiladorOCLMeu\\ocl.ocl";
 			AnalisadorLexico sc = new AnalisadorLexico(new java.io.FileReader(filePath));
 //			AnalisadorSintatico parser_obj = new AnalisadorSintatico(sc);
 			parser parser_obj = new parser(sc);

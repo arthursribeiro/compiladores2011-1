@@ -138,7 +138,10 @@ public class Node {
 
 	@Override
 	public String toString() {
-		return value.toString();
+		if(value!=null)
+			return value.toString();
+		else
+			return "";
 	}
 
 	public boolean isNumber() {
