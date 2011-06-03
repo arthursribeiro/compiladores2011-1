@@ -9,7 +9,7 @@ public class OperacaoMaior {
 	private Entidade returnClass;
 	private String visibility;
 	
-	private ArrayList<ArrayList<Parametro>> listaParametros;
+	public ArrayList<ArrayList<Parametro>> listaParametros;
 	
 	private String preCond = "";
 	private String preSep = "";

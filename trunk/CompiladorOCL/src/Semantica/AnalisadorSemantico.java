@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 import xmi.ManipuladorXMI;
 import xmi.bean.Atributo;
@@ -34,6 +35,8 @@ public class AnalisadorSemantico {
 		
 		
 		private String contextAux = "";
+		
+		private Stack<String> pilhaContextAux = new Stack<String>();
 		
 		public boolean contextAuxBool = false;
 		
@@ -270,7 +273,7 @@ public class AnalisadorSemantico {
 		}
 
         public void checkStereotype(String token, int line) throws Exception {
-                if (!stereotype.equals("post"))
+                if (!stereotype.equals("post") || contextAuxBool)
                        throw new Exception("Syntax Error in '"+token + "' at line: "+(line+1) );
                 if(token.equals("result")){
                 	if(contextType.equals("void"))
@@ -764,10 +767,15 @@ public class AnalisadorSemantico {
 		public void semanticNumberTypeError(String typeExpected, String typeGot, int line) throws Exception{
 			throw new Exception("Semantic ERROR: Expected a "+typeExpected+" and got <"+typeGot+"> at line: "+(line+1));
 		}
+		
+		private int parentesis = 0;
 
 		public void setContextAuxBool(boolean b) {
-			contextAuxBool = b;
-			
+			if(!b){
+				parentesis--;
+			}
+			if(!b && parentesis==0)
+				contextAuxBool = b;
 		}
 		
 		private Node lastNodeAux = null;
@@ -798,5 +806,9 @@ public class AnalisadorSemantico {
 				Node call = listas.get(0);
 				ehColecaoOp(call.getValue());
 			}
+		}
+
+		public void addParentesis() {
+			this.parentesis++;
 		}
 }

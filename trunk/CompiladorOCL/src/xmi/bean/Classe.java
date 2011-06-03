@@ -149,7 +149,7 @@ public class Classe implements Entidade{
 		return quebras;
 	}
 
-	private String getHeranca() {
+	public String getHeranca() {
 		String pai = "";
 		if(classePai!=null){
 			pai = classePai.getName();
