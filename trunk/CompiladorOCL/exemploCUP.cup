@@ -458,10 +458,9 @@ postfixExpressionAux2Loop ::= postfixExpressionAux2:paux2 postfixExpressionAux2L
 																						 	 	resultado.setCode(resultado.getCode() + "." + ((Node)ploop).getCode());
 																						 	 	resultado.setArrobapre(((Node)ploop).isArrobapre());
 																						 	 	resultado.addAllCaminho(((Node)ploop).getList_caminho());
-																						 }
-																						 RESULT  = resultado;:}
-																						 | {: RESULT = null; :} 
-;primaryExpression ::= literalCollection 
+																						 }RESULT  = resultado;:}
+																						 | {: RESULT = null; :} ;
+primaryExpression ::= literalCollection 
 					| literal:lit1 
 						{: 
 							RESULT = lit1; 
@@ -483,7 +482,7 @@ postfixExpressionAux2Loop ::= postfixExpressionAux2:paux2 postfixExpressionAux2L
 
 
 
-propertyCallParameters ::= LEFTPARENTHESIS propertyCallParametersAux2:prop2  RIGHTPARENTHESIS{: 
+propertyCallParameters ::= LEFTPARENTHESIS {: parser.semantico.addParentesis(); :} propertyCallParametersAux2:prop2  RIGHTPARENTHESIS{: 
 																								 if(prop2!= null){
 																									 //System.out.println("blaca baga :" + ((Node)prop2).listToString());
 																									Node n = (Node)prop2;
@@ -545,7 +544,7 @@ collectionItemAux ::= POINT POINT expression | ;
 
 /* propertyCall ::= pathName ( qualifiers )? ( propertyCallParameters )?; */
 
-propertyCall ::= pathName:pt propertyCallAux:paux propertyCallAux3:prop3 {: Node resultado = new Node();
+propertyCall ::= pathName:pt {: parser.semantico.checkCallName((Node)pt); :} propertyCallAux:paux propertyCallAux3:prop3 {: Node resultado = new Node();
 																						if(prop3 == null){
 																							resultado.setRole(Semantica.Node.VARIABLE);
 																							resultado.addAllCaminho(((Node)pt).getElements());
@@ -556,8 +555,11 @@ propertyCall ::= pathName:pt propertyCallAux:paux propertyCallAux3:prop3 {: Node
 																							resultado.setValue(((Node)pt).getElements().get(((Node)pt).getElements().size()-1).getValue());
 																							//System.out.println("Value :" + resultado.getValue());
 																							resultado.addAllElements(((Node) prop3).getElements());
-																							resultado.setCode(((Node)pt).getCode()+((Node)prop3).getCode());																							resultado.setArrobapre(((Node)paux).isArrobapre());
+																							parser.semantico.setContextAuxBool(false);
+																							resultado.setCode(((Node)pt).getCode()+((Node)prop3).getCode());
+																							resultado.setArrobapre(((Node)paux).isArrobapre());
 																						}
+																						
 																						RESULT = resultado;:};
 propertyCallAux ::= timeExpression {: Node n = new Node(); n.setArrobapre(true); RESULT = n; :} | {: RESULT = new Node(); :};
 
