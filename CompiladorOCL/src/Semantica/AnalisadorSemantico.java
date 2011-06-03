@@ -806,9 +806,9 @@ public class AnalisadorSemantico {
 			if(listas.size()==1){
 				Node call = listas.get(0);
 				if(!ehColecaoOp(call.getValue())){
-					if(contextAuxBool){
-						call.setPrefix("x.");
-					}
+//					if(contextAuxBool){
+//						call.setPrefix("x.");
+//					}
 				}
 			}
 		}
