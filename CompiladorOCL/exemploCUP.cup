@@ -2,6 +2,7 @@ import java_cup.runtime.*;
 import Semantica.AnalisadorSemantico;
 import Semantica.Node;
 import Semantica.DeclaratorNode;
+import java.util.List;
 
 /* Definindo alguns trechos de código que será utilizado no Analisador Sintático  */
 scan with {: return scanner.next_token(); :};
@@ -82,7 +83,7 @@ non terminal            oclFile, packageName, oclExpressions,constraint,contextD
 					collectionType, oclExpression, returnType, expression, logicalExpression, 
 					relationalExpression, additiveExpression, multiplicativeExpression, qualifiers, 
 					unaryExpression, postfixExpression, primaryExpression, propertyCall, propertyCallParameters, 
-					literal, simpleTypeSpecifier, literalCollection, collectionItem, declarator, 
+					literal, simpleTypeSpecifier, literalCollection, collectionItem, 
 					pathName, timeExpression, actualParameterList, collectionKind, relationalOperator, 
 					addOperator, multiplyOperator, unaryOperator, logicalOperator, number, 
 					
@@ -118,9 +119,7 @@ non terminal            oclFile, packageName, oclExpressions,constraint,contextD
 					
 					collectionItemAux, 
 					
-					propertyCallAux, propertyCallAux2, propertyCallAux3, 
-					
-					declaratorAux, declaratorAuxLoop, declaratorAux2,
+					propertyCallAux, propertyCallAux2, propertyCallAux3,
 					
 					pathNameAux, pathNameAuxLoop, 
 					
@@ -392,7 +391,6 @@ unaryExpressionAux ::= unaryOperator:unop postfixExpression:postfexp
 postfixExpression ::= primaryExpression:primexp {: parser.semantico.setContextAux(primexp,primexpleft); :} postfixExpressionAux2Loop:postfexp
 					{:
 						Node resultado;
-						//System.out.println("LOL");
 						Node aux = new Node();
 						if( ((Node)primexp).getList_caminho().size() < 1 ){
 							aux.addCaminho(((Node)primexp));
@@ -403,8 +401,6 @@ postfixExpression ::= primaryExpression:primexp {: parser.semantico.setContextAu
 							aux.addAllCaminho(((Node)postfexp).getList_caminho());
 						}
 						if( postfexp != null || ((Node)primexp).getRole() == Node.VARIABLE ){
-						    //System.out.println("Esse bixim aqui: "+ ((Node)aux).getList_caminho().get(((Node)aux).getList_caminho().size()-1)+ " caminho : " + ((Node)aux).caminhoToString());
-							//System.out.println("Teste Parametros: " + ((Node)aux).printAllParamethrs() );
 							resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft,null,null);
 							RESULT = resultado;
 						}else{
@@ -457,20 +453,18 @@ primaryExpression ::= literalCollection
 
 
 
-propertyCallParameters ::= LEFTPARENTHESIS propertyCallParametersAux:pcpa propertyCallParametersAux2:prop1  RIGHTPARENTHESIS {: if(pcpa != null && prop1 == null) {
-                                                                                                                                    throw new Exception("Expected expression after declarator." + pcpaleft);
-                                                                                                                                } :}| 
-							LEFTPARENTHESIS propertyCallParametersAux2:prop2  RIGHTPARENTHESIS{: 
+propertyCallParameters ::= LEFTPARENTHESIS propertyCallParametersAux2:prop2  RIGHTPARENTHESIS{: 
 																								 if(prop2!= null){
 																									 //System.out.println("blaca baga :" + ((Node)prop2).listToString());
-																									 
-																								  	RESULT = (Node)prop2;
+																									Node n = (Node)prop2;
+																									n.setCode("(" + n.getCode() + ")"); 
+																								  	RESULT = n;
 																								 }else{
-																								 	RESULT = new Node();
+																								    Node n = new Node();
+																								    n.setCode("()");
+																								 	RESULT = n;
 																								 }
 																								 :};
-
-propertyCallParametersAux ::= declarator:d {: RESULT = d; :};
 
 propertyCallParametersAux2 ::= actualParameterList:a1 {: RESULT = (Node)a1;:}
 								|{: RESULT = null; :} ;
@@ -521,68 +515,36 @@ collectionItemAux ::= POINT POINT expression | ;
 
 /* propertyCall ::= pathName ( qualifiers )? ( propertyCallParameters )?; */
 
-propertyCall ::= pathName:pt {: parser.semantico.checkCallName((Node)pt); :} propertyCallAux propertyCallAux2 propertyCallAux3:prop3 {: Node resultado = new Node();
+propertyCall ::= pathName:pt propertyCallAux:paux propertyCallAux3:prop3 {: Node resultado = new Node();
 																						if(prop3 == null){
 																							resultado.setRole(Semantica.Node.VARIABLE);
 																							resultado.addAllCaminho(((Node)pt).getElements());
+																							resultado.setCode(((Node)pt).getCode());
 																						}else{
 																							resultado.setRole(Semantica.Node.FUNCTION);
 																							resultado.setValue(((Node)pt).getElements().get(((Node)pt).getElements().size()-1).getValue());
 																							//System.out.println("Value :" + resultado.getValue());
 																							resultado.addAllElements(((Node) prop3).getElements());
-																						}RESULT = resultado;:};
-propertyCallAux ::= timeExpression | ;
-
-propertyCallAux2 ::= qualifiers:q1 {: RESULT = q1; :} 
-					 | {: RESULT = null; :};
+																							resultado.setCode(((Node)pt).getCode()+((Node)prop3).getCode());
+																						}
+																						resultado.setArrobapre(((Node)paux).isArrobapre());
+																						RESULT = resultado;:};
+																						
+propertyCallAux ::= timeExpression {: Node n = new Node(); n.setArrobapre(true); :} | {: RESULT = new Node(); :};
 
 propertyCallAux3 ::= propertyCallParameters:prop1 {: RESULT = prop1; :}  
 					|{: RESULT = null; :} ;
-
-qualifiers ::= LEFTBRACK actualParameterList:a1 RIGHTBRACK {: RESULT = (Node)a1; :};
-
-
-
-/* declarator ::= IDENTIFIER ( VIRGULA IDENTIFIER )* ( DOUBLEPOINT simpleTypeSpecifier )? ( POINT_VIRGULA IDENTIFIER POINT_VIRGULA typeSpecifier EQ expression )? PIPELINE ; */
-
-declarator ::= IDENTIFIER:id declaratorAuxLoop:dal declaratorAux2:da2 PIPELINE {: if(da2 == null) {
-                                                                                     DeclaratorNode decl = new DeclaratorNode(DeclaratorNode.NON_TYPE_DECLARATOR);
-                                                                                     decl.addNode(new Node(id.toString(), null));
-                                                                                     RESULT = decl;
-                                                                                 } else {
-                                                                                     DeclaratorNode decl = new DeclaratorNode(DeclaratorNode.TYPED_DECLARATOR);
-                                                                                     decl.setTipoConteudo(((Node)da2).getType());
-                                                                                     decl.addNode(new Node(id.toString(), null));
-                                                                                     decl.addNodes(((Node)da2).getElements());
-                                                                                     RESULT = decl;  
-                                                                                 } 
-                                                                              :} ;
-
-declaratorAux ::= VIRGULA IDENTIFIER:id {: RESULT = new Node(id.toString(), null); :};
-
-declaratorAuxLoop ::= declaratorAux:da declaratorAuxLoop:dal {: Node n = new Node();
-                                                                if(dal == null) {
-                                                                    n.addElement((Node)da);
-                                                                } else {
-                                                                    n.addElement((Node)da);
-                                                                    n.addAllElements(((Node)dal).getElements());
-                                                                } 
-                                                                RESULT = n;:} 
-                    | {: RESULT = null; :};
-
-declaratorAux2 ::= DOUBLEPOINT simpleTypeSpecifier:sts {: RESULT = new Node(null, sts.toString()); :} 
-                 | {: RESULT = null; :}  ;
-
-
 
 pathName ::= IDENTIFIER:id pathNameAuxLoop:ploop {: Node resultado = new Node();
 													Node identifier = new Node(id.toString());
 													if(ploop == null){
 														resultado.addElement(identifier);
-														
+														resultado.setCode(id.toString());
 													}else{
 														resultado.addElement(identifier);
 														resultado.addAllElements(((Node) ploop).getElements());
+														List<Node> l = ((Node) ploop).getElements();
+														resultado.setCode((String)l.get(l.size() - 1).getValue());
 													}
 													RESULT = resultado;   :};
 
@@ -610,20 +572,24 @@ actualParameterList ::= expression:e1 actualParameterListAuxLoop:aloop {: Node r
 																			resultado = null;
 																		}else if(aloop == null){
 																			resultado.addElement((Node)e1);
+																			resultado.setCode(((Node)e1).getCode());
 																		}else{
 																			resultado.addElement((Node)e1);
 																			resultado.addAllElements(((Node) aloop).getElements());}
+																			resultado.setCode(((Node)e1).getCode()+((Node) aloop).getCode());
 																		RESULT = resultado; :};
 
-actualParameterListAux ::= VIRGULA expression:e1 {: RESULT = (Node)e1;:};
+actualParameterListAux ::= VIRGULA expression:e1 {: Node n = (Node)e1; n.setCode(", " + ((Node)e1).getCode()); RESULT = n; :};
 
 actualParameterListAuxLoop ::= actualParameterListAux:a1 actualParameterListAuxLoop:aloop{: Node resultado = new Node();
 																							if(aloop == null) {
 																								resultado.addElement((Node) a1);
+																								resultado.setCode(((Node) a1).getCode());
 																							}
 																							else{
 																								resultado.addElement((Node)a1);
 																								resultado.addAllElements(((Node) aloop).getElements());}
+																								resultado.setCode(((Node) a1).getCode()+((Node) aloop).getCode());
 																							RESULT = resultado; :}
                               |{: RESULT = null; :} ;
 
