@@ -96,6 +96,13 @@ public class Classe implements Entidade{
 			this.operacoes.add(op);
 		}
 	}
+	public Classe getUltimoPai(){
+		Classe max_pai = this;
+		while(max_pai.temPai()){
+			max_pai = max_pai.getClassePai();
+		}
+		return max_pai;
+	}
 
 	public boolean temPai() {
 		return this.classePai!=null;
