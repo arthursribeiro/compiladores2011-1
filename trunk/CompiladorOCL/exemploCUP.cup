@@ -176,7 +176,8 @@ oclExpressionsAux ::= constraint oclExpressionsAux | ;
 
 constraint ::= contextDeclaration constraintAux2LoopWithOne;
 
-constraintAux2 ::= constraintAux constraintAux3 DOUBLEPOINT oclExpression:exp {: System.out.println(((Node)exp).getCode());:};
+constraintAux2 ::= constraintAux constraintAux3 DOUBLEPOINT oclExpression:exp {: System.out.println(((Node)exp).getCode());
+																				 parser.semantico.loadCondictions(((Node)exp).getCode()); :};
 				
 constraintAux ::= PRE  {: parser.semantico.setStereotype("pre"); :} | POST  {: parser.semantico.setStereotype("post"); :};
 
@@ -410,6 +411,7 @@ postfixExpression ::= primaryExpression:primexp {: parser.semantico.setContextAu
 						}
 						if( !aux.isArrobapre() || (aux.isArrobapre() && !prime.isSelfable())){
 							aux.setCode(((Node)primexp).getCode());
+							aux.setSelfable(((Node)primexp).isSelfable());
 						}
 						if(postfexp_check){
 							if(aux.getCode() != null){
@@ -421,6 +423,12 @@ postfixExpression ::= primaryExpression:primexp {: parser.semantico.setContextAu
 						if(aux.isArrobapre()){
 							String code_aux = aux.getCode();
 							aux.setCode("context"+code_aux);
+						}else{
+							
+							if(!aux.isSelfable()){
+								String code_aux = aux.getCode();	
+								aux.setCode("self."+code_aux);
+							}
 						}
 						if( postfexp != null || ((Node)primexp).getRole() == Node.VARIABLE ){
 							//System.out.println("List : " + ((Node)aux).listToString() + "\n" + "Caminho = " + ((Node)aux).printAllParamethrs() );
@@ -504,7 +512,7 @@ propertyCallParametersAux2 ::= actualParameterList:a1 {: RESULT = (Node)a1;:}
 booleanLiteral ::= TRUE:boolTrue {: RESULT = new Node(boolTrue,"Boolean", "True"); :} 
 					| FALSE:boolFalse {: RESULT = new Node(boolFalse,"Boolean", "False"); :};
 
-literal ::= STRING_LITERAL:litString {: RESULT = new Node(litString,"String", (String) litString); :} 
+literal ::= STRING_LITERAL:litString {: RESULT = new Node(litString,"String", "'"+ (String) litString  + "'"); :} 
 			| number:litNum {: RESULT = litNum; :} 
 			| booleanLiteral:litBool {: RESULT = litBool; :} 
 			| RESULT:litResult 
