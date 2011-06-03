@@ -11,6 +11,7 @@ public class Node {
 	private Object value;
 	private String type;
 	private String code;
+	private boolean selfable = false;
 	private String operation;
 	private List<Node> list_caminho;
 	private List<Node> list;
@@ -163,6 +164,14 @@ public class Node {
 			teste += d.listToString() + " ";
 		}
 		return teste;
+	}
+
+	public void setSelfable(boolean selfable) {
+		this.selfable = selfable;
+	}
+
+	public boolean isSelfable() {
+		return selfable;
 	}
 
 }
