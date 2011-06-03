@@ -14,6 +14,7 @@ public class Node {
 	private String operation;
 	private List<Node> list_caminho;
 	private List<Node> list;
+	private boolean arrobapre = false;
 
 	public void addCaminho(Node element) {
 		list_caminho.add(element);
@@ -52,7 +53,7 @@ public class Node {
 		this.list = new ArrayList<Node>();
 		this.list_caminho = new ArrayList<Node>();
 	}
-	
+
 	public Node(Object value, String type, String code) {
 		this.value = value;
 		this.type = type;
@@ -134,6 +135,14 @@ public class Node {
 			teste += d.toString() + " ";
 		}
 		return teste;
+	}
+
+	public boolean isArrobapre() {
+		return arrobapre;
+	}
+
+	public void setArrobapre(boolean arrobapre) {
+		this.arrobapre = arrobapre;
 	}
 
 	@Override
