@@ -123,7 +123,7 @@ public class Classe implements Entidade{
 		for (Atributo att : atributos) {
 			code+=endentacao(2)+"self."+(att.getVisibilidade().equalsIgnoreCase("private")?"_":"")+att.getNome()+" = "+att.getNome()+"Param"+quebraLinha(1);
 		}
-		code+=quebraLinha(2);
+		code+=endentacao(2)+"pass"+quebraLinha(2);
 		
 		for (OperacaoMaior op : operacoes) {
 			code+=op.generateCode(2)+quebraLinha(2);
