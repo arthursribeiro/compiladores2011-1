@@ -265,6 +265,7 @@ oclExpression ::= expression:exp
 				{: 
 					if( ! ((Node)exp).getType().equals("Boolean") )
 						throw new Exception("Semantic ERROR: Must have a <Boolean> inside <"+parser.semantico.getStereotype().toUpperCase()+"> and got <"+((Node)exp).getType()+"> at line: "+expleft);
+				 	System.out.println(((Node)exp).getCode());
 					RESULT = exp; 
 				:};
 
@@ -401,6 +402,7 @@ postfixExpression ::= primaryExpression:primexp {: parser.semantico.setContextAu
 							aux.addAllCaminho(((Node)postfexp).getList_caminho());
 						}
 						if( postfexp != null || ((Node)primexp).getRole() == Node.VARIABLE ){
+							System.out.println("List : " + ((Node)aux).listToString() + "\n" + "Caminho = " + ((Node)aux).printAllParamethrs() );
 							resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft,null,null);
 							RESULT = resultado;
 						}else{
@@ -440,6 +442,7 @@ primaryExpression ::= literalCollection
 					| propertyCall:p1 {: RESULT = p1; :}
 					| LEFTPARENTHESIS expression:exp RIGHTPARENTHESIS 
 						{:
+							((Node)exp).setCode(" ( " + ((Node)exp).getCode()+ " ) ");
 							RESULT = exp;
 						:} 
 					| SELF {: RESULT = new Node("self",parser.semantico.getContextClass()); :}
