@@ -142,7 +142,7 @@ public class Node {
 	}
 
 	public void setArrobapre(boolean arrobapre) {
-		this.arrobapre = arrobapre;
+		if(arrobapre)this.arrobapre = arrobapre;
 	}
 
 	@Override
