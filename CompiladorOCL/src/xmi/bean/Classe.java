@@ -133,7 +133,7 @@ public class Classe implements Entidade{
 		code+=endentacao(2)+"pass"+quebraLinha(2);
 		
 		for (OperacaoMaior op : operacoes) {
-			code+=op.generateCode(2)+quebraLinha(2);
+			code+=op.generateCode(1)+quebraLinha(2);
 		}
 		
 		return code;
