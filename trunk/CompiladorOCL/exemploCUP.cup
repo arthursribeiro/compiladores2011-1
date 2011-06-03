@@ -176,7 +176,7 @@ oclExpressionsAux ::= constraint oclExpressionsAux | ;
 
 constraint ::= contextDeclaration constraintAux2LoopWithOne;
 
-constraintAux2 ::= constraintAux constraintAux3 DOUBLEPOINT oclExpression:exp {: System.out.println(((Node)exp).getCode());
+constraintAux2 ::= constraintAux constraintAux3 DOUBLEPOINT oclExpression:exp {: //System.out.println(((Node)exp).getCode());
 																				 parser.semantico.loadCondictions(((Node)exp).getCode()); :};
 				
 constraintAux ::= PRE  {: parser.semantico.setStereotype("pre"); :} | POST  {: parser.semantico.setStereotype("post"); :};
@@ -427,12 +427,52 @@ postfixExpression ::= primaryExpression:primexp {: parser.semantico.setContextAu
 							
 							if(!aux.isSelfable()){
 								String code_aux = aux.getCode();
-								if(parser.semantico.contextAuxBool){
+								if(parser.semantico.contextAuxBool && !(aux.getCode().indexOf("forAll(")>0 || aux.getCode().indexOf("select(")>0) ){
 									aux.setCode("x."+code_aux);
 								}else{
+									
+									
 									aux.setCode("self."+code_aux);
 								}
 								
+							}
+						}
+						if(!(parser.semantico.contextAuxBool && !(aux.getCode().indexOf("forAll(")>0 || aux.getCode().indexOf("select(")>0) )){
+							if(aux.getCode().indexOf("forAll(")>0){
+								int forI = aux.getCode().indexOf("forAll(");
+								String pathBefore = aux.getCode().substring(0,forI-1);
+								int paramI = aux.getCode().indexOf("(", forI);
+								String param = aux.getCode().substring(paramI);
+								String code = "([ x for x in "+pathBefore+" if("+param+")] == "+pathBefore+")";
+								aux.setCode(code);
+							}else if(aux.getCode().indexOf("select(")>0){
+								String codeAux = aux.getCode();
+								while(codeAux.indexOf("select(")>0){
+									int forI = codeAux.indexOf("select(");
+									String pathBefore = codeAux.substring(0,forI-1);
+									int paramI = codeAux.indexOf("(", forI);
+									String end = codeAux.substring(paramI);
+									int parentesis = 0;
+									int endParam = -1;
+									String fim = "";
+									for (int i = 0; i < end.length(); i++) {
+										if((end.charAt(i)+"").equalsIgnoreCase("("))
+											parentesis++;
+										if((end.charAt(i)+"").equalsIgnoreCase(")"))
+											parentesis--;
+										if(parentesis == 0){
+											endParam = i+1;
+											
+											break;
+										}
+										fim+=end.charAt(i);
+									}
+									
+									end = end.substring(endParam);
+									
+									codeAux = "Collection([ x for x in "+pathBefore+" if("+fim+")])"+end;
+								}
+								aux.setCode(codeAux);
 							}
 						}
 						if( postfexp != null || ((Node)primexp).getRole() == Node.VARIABLE ){
