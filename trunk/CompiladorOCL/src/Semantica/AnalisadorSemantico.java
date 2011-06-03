@@ -32,6 +32,11 @@ public class AnalisadorSemantico {
         private Set<String> logErros = new HashSet<String>();
 		private String[] collectionTypes = {"Set", "Bag", "Sequence", "Collection"};
 		
+		
+		private String contextAux = "";
+		
+		private boolean contextAuxBool = false;
+		
 		public AnalisadorSemantico() {
 			Parametro p = new Parametro("exp","Boolean");
 			Parametro p2 = new Parametro("exp2","SELF3");
@@ -169,8 +174,11 @@ public class AnalisadorSemantico {
 		private boolean ehColecaoOp(Object idFunc) {
 			boolean temCol = false;
         	for (OperacaoMaior colOp : collOperations) {
-				if(colOp.getNome().equals(idFunc)){
+				if(colOp.getNome().equals((String)idFunc)){
 					temCol = true;
+					if(colOp.getNome().equals("forAll") || colOp.getNome().equals("select") ){
+						contextAuxBool = true;
+					}
 				}
 			}
         	return temCol;
@@ -296,8 +304,13 @@ public class AnalisadorSemantico {
         public Node checkAllPathFunction(List<Node> lista_caminho, int line, String teveCol, Node last2) throws Exception{
         	String typeContext = null;
         	String typeCol = null;
+        	String contextClass2 = contextClass;
+        	if(contextAuxBool){
+        		contextClass2 = contextAux;
+        	}
+//        	System.out.println(contextAux);
         	if(last2 ==null)
-        		typeContext = contextClass;
+        		typeContext = contextClass2;
         	else{
         		typeContext = last2.getType();
         		if(ehColFromTypeDef(last2.getType())){
@@ -305,7 +318,6 @@ public class AnalisadorSemantico {
         		}
         	}
         	OperacaoMaior opCont = null;
-        	
         	try{
         		opCont = ManipuladorXMI.contemFuncao(contextClass, contextClass, contextMethod);
         	}catch(Exception e){
@@ -320,9 +332,9 @@ public class AnalisadorSemantico {
         				Atributo att = null;
         				try{
         					if(!ehColFromTypeDef(typeContext))
-        						att = ManipuladorXMI.contemAtributo(contextClass, typeContext, id );
+        						att = ManipuladorXMI.contemAtributo(contextClass2, typeContext, id );
         					else
-        						att = ManipuladorXMI.contemAtributo(contextClass, typeCol, id );
+        						att = ManipuladorXMI.contemAtributo(contextClass2, typeCol, id );
         				}catch(Exception e){
         					
         				}
@@ -361,7 +373,7 @@ public class AnalisadorSemantico {
         				String id = (String) node.getValue();
         				OperacaoMaior op = null;
         				try{
-        					op = ManipuladorXMI.contemFuncao(contextClass, typeContext, id);
+        					op = ManipuladorXMI.contemFuncao(contextClass2, typeContext, id);
         				}catch(Exception e){
         					
         				}
@@ -383,7 +395,7 @@ public class AnalisadorSemantico {
         					last = node;
         				else if(node.getType()==null){
         					node.setRole(Node.VARIABLE);
-        					return checkAllPathFunction(lista_caminho, line,null,null);
+        					return checkAllPathFunction(lista_caminho, line,teveCol,last2);
         				}
         				else
         					return node;
@@ -409,7 +421,9 @@ public class AnalisadorSemantico {
         	} catch (Exception e) {
 				throw new Exception(e.getMessage());
 			}
-        	last.setRole(Node.VALUE);
+        	if(last!=null)
+        		last.setRole(Node.VALUE);
+        	contextAuxBool = false;
         	return last;
         }
         
@@ -447,8 +461,8 @@ public class AnalisadorSemantico {
 		}
 
 		private String getTypeCol(String type) {
-			if(ehColecaoOp(type)){
-				int firstI = type.indexOf("<");
+			if(type.indexOf("<")>0){
+				int firstI = type.indexOf("<")+1;
 				int lastI = type.lastIndexOf(">");
 				return type.substring(firstI, lastI);
 			}
@@ -750,5 +764,40 @@ public class AnalisadorSemantico {
 		
 		public void semanticNumberTypeError(String typeExpected, String typeGot, int line) throws Exception{
 			throw new Exception("Semantic ERROR: Expected a "+typeExpected+" and got <"+typeGot+"> at line: "+(line+1));
+		}
+
+//		public void setContextAuxBool(boolean b) {
+//			contextAuxBool = b;
+//			
+//		}
+		
+		private Node lastNodeAux = null;
+
+		public void setContextAux(Object primexp, int line) throws Exception {
+			Node p = (Node) primexp;
+			if(p!=null && !contextAuxBool){
+				String typeCol = null;
+				if(lastNodeAux!=null){
+					typeCol = getTypeCol(lastNodeAux.getType());
+				}
+				Node last = checkAllPathFunction(p.getList_caminho(), line, typeCol, lastNodeAux);
+				lastNodeAux = last;
+				if(last!=null){
+					String type = last.getType();
+					if(type.indexOf("<")>0)
+						type = getTypeCol(type);
+					contextAux = type;
+				}else{
+					contextAux = contextClass;
+				}
+			}
+		}
+
+		public void checkCallName(Node pt) {
+			List<Node> listas = pt.getElements();
+			if(listas.size()==1){
+				Node call = listas.get(0);
+				ehColecaoOp(call.getValue());
+			}
 		}
 }
