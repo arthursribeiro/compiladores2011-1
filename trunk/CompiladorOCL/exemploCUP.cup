@@ -176,7 +176,7 @@ oclExpressionsAux ::= constraint oclExpressionsAux | ;
 
 constraint ::= contextDeclaration constraintAux2LoopWithOne;
 
-constraintAux2 ::= constraintAux constraintAux3 DOUBLEPOINT oclExpression;
+constraintAux2 ::= constraintAux constraintAux3 DOUBLEPOINT oclExpression:exp {: System.out.println(((Node)exp).getCode());:};
 				
 constraintAux ::= PRE  {: parser.semantico.setStereotype("pre"); :} | POST  {: parser.semantico.setStereotype("post"); :};
 
@@ -265,7 +265,6 @@ oclExpression ::= expression:exp
 				{: 
 					if( ! ((Node)exp).getType().equals("Boolean") )
 						throw new Exception("Semantic ERROR: Must have a <Boolean> inside <"+parser.semantico.getStereotype().toUpperCase()+"> and got <"+((Node)exp).getType()+"> at line: "+expleft);
-				 	System.out.println(((Node)exp).getCode());
 					RESULT = exp; 
 				:};
 
@@ -393,17 +392,40 @@ postfixExpression ::= primaryExpression:primexp {: parser.semantico.setContextAu
 					{:
 						Node resultado;
 						Node aux = new Node();
+						Node prime = (Node)primexp;
+						aux.setArrobapre(((Node)primexp).isArrobapre());
+						boolean postfexp_check = false;
 						if( ((Node)primexp).getList_caminho().size() < 1 ){
 							aux.addCaminho(((Node)primexp));
 						}else{
 							aux.addAllCaminho(((Node)primexp).getList_caminho());
 						}
+						
 						if (postfexp != null){
+							//System.out.println(((Node)postfexp).getCode());
 							aux.addAllCaminho(((Node)postfexp).getList_caminho());
+							aux.setArrobapre(((Node)postfexp).isArrobapre());
+							postfexp_check = true;
+							
+						}
+						if( !aux.isArrobapre() || (aux.isArrobapre() && !prime.isSelfable())){
+							aux.setCode(((Node)primexp).getCode());
+						}
+						if(postfexp_check){
+							if(aux.getCode() != null){
+								aux.setCode(aux.getCode()+"."+((Node)postfexp).getCode());
+							}else{
+								aux.setCode("."+((Node)postfexp).getCode());
+							}
+						}
+						if(aux.isArrobapre()){
+							String code_aux = aux.getCode();
+							aux.setCode("context"+code_aux);
 						}
 						if( postfexp != null || ((Node)primexp).getRole() == Node.VARIABLE ){
-							System.out.println("List : " + ((Node)aux).listToString() + "\n" + "Caminho = " + ((Node)aux).printAllParamethrs() );
+							//System.out.println("List : " + ((Node)aux).listToString() + "\n" + "Caminho = " + ((Node)aux).printAllParamethrs() );
 							resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft,null,null);
+							resultado.setCode(aux.getCode());
 							RESULT = resultado;
 						}else{
 							RESULT = primexp;
@@ -424,6 +446,8 @@ postfixExpressionAux2 ::= postfixExpressionAux:paux propertyCall:pc {: //System.
 
 postfixExpressionAux2Loop ::= postfixExpressionAux2:paux2 postfixExpressionAux2Loop:ploop {: Node resultado = new Node();
 																							 Node aux = (Node)paux2;
+																							  resultado.setCode(aux.getCode());
+																							  resultado.setArrobapre(aux.isArrobapre());
 																							 if( aux.getRole() == Semantica.Node.FUNCTION || aux.getRole() == Semantica.Node.FUNCTION_COLLECTION){
 																							 	//System.out.println("MACONHA Result: " + ((Node) aux).listToString() );
 																							 	resultado.addCaminho(aux);
@@ -431,10 +455,13 @@ postfixExpressionAux2Loop ::= postfixExpressionAux2:paux2 postfixExpressionAux2L
 																							 	resultado.addAllCaminho(((Node)paux2).getList_caminho());
 																							 }
 																						 	 if(ploop != null){
+																						 	 	resultado.setCode(resultado.getCode() + "." + ((Node)ploop).getCode());
+																						 	 	resultado.setArrobapre(((Node)ploop).isArrobapre());
 																						 	 	resultado.addAllCaminho(((Node)ploop).getList_caminho());
-																						 }RESULT  = resultado;:}
-																						 | {: RESULT = null; :} ;
-primaryExpression ::= literalCollection 
+																						 }
+																						 RESULT  = resultado;:}
+																						 | {: RESULT = null; :} 
+;primaryExpression ::= literalCollection 
 					| literal:lit1 
 						{: 
 							RESULT = lit1; 
@@ -445,8 +472,8 @@ primaryExpression ::= literalCollection
 							((Node)exp).setCode(" ( " + ((Node)exp).getCode()+ " ) ");
 							RESULT = exp;
 						:} 
-					| SELF {: RESULT = new Node("self",parser.semantico.getContextClass()); :}
-					| SELF timeExpression   {: RESULT = new Node("self",parser.semantico.getContextClass()); :}
+					| SELF {: Node aux = new Node("self",parser.semantico.getContextClass(),"self"); aux.setSelfable(true); RESULT = aux; :}
+					| SELF timeExpression   {: Node aux = new Node("self",parser.semantico.getContextClass(),""); aux.setArrobapre(true); RESULT = aux; :}
 					| ifExpression:ifStmt {: //System.out.println("tipo na primary " + ((Node)ifStmt).getType()); 
 												RESULT = (Node)ifStmt; :};
 
@@ -518,23 +545,21 @@ collectionItemAux ::= POINT POINT expression | ;
 
 /* propertyCall ::= pathName ( qualifiers )? ( propertyCallParameters )?; */
 
-propertyCall ::= pathName:pt {: parser.semantico.checkCallName((Node)pt); :} propertyCallAux:paux propertyCallAux3:prop3 {: Node resultado = new Node();
+propertyCall ::= pathName:pt propertyCallAux:paux propertyCallAux3:prop3 {: Node resultado = new Node();
 																						if(prop3 == null){
 																							resultado.setRole(Semantica.Node.VARIABLE);
 																							resultado.addAllCaminho(((Node)pt).getElements());
 																							resultado.setCode(((Node)pt).getCode());
+																							resultado.setArrobapre(((Node)paux).isArrobapre());
 																						}else{
 																							resultado.setRole(Semantica.Node.FUNCTION);
 																							resultado.setValue(((Node)pt).getElements().get(((Node)pt).getElements().size()-1).getValue());
 																							//System.out.println("Value :" + resultado.getValue());
 																							resultado.addAllElements(((Node) prop3).getElements());
-																							parser.semantico.setContextAuxBool(false);
-																							resultado.setCode(((Node)pt).getCode()+((Node)prop3).getCode());
+																							resultado.setCode(((Node)pt).getCode()+((Node)prop3).getCode());																							resultado.setArrobapre(((Node)paux).isArrobapre());
 																						}
-																						resultado.setArrobapre(((Node)paux).isArrobapre());
 																						RESULT = resultado;:};
-																						
-propertyCallAux ::= timeExpression {: Node n = new Node(); n.setArrobapre(true); :} | {: RESULT = new Node(); :};
+propertyCallAux ::= timeExpression {: Node n = new Node(); n.setArrobapre(true); RESULT = n; :} | {: RESULT = new Node(); :};
 
 propertyCallAux3 ::= propertyCallParameters:prop1 {: RESULT = prop1; :}  
 					|{: RESULT = null; :} ;
