@@ -808,6 +808,24 @@ public class AnalisadorSemantico {
 			}
 		}
 
+		public void loadCondictions(String code) {
+			// TODO Auto-generated method stub
+			try {
+				OperacaoMaior opCont = ManipuladorXMI.contemFuncao(contextClass, contextClass, contextMethod);
+				if(stereotype.equalsIgnoreCase("pre")){
+					opCont.setPreCond(code);
+					//System.out.println("PRE \n"+opCont.generateCode(2));
+				}else{
+					opCont.setPosCond(code);
+					//System.out.println("POS \n"+opCont.generateCode(2));
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
 		public void addParentesis() {
 			this.parentesis++;
 		}
