@@ -426,8 +426,13 @@ postfixExpression ::= primaryExpression:primexp {: parser.semantico.setContextAu
 						}else{
 							
 							if(!aux.isSelfable()){
-								String code_aux = aux.getCode();	
-								aux.setCode("self."+code_aux);
+								String code_aux = aux.getCode();
+								if(parser.semantico.contextAuxBool){
+									aux.setCode("x."+code_aux);
+								}else{
+									aux.setCode("self."+code_aux);
+								}
+								
 							}
 						}
 						if( postfexp != null || ((Node)primexp).getRole() == Node.VARIABLE ){
