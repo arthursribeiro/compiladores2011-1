@@ -1,6 +1,3 @@
-context Cliente::idade():Integer
-pre: if(rg = 'bla') then masculino else false endif
-post: if(nome = 'bla') then masculino else false endif
-
 context ProgramaFidelidade::cadastrar( c:Cliente )
-post: nivelServicos.servicosDisponiveis->forAll(transacoes->size()>2)
+pre: nivelServicos.servicosDisponiveis->size()>0
+post: nivelServicos.servicosDisponiveis->select(transacoes->size()>2 and condicao)->size()>3
