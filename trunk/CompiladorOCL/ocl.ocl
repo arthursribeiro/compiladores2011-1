@@ -1,2 +1,3 @@
 context Cliente::idade():Integer
-pre: if ((10 = 10) and (if (11 = 11) then true else false endif)) then true else false endif
+pre: if(rg = 'bla') then masculino else false endif
+post: if(nome = 'bla') then masculino else false endif
