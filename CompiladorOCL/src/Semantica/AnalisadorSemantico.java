@@ -174,7 +174,7 @@ public class AnalisadorSemantico {
         	}
         }
 
-		private boolean ehColecaoOp(Object idFunc) {
+		public boolean ehColecaoOp(Object idFunc) {
 			boolean temCol = false;
         	for (OperacaoMaior colOp : collOperations) {
 				if(colOp.getNome().equals((String)idFunc)){
@@ -779,6 +779,7 @@ public class AnalisadorSemantico {
 		}
 		
 		private Node lastNodeAux = null;
+		public boolean botaPrefix = false;
 
 		public void setContextAux(Object primexp, int line) throws Exception {
 			Node p = (Node) primexp;
@@ -804,7 +805,11 @@ public class AnalisadorSemantico {
 			List<Node> listas = pt.getElements();
 			if(listas.size()==1){
 				Node call = listas.get(0);
-				ehColecaoOp(call.getValue());
+				if(!ehColecaoOp(call.getValue())){
+					if(contextAuxBool){
+						call.setPrefix("x.");
+					}
+				}
 			}
 		}
 

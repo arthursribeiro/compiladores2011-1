@@ -16,6 +16,8 @@ public class Node {
 	private List<Node> list_caminho;
 	private List<Node> list;
 	private boolean arrobapre = false;
+	
+	private String prefix = "";
 
 	public void addCaminho(Node element) {
 		list_caminho.add(element);
@@ -83,7 +85,7 @@ public class Node {
 	}
 
 	public String getCode() {
-		return code;
+		return prefix+code;
 	}
 
 	public void setCode(String code) {
@@ -172,6 +174,14 @@ public class Node {
 
 	public boolean isSelfable() {
 		return selfable;
+	}
+
+	public String getPrefix() {
+		return prefix;
+	}
+
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
 	}
 
 }
