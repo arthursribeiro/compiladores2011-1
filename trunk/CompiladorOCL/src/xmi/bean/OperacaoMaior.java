@@ -169,7 +169,7 @@ public class OperacaoMaior {
 			numEndent++;
 			retornoFora = "False";
 		}
-		code+=endentacao(numEndent)+"result = "+getNome()+"("+paramsChamada+")";
+		code+=endentacao(numEndent)+"result = "+getNome()+"("+paramsChamada+")"+quebraLinha(1);
 		if(posCond.trim().length()>0){
 			code+=endentacao(numEndent)+"if("+posCond+"):"+quebraLinha(1);
 			code+=endentacao(numEndent+1)+"return True"+quebraLinha(2);

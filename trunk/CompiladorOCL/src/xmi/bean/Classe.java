@@ -115,7 +115,7 @@ public class Classe implements Entidade{
 	public String generateCode(){
 		String code = "";
 		code += "class "+(visibility.equalsIgnoreCase("private")?"_":"")+getName()+"("+getHeranca()+"):"+quebraLinha(2);
-		code+=endentacao(1)+"def __inti__(self";
+		code+=endentacao(1)+"def __init__(self";
 		for (Atributo att : atributos) {
 			code+=","+att.getNome()+"Param";
 		}
