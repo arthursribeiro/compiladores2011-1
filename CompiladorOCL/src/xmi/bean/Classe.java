@@ -110,4 +110,52 @@ public class Classe implements Entidade{
 		}
 		return false;
 	}
+	
+	
+	public String generateCode(){
+		String code = "";
+		code += "class "+(visibility.equalsIgnoreCase("private")?"_":"")+getName()+"("+getHeranca()+"):"+quebraLinha(2);
+		code+=endentacao(1)+"def __inti__(self";
+		for (Atributo att : atributos) {
+			code+=","+att.getNome()+"Param";
+		}
+		code+="):"+quebraLinha(1);
+		for (Atributo att : atributos) {
+			code+=endentacao(2)+"self."+(att.getVisibilidade().equalsIgnoreCase("private")?"_":"")+att.getNome()+" = "+att.getNome()+"Param"+quebraLinha(1);
+		}
+		code+=quebraLinha(2);
+		
+		for (OperacaoMaior op : operacoes) {
+			code+=op.generateCode(2)+quebraLinha(2);
+		}
+		
+		return code;
+	}
+	
+	private String endentacao(int i){
+		String  endent = "";
+		for (int j = 0; j < i; j++) {
+			endent+="  ";
+		}
+		return endent;
+	}
+	
+	private String quebraLinha(int i){
+		String barraN = System.getProperty("line.separator");
+		String quebras = "";
+		for (int j=0; j < i; j++) {
+			quebras+=barraN;
+		}
+		return quebras;
+	}
+
+	private String getHeranca() {
+		String pai = "";
+		if(classePai!=null){
+			pai = classePai.getName();
+		}else if(idClassePai.trim().length()>0){
+			pai = idClassePai;
+		}
+		return pai;
+	}
 }

@@ -518,7 +518,7 @@ collectionItemAux ::= POINT POINT expression | ;
 
 /* propertyCall ::= pathName ( qualifiers )? ( propertyCallParameters )?; */
 
-propertyCall ::= pathName:pt propertyCallAux:paux propertyCallAux3:prop3 {: Node resultado = new Node();
+propertyCall ::= pathName:pt {: parser.semantico.checkCallName((Node)pt); :} propertyCallAux:paux propertyCallAux3:prop3 {: Node resultado = new Node();
 																						if(prop3 == null){
 																							resultado.setRole(Semantica.Node.VARIABLE);
 																							resultado.addAllCaminho(((Node)pt).getElements());
@@ -528,6 +528,7 @@ propertyCall ::= pathName:pt propertyCallAux:paux propertyCallAux3:prop3 {: Node
 																							resultado.setValue(((Node)pt).getElements().get(((Node)pt).getElements().size()-1).getValue());
 																							//System.out.println("Value :" + resultado.getValue());
 																							resultado.addAllElements(((Node) prop3).getElements());
+																							parser.semantico.setContextAuxBool(false);
 																							resultado.setCode(((Node)pt).getCode()+((Node)prop3).getCode());
 																						}
 																						resultado.setArrobapre(((Node)paux).isArrobapre());

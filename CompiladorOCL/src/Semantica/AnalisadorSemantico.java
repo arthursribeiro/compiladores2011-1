@@ -35,7 +35,7 @@ public class AnalisadorSemantico {
 		
 		private String contextAux = "";
 		
-		private boolean contextAuxBool = false;
+		public boolean contextAuxBool = false;
 		
 		public AnalisadorSemantico() {
 			Parametro p = new Parametro("exp","Boolean");
@@ -423,7 +423,6 @@ public class AnalisadorSemantico {
 			}
         	if(last!=null)
         		last.setRole(Node.VALUE);
-        	contextAuxBool = false;
         	return last;
         }
         
@@ -766,10 +765,10 @@ public class AnalisadorSemantico {
 			throw new Exception("Semantic ERROR: Expected a "+typeExpected+" and got <"+typeGot+"> at line: "+(line+1));
 		}
 
-//		public void setContextAuxBool(boolean b) {
-//			contextAuxBool = b;
-//			
-//		}
+		public void setContextAuxBool(boolean b) {
+			contextAuxBool = b;
+			
+		}
 		
 		private Node lastNodeAux = null;
 

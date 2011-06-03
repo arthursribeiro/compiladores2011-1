@@ -10,6 +10,11 @@ public class OperacaoMaior {
 	private String visibility;
 	
 	private ArrayList<ArrayList<Parametro>> listaParametros;
+	
+	private String preCond = "";
+	private String preSep = "";
+	private String posCond = "";
+	private String posSep = "";
 
 	public OperacaoMaior(String n, String retorno, String v, ArrayList<ArrayList<Parametro>> params) {
 		this.nome = n;
@@ -89,5 +94,88 @@ public class OperacaoMaior {
 				return true;
 		}
 		return false;
+	}
+
+	public String getPreCond() {
+		return preCond;
+	}
+
+	public void setPreCond(String preCond) {
+		this.preCond = this.preCond+preSep+preCond;
+		preSep = " and ";
+	}
+
+	public String getPosCond() {
+		return posCond;
+	}
+
+	public void setPosCond(String posCond) {
+		this.posCond = this.posCond+posSep+posCond;
+		posSep = " and ";
+	}
+	
+	
+	private String endentacao(int i){
+		String  endent = "";
+		for (int j = 0; j < i; j++) {
+			endent+="  ";
+		}
+		return endent;
+	}
+	
+	private String quebraLinha(int i){
+		String barraN = System.getProperty("line.separator");
+		String quebras = "";
+		for (int j=0; j < i; j++) {
+			quebras+=barraN;
+		}
+		return quebras;
+	}
+
+	public String generateCode(int i) {
+		String code = "";
+		code+=endentacao(i)+"def "+getNome()+"(self";
+		for (Parametro param : listaParametros.get(0)) {
+			code+=","+param.getNome();
+		}
+		code+="):"+quebraLinha(1)+endentacao(i+1)+"pass"+quebraLinha(2);
+		
+		code+=generatePrePosCode(i);
+		
+		return code;
+	}
+
+	private String generatePrePosCode(int i) {
+		String code = "";
+		
+		code+=endentacao(i)+"def validate_"+getNome()+"(self";
+		String paramsChamada = "";
+		String sep = "";
+		for (Parametro param : listaParametros.get(0)) {
+			code+=","+param.getNome();
+			paramsChamada += sep+param.getNome();
+			sep = ",";
+		}
+		code+="):"+quebraLinha(1);
+		
+		int numEndent = i+1;
+		
+		code+=endentacao(numEndent)+"context = copy(self)"+quebraLinha(2);
+		
+		String retornoFora = "True";
+		
+		if(preCond.trim().length()>0){
+			code+=endentacao(numEndent)+"if("+preCond+"):"+quebraLinha(1);
+			numEndent++;
+			retornoFora = "False";
+		}
+		code+=endentacao(numEndent)+"result = "+getNome()+"("+paramsChamada+")";
+		if(posCond.trim().length()>0){
+			code+=endentacao(numEndent)+"if("+posCond+"):"+quebraLinha(1);
+			code+=endentacao(numEndent+1)+"return True"+quebraLinha(2);
+			retornoFora = "False";
+		}
+		code+=endentacao(i+1)+"return "+retornoFora;
+		return code;
 	}
 }
