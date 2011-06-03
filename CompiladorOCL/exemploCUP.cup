@@ -578,8 +578,9 @@ actualParameterList ::= expression:e1 actualParameterListAuxLoop:aloop {: Node r
 																			resultado.setCode(((Node)e1).getCode());
 																		}else{
 																			resultado.addElement((Node)e1);
-																			resultado.addAllElements(((Node) aloop).getElements());}
+																			resultado.addAllElements(((Node) aloop).getElements());
 																			resultado.setCode(((Node)e1).getCode()+((Node) aloop).getCode());
+																		}
 																		RESULT = resultado; :};
 
 actualParameterListAux ::= VIRGULA expression:e1 {: Node n = (Node)e1; n.setCode(", " + ((Node)e1).getCode()); RESULT = n; :};
@@ -591,8 +592,9 @@ actualParameterListAuxLoop ::= actualParameterListAux:a1 actualParameterListAuxL
 																							}
 																							else{
 																								resultado.addElement((Node)a1);
-																								resultado.addAllElements(((Node) aloop).getElements());}
+																								resultado.addAllElements(((Node) aloop).getElements());
 																								resultado.setCode(((Node) a1).getCode()+((Node) aloop).getCode());
+																							}
 																							RESULT = resultado; :}
                               |{: RESULT = null; :} ;
 
