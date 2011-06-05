@@ -1,10 +1,7 @@
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import xmi.ManipuladorXMI;
@@ -12,7 +9,6 @@ import xmi.XMIParser;
 import xmi.bean.Classe;
 import xmi.bean.Entidade;
 
-import java_cup.symbol;
 import java_cup.runtime.Symbol;
 
 
@@ -102,7 +98,7 @@ public class Main {
 //			p.parse();
 
 //			File xmi = filePath2;
-			File xmi = new File("C:\\Users\\Jonathan\\workspace\\CompiladorOCLMeu\\src\\Profe.xml");
+			File xmi = new File("C:\\Users\\DAVI\\Documents\\workspace\\Java\\CompiladorOCLMeu\\src\\Profe.xml");
 
 			XMIParser xmiP = new XMIParser(xmi);
 			xmiP.readXMI();
@@ -111,7 +107,7 @@ public class Main {
 			Collection<Entidade> ents = xmiP.getArrayClasses();
 			ManipuladorXMI.setStaticClasses(ents);
 			/* create a parsing object */
-			String filePath = "C:\\Users\\Jonathan\\workspace\\CompiladorOCLMeu\\ocl.ocl";
+			String filePath = "C:\\Users\\DAVI\\Documents\\workspace\\Java\\CompiladorOCLMeu\\ocl.ocl";
 			AnalisadorLexico sc = new AnalisadorLexico(new java.io.FileReader(filePath));
 //			AnalisadorSintatico parser_obj = new AnalisadorSintatico(sc);
 			parser parser_obj = new parser(sc);

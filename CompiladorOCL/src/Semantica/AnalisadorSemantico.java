@@ -179,9 +179,6 @@ public class AnalisadorSemantico {
         	for (OperacaoMaior colOp : collOperations) {
 				if(colOp.getNome().equals((String)idFunc)){
 					temCol = true;
-					if(colOp.getNome().equals("forAll") || colOp.getNome().equals("select") ){
-						contextAuxBool = true;
-					}
 				}
 			}
         	return temCol;
@@ -771,11 +768,11 @@ public class AnalisadorSemantico {
 		private int parentesis = 0;
 
 		public void setContextAuxBool(boolean b) {
-			if(!b){
-				parentesis--;
-			}
-			if(!b && parentesis==0)
+			parentesis--;
+			if(!b && parentesis==0){
 				contextAuxBool = b;
+				lastNodeAux = null;
+			}
 		}
 		
 		private Node lastNodeAux = null;
@@ -783,6 +780,7 @@ public class AnalisadorSemantico {
 
 		public void setContextAux(Object primexp, int line) throws Exception {
 			Node p = (Node) primexp;
+			String con = contextAux;
 			if(p!=null && !contextAuxBool){
 				String typeCol = null;
 				if(lastNodeAux!=null){
@@ -795,7 +793,9 @@ public class AnalisadorSemantico {
 					if(type.indexOf("<")>0)
 						type = getTypeCol(type);
 					contextAux = type;
+					con = type;
 				}else{
+					contextAuxBool = false;
 					contextAux = contextClass;
 				}
 			}
@@ -805,10 +805,10 @@ public class AnalisadorSemantico {
 			List<Node> listas = pt.getElements();
 			if(listas.size()==1){
 				Node call = listas.get(0);
-				if(!ehColecaoOp(call.getValue())){
-//					if(contextAuxBool){
-//						call.setPrefix("x.");
-//					}
+				if(ehColecaoOp(call.getValue())){
+					if(call.getValue().equals("exists") || call.getValue().equals("forAll") || call.getValue().equals("select") ){
+						contextAuxBool = true;
+					}
 				}
 			}
 		}
@@ -834,4 +834,5 @@ public class AnalisadorSemantico {
 		public void addParentesis() {
 			this.parentesis++;
 		}
+		
 }

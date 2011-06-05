@@ -1560,7 +1560,7 @@ class CUP$parser$actions {
 							
 							if(!aux.isSelfable()){
 								String code_aux = aux.getCode();
-								if(parser.semantico.contextAuxBool && !(aux.getCode().indexOf("forAll(")>0 || aux.getCode().indexOf("select(")>0) ){
+								if(parser.semantico.contextAuxBool && !(aux.getCode().indexOf("exists(")>0 || aux.getCode().indexOf("forAll(")>0 || aux.getCode().indexOf("select(")>0) ){
 									aux.setCode("x."+code_aux);
 								}else{
 									
@@ -1570,7 +1570,12 @@ class CUP$parser$actions {
 								
 							}
 						}
-						if(!(parser.semantico.contextAuxBool && !(aux.getCode().indexOf("forAll(")>0 || aux.getCode().indexOf("select(")>0) )){
+//						System.out.println(aux.getCode());
+						aux.setCode(aux.getCode().replace(".size()", ".__len__()"));
+						if(aux.getCode().indexOf(".includes(")>0){
+							
+						}
+						if(!(parser.semantico.contextAuxBool && !(aux.getCode().indexOf("exists(")>0 || aux.getCode().indexOf("forAll(")>0 || aux.getCode().indexOf("select(")>0) )){
 							if(aux.getCode().indexOf("forAll(")>0){
 								int forI = aux.getCode().indexOf("forAll(");
 								String pathBefore = aux.getCode().substring(0,forI-1);
@@ -1603,7 +1608,35 @@ class CUP$parser$actions {
 									
 									end = end.substring(endParam);
 									
-									codeAux = "Collection([ x for x in "+pathBefore+" if("+fim+")])"+end;
+									codeAux = "([ x for x in "+pathBefore+" if("+fim+")])"+end;
+								}
+								aux.setCode(codeAux);
+							}else if(aux.getCode().indexOf("exists(")>0){
+								String codeAux = aux.getCode();
+								while(codeAux.indexOf("exists(")>0){
+									int forI = codeAux.indexOf("exists(");
+									String pathBefore = codeAux.substring(0,forI-1);
+									int paramI = codeAux.indexOf("(", forI);
+									String end = codeAux.substring(paramI);
+									int parentesis = 0;
+									int endParam = -1;
+									String fim = "";
+									for (int i = 0; i < end.length(); i++) {
+										if((end.charAt(i)+"").equalsIgnoreCase("("))
+											parentesis++;
+										if((end.charAt(i)+"").equalsIgnoreCase(")"))
+											parentesis--;
+										if(parentesis == 0){
+											endParam = i+1;
+											
+											break;
+										}
+										fim+=end.charAt(i);
+									}
+									
+									end = end.substring(endParam);
+									
+									codeAux = "([ x for x in "+pathBefore+" if("+fim+")].__len__() > 0)"+end;
 								}
 								aux.setCode(codeAux);
 							}
