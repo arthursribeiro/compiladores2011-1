@@ -1227,7 +1227,7 @@ class CUP$parser$actions {
 			int litResultright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-0)).right;
 			Object litResult = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-0)).value;
 			parser.semantico.checkStereotype("result",litResultleft); 
-			RESULT = new Node("result",parser.semantico.getContextReturn());
+			RESULT = new Node("result",parser.semantico.getContextReturn(),"result");
 
 			CUP$parser$result = new java_cup.runtime.Symbol(25/*literal*/, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-0)).left, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-0)).right, RESULT);
 		}
