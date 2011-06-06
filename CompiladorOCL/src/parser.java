@@ -1563,9 +1563,9 @@ class CUP$parser$actions {
 					if(parser.semantico.contextAuxBool && !(aux.getCode().indexOf("exists(")>0 || aux.getCode().indexOf("forAll(")>0 || aux.getCode().indexOf("select(")>0) ){
 						aux.setCode("x."+code_aux);
 					}else{
-
-
-						aux.setCode("self."+code_aux);
+						if(!parser.semantico.contemNoContexto(code_aux)) {
+							aux.setCode("self."+code_aux);
+						}
 					}
 
 				}
@@ -2436,6 +2436,8 @@ class CUP$parser$actions {
 			Object RESULT = null;
 
 			CUP$parser$result = new java_cup.runtime.Symbol(4/*constraint*/, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-0)).right, RESULT);
+			
+			parser.semantico.inicializarLista();
 		}
 		return CUP$parser$result;
 
