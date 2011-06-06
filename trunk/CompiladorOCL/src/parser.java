@@ -1571,211 +1571,239 @@ class CUP$parser$actions {
 				}
 			}
 			//						System.out.println(aux.getCode());
-			if(aux.getCode().indexOf(".forAll(")>0){
-				int forI = aux.getCode().indexOf(".forAll(");
-				String pathBefore = aux.getCode().substring(0,forI);
-				int paramI = aux.getCode().indexOf("(", forI);
-				String param = aux.getCode().substring(paramI);
-				String code = "([ x for x in "+pathBefore+" if("+param+")] == "+pathBefore+")";
-				aux.setCode(code);
-			}
-			if(aux.getCode().indexOf(".select(")>0){
-				String codeAux = aux.getCode();
-				while(codeAux.indexOf(".select(")>0){
-					int forI = codeAux.indexOf(".select(");
-					String pathBefore = codeAux.substring(0,forI);
-					int paramI = codeAux.indexOf("(", forI);
-					String end = codeAux.substring(paramI);
-					int parentesis = 0;
-					int endParam = -1;
-					String fim = "";
-					for (int i = 0; i < end.length(); i++) {
-						if((end.charAt(i)+"").equalsIgnoreCase("("))
-							parentesis++;
-						if((end.charAt(i)+"").equalsIgnoreCase(")"))
-							parentesis--;
-						if(parentesis == 0){
-							endParam = i+1;
-
-							break;
-						}
-						fim+=end.charAt(i);
-					}
-
-					end = end.substring(endParam);
-
-					codeAux = "([ x for x in "+pathBefore+" if("+fim+")])"+end;
+			
+			if(!parser.semantico.contextAuxBool && (aux.getCode().indexOf(".forAll(")>0 || aux.getCode().indexOf(".select(")>0 || 
+													aux.getCode().indexOf(".exists(")>0 || aux.getCode().indexOf(".size(")>0 || 
+													aux.getCode().indexOf(".includes(")>0 || aux.getCode().indexOf(".excludes(")>0 || 
+													aux.getCode().indexOf(".including(")>0 || aux.getCode().indexOf(".excluding(")>0 || 
+													aux.getCode().indexOf(".isEmpty(")>0 || aux.getCode().indexOf(".first(")>0
+													 || aux.getCode().indexOf(".last(")>0)){
+				
+//				System.out.println("Antes de forall: "+aux.getCode());
+				if(aux.getCode().indexOf(".forAll(")>0){
+					int forI = aux.getCode().indexOf(".forAll(");
+					String pathBefore = aux.getCode().substring(0,forI);
+					int paramI = aux.getCode().indexOf("(", forI);
+					String param = aux.getCode().substring(paramI);
+					String code = "([ x for x in "+pathBefore+" if("+param+")] == "+pathBefore+")";
+					aux.setCode(code);
 				}
-				aux.setCode(codeAux);
-			}
-
-			if(aux.getCode().indexOf(".exists(")>0){
-				String codeAux = aux.getCode();
-				while(codeAux.indexOf(".exists(")>0){
-					int forI = codeAux.indexOf(".exists(");
-					String pathBefore = codeAux.substring(0,forI);
-					int paramI = codeAux.indexOf("(", forI);
-					String end = codeAux.substring(paramI);
-					int parentesis = 0;
-					int endParam = -1;
-					String fim = "";
-					for (int i = 0; i < end.length(); i++) {
-						if((end.charAt(i)+"").equalsIgnoreCase("("))
-							parentesis++;
-						if((end.charAt(i)+"").equalsIgnoreCase(")"))
-							parentesis--;
-						if(parentesis == 0){
-							endParam = i+1;
-
-							break;
+				
+//				System.out.println("Antes de select: "+aux.getCode());
+				if(aux.getCode().indexOf(".select(")>0){
+					String codeAux = aux.getCode();
+					while(codeAux.indexOf(".select(")>0){
+						int forI = codeAux.indexOf(".select(");
+						String pathBefore = codeAux.substring(0,forI);
+						int paramI = codeAux.indexOf("(", forI);
+						String end = codeAux.substring(paramI);
+						int parentesis = 0;
+						int endParam = -1;
+						String fim = "";
+						for (int i = 0; i < end.length(); i++) {
+							if((end.charAt(i)+"").equalsIgnoreCase("("))
+								parentesis++;
+							if((end.charAt(i)+"").equalsIgnoreCase(")"))
+								parentesis--;
+							if(parentesis == 0){
+								endParam = i+1;
+								fim+=end.charAt(i);
+								break;
+							}
+							fim+=end.charAt(i);
 						}
-						fim+=end.charAt(i);
+
+						end = end.substring(endParam);
+
+						codeAux = "([ x for x in "+pathBefore+" if("+fim+")])"+end;
 					}
-
-					end = end.substring(endParam);
-
-					codeAux = "([ x for x in "+pathBefore+" if("+fim+")].__len__() > 0)"+end;
+					aux.setCode(codeAux);
 				}
-				aux.setCode(codeAux);
-			}
-
-			if(aux.getCode().indexOf(".size(")>0)
-				aux.setCode(aux.getCode().replace(".size()", ".__len__()"));
-
-			if(aux.getCode().indexOf(".includes(")>0){
-				String codeAux = aux.getCode();
-				while(codeAux.indexOf(".includes(")>0){
-					int forI = codeAux.indexOf(".includes(");
-					String pathBefore = codeAux.substring(0,forI);
-					int paramI = codeAux.indexOf("(", forI);
-					String end = codeAux.substring(paramI);
-					int parentesis = 0;
-					int endParam = -1;
-					String param = "";
-					for (int i = 0; i < end.length(); i++) {
-						if((end.charAt(i)+"").equalsIgnoreCase("("))
-							parentesis++;
-						if((end.charAt(i)+"").equalsIgnoreCase(")"))
-							parentesis--;
-						if(parentesis == 0){
-							endParam = i+1;
-
-							break;
+				
+				
+//				System.out.println("Antes de exists: "+aux.getCode());
+				if(aux.getCode().indexOf(".exists(")>0){
+					String codeAux = aux.getCode();
+					while(codeAux.indexOf(".exists(")>0){
+						int forI = codeAux.indexOf(".exists(");
+						String pathBefore = codeAux.substring(0,forI);
+						int paramI = codeAux.indexOf("(", forI);
+						String end = codeAux.substring(paramI);
+						int parentesis = 0;
+						int endParam = -1;
+						String fim = "";
+						for (int i = 0; i < end.length(); i++) {
+							if((end.charAt(i)+"").equalsIgnoreCase("("))
+								parentesis++;
+							if((end.charAt(i)+"").equalsIgnoreCase(")"))
+								parentesis--;
+							if(parentesis == 0){
+								endParam = i+1;
+								fim+=end.charAt(i);
+								break;
+							}
+							fim+=end.charAt(i);
 						}
-						param+=end.charAt(i);
+
+						end = end.substring(endParam);
+
+						codeAux = "([ x for x in "+pathBefore+" if("+fim+")].__len__() > 0)"+end;
 					}
-
-					end = end.substring(endParam);
-
-					codeAux = "("+param+" in "+pathBefore+") "+end;
+					aux.setCode(codeAux);
 				}
-				aux.setCode(codeAux);
-			}
 
-			if(aux.getCode().indexOf(".excludes(")>0){
-				String codeAux = aux.getCode();
-				while(codeAux.indexOf(".excludes(")>0){
-					int forI = codeAux.indexOf(".excludes(");
-					String pathBefore = codeAux.substring(0,forI);
-					int paramI = codeAux.indexOf("(", forI);
-					String end = codeAux.substring(paramI);
-					int parentesis = 0;
-					int endParam = -1;
-					String param = "";
-					for (int i = 0; i < end.length(); i++) {
-						if((end.charAt(i)+"").equalsIgnoreCase("("))
-							parentesis++;
-						if((end.charAt(i)+"").equalsIgnoreCase(")"))
-							parentesis--;
-						if(parentesis == 0){
-							endParam = i+1;
+//				System.out.println("Antes de size: "+aux.getCode());
+				if(aux.getCode().indexOf(".size(")>0)
+					aux.setCode(aux.getCode().replace(".size()", ".__len__()"));
 
-							break;
+				
+//				System.out.println("Antes de includes: "+aux.getCode());
+				if(aux.getCode().indexOf(".includes(")>0){
+					String codeAux = aux.getCode();
+					while(codeAux.indexOf(".includes(")>0){
+						int forI = codeAux.indexOf(".includes(");
+						String pathBefore = codeAux.substring(0,forI);
+						int paramI = codeAux.indexOf("(", forI);
+						String end = codeAux.substring(paramI);
+						int parentesis = 0;
+						int endParam = -1;
+						String param = "";
+						for (int i = 0; i < end.length(); i++) {
+							if((end.charAt(i)+"").equalsIgnoreCase("("))
+								parentesis++;
+							if((end.charAt(i)+"").equalsIgnoreCase(")"))
+								parentesis--;
+							if(parentesis == 0){
+								endParam = i+1;
+								param+=end.charAt(i);
+								break;
+							}
+							param+=end.charAt(i);
 						}
-						param+=end.charAt(i);
+
+						end = end.substring(endParam);
+
+						codeAux = "("+param+" in "+pathBefore+") "+end;
 					}
-
-					end = end.substring(endParam);
-
-					codeAux = "("+param+" not in "+pathBefore+") "+end;
+					aux.setCode(codeAux);
 				}
-				aux.setCode(codeAux);
-			}
 
-			if(aux.getCode().indexOf(".including(")>0){
-				String codeAux = aux.getCode();
-				while(codeAux.indexOf(".including(")>0){
-					int forI = codeAux.indexOf(".including(");
-					String pathBefore = codeAux.substring(0,forI);
-					int paramI = codeAux.indexOf("(", forI);
-					String end = codeAux.substring(paramI);
-					int parentesis = 0;
-					int endParam = -1;
-					String param = "";
-					for (int i = 0; i < end.length(); i++) {
-						if((end.charAt(i)+"").equalsIgnoreCase("("))
-							parentesis++;
-						if((end.charAt(i)+"").equalsIgnoreCase(")"))
-							parentesis--;
-						if(parentesis == 0){
-							endParam = i+1;
-
-							break;
+				
+//				System.out.println("Antes de excludes: "+aux.getCode());
+				if(aux.getCode().indexOf(".excludes(")>0){
+					String codeAux = aux.getCode();
+					while(codeAux.indexOf(".excludes(")>0){
+						int forI = codeAux.indexOf(".excludes(");
+						String pathBefore = codeAux.substring(0,forI);
+						int paramI = codeAux.indexOf("(", forI);
+						String end = codeAux.substring(paramI);
+						int parentesis = 0;
+						int endParam = -1;
+						String param = "";
+						for (int i = 0; i < end.length(); i++) {
+							if((end.charAt(i)+"").equalsIgnoreCase("("))
+								parentesis++;
+							if((end.charAt(i)+"").equalsIgnoreCase(")"))
+								parentesis--;
+							if(parentesis == 0){
+								endParam = i+1;
+								param+=end.charAt(i);
+								break;
+							}
+							param+=end.charAt(i);
 						}
-						param+=end.charAt(i);
+
+						end = end.substring(endParam);
+
+						codeAux = "("+param+" not in "+pathBefore+") "+end;
 					}
-
-					end = end.substring(endParam);
-
-					codeAux = "("+pathBefore+" + ["+param+"]) "+end;
+					aux.setCode(codeAux);
 				}
-				aux.setCode(codeAux);
-			}
 
-			if(aux.getCode().indexOf(".excluding(")>0){
-				String codeAux = aux.getCode();
-				while(codeAux.indexOf(".excluding(")>0){
-					int forI = codeAux.indexOf(".excluding(");
-					String pathBefore = codeAux.substring(0,forI);
-					int paramI = codeAux.indexOf("(", forI);
-					String end = codeAux.substring(paramI);
-					int parentesis = 0;
-					int endParam = -1;
-					String param = "";
-					for (int i = 0; i < end.length(); i++) {
-						if((end.charAt(i)+"").equalsIgnoreCase("("))
-							parentesis++;
-						if((end.charAt(i)+"").equalsIgnoreCase(")"))
-							parentesis--;
-						if(parentesis == 0){
-							endParam = i+1;
-
-							break;
+				
+//				System.out.println("Antes de including: "+aux.getCode());
+				if(aux.getCode().indexOf(".including(")>0){
+					String codeAux = aux.getCode();
+					while(codeAux.indexOf(".including(")>0){
+						int forI = codeAux.indexOf(".including(");
+						String pathBefore = codeAux.substring(0,forI);
+						int paramI = codeAux.indexOf("(", forI);
+						String end = codeAux.substring(paramI);
+						int parentesis = 0;
+						int endParam = -1;
+						String param = "";
+						for (int i = 0; i < end.length(); i++) {
+							if((end.charAt(i)+"").equalsIgnoreCase("("))
+								parentesis++;
+							if((end.charAt(i)+"").equalsIgnoreCase(")"))
+								parentesis--;
+							if(parentesis == 0){
+								endParam = i+1;
+								param+=end.charAt(i);
+								break;
+							}
+							param+=end.charAt(i);
 						}
-						param+=end.charAt(i);
+
+						end = end.substring(endParam);
+
+						codeAux = "("+pathBefore+" + ["+param+"]) "+end;
 					}
-
-					end = end.substring(endParam);
-
-					codeAux = "([ x for x in "+pathBefore+" if(x != "+param+")]) "+end;
+					aux.setCode(codeAux);
 				}
-				aux.setCode(codeAux);
+
+//				System.out.println("Antes de excluding: "+aux.getCode());
+				if(aux.getCode().indexOf(".excluding(")>0){
+					String codeAux = aux.getCode();
+					while(codeAux.indexOf(".excluding(")>0){
+						int forI = codeAux.indexOf(".excluding(");
+						String pathBefore = codeAux.substring(0,forI);
+						int paramI = codeAux.indexOf("(", forI);
+						String end = codeAux.substring(paramI);
+						int parentesis = 0;
+						int endParam = -1;
+						String param = "";
+						for (int i = 0; i < end.length(); i++) {
+							if((end.charAt(i)+"").equalsIgnoreCase("("))
+								parentesis++;
+							if((end.charAt(i)+"").equalsIgnoreCase(")"))
+								parentesis--;
+							if(parentesis == 0){
+								endParam = i+1;
+								param+=end.charAt(i);
+								break;
+							}
+							param+=end.charAt(i);
+						}
+
+						end = end.substring(endParam);
+
+						codeAux = "([ x for x in "+pathBefore+" if(x != "+param+")]) "+end;
+					}
+					aux.setCode(codeAux);
+				}
+
+//				System.out.println("Antes de isEmpty: "+aux.getCode());
+				if(aux.getCode().indexOf(".isEmpty(")>0)
+					aux.setCode("("+aux.getCode().replace(".isEmpty()", ".__len__()==0)"));
+
+				String codeAntigo = aux.getCode();
+
+//				System.out.println("Antes de first: "+aux.getCode());
+				if(aux.getCode().indexOf(".first(")>0)
+					aux.setCode("("+aux.getCode().replace(".first()", "[0] if "+codeAntigo+".__len__()>0 else None )"));
+
+				codeAntigo = aux.getCode();
+
+				
+//				System.out.println("Antes de last: "+aux.getCode());
+				if(aux.getCode().indexOf(".last(")>0)
+					aux.setCode("("+aux.getCode().replace(".last()", "[-1] if "+codeAntigo+".__len__()>0 else None )"));
+
+
+				
 			}
-
-			if(aux.getCode().indexOf(".isEmpty(")>0)
-				aux.setCode("("+aux.getCode().replace(".isEmpty()", ".__len__()==0)"));
-
-			String codeAntigo = aux.getCode();
-
-			if(aux.getCode().indexOf(".first(")>0)
-				aux.setCode("("+aux.getCode().replace(".first()", "[0] if "+codeAntigo+".__len__()>0 else None )"));
-
-			codeAntigo = aux.getCode();
-
-			if(aux.getCode().indexOf(".last(")>0)
-				aux.setCode("("+aux.getCode().replace(".last()", "[-1] if "+codeAntigo+".__len__()>0 else None )"));
-
-
+			
 			if( postfexp != null || ((Node)primexp).getRole() == Node.VARIABLE ){
 				//System.out.println("List : " + ((Node)aux).listToString() + "\n" + "Caminho = " + ((Node)aux).printAllParamethrs() );
 				resultado = parser.semantico.checkAllPathFunction(aux.getList_caminho(),primexpleft,null,null);

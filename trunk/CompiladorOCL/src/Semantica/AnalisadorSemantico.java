@@ -290,6 +290,17 @@ public class AnalisadorSemantico {
         public String maxType(String type1, String type2, int line) throws Exception{
                 return ManipuladorXMI.maxType(type1, type2, line);
         }
+        
+        public OperacaoMaior getOpContext() {
+        	try {
+				OperacaoMaior opCont = ManipuladorXMI.contemFuncao(contextClass, contextClass, contextMethod);
+				return opCont;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+        
         /**
          * Dada uma lista de nodes que representa o caminho, retornar um node com o tipo associado.
          * Nodes que são apenas caminhos tem seus roles setados para VARIABLE, e nodes com parametros tem 
@@ -776,7 +787,6 @@ public class AnalisadorSemantico {
 			parentesis--;
 			if(!b && parentesis==0){
 				contextAuxBool = b;
-				lastNodeAux = null;
 			}
 		}
 		
@@ -785,7 +795,6 @@ public class AnalisadorSemantico {
 
 		public void setContextAux(Object primexp, int line) throws Exception {
 			Node p = (Node) primexp;
-			String con = contextAux;
 			if(p!=null && !contextAuxBool){
 				String typeCol = null;
 				if(lastNodeAux!=null){
@@ -798,10 +807,9 @@ public class AnalisadorSemantico {
 					if(type.indexOf("<")>0)
 						type = getTypeCol(type);
 					contextAux = type;
-					con = type;
 				}else{
 					contextAuxBool = false;
-					contextAux = contextClass;
+//					contextAux = contextClass;
 				}
 			}
 		}
