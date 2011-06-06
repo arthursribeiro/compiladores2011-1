@@ -138,8 +138,10 @@ public class Main {
 			}
 			//System.out.println(classes.size());
 			ArrayList<Classe> ordenadas = ordenarClass(classes);
+			code+="from copy import copy"+System.getProperty("line.separator")+System.getProperty("line.separator");
 			for(Classe x : ordenadas){
-				code += x.generateCode();
+				if(!(x.getName().indexOf("<")>0))
+					code += x.generateCode();
 			}
 			System.out.println(code);
 		} catch (Error er){
