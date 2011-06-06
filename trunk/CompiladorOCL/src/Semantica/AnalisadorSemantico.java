@@ -720,14 +720,14 @@ public class AnalisadorSemantico {
 			params.addElement(param);
 			if(loop!=null)
 				params.addAllElements( ((Node) loop).getElements() );
-			System.out.println("entrou aqui4");
+//			System.out.println("entrou aqui4");
 			this.contextParams.add((String)idParam);
 			return params;
         }
         
         public Object checkFormalParameterListAux(Object idParam, Object typeSpec,int line) throws Exception{
         	Node param = new Node( ((String) idParam),  getTypeFromTypeSpecifier(((Node)typeSpec),line).getType());
-        	System.out.println("entrou aqui3");
+//        	System.out.println("entrou aqui3");
         	this.contextParams.add((String)idParam);
 			return param;
         }
@@ -851,7 +851,7 @@ public class AnalisadorSemantico {
 		public void inicializarLista() {
 			// TODO Auto-generated method stub
 			contextParams = new ArrayList<String>();
-			System.out.println("entrou aqui");
+//			System.out.println("entrou aqui");
 		}
 
 		public boolean contemNoContexto(String codeAux) {
