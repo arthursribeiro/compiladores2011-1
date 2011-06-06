@@ -1560,21 +1560,18 @@ class CUP$parser$actions {
 							
 							if(!aux.isSelfable()){
 								String code_aux = aux.getCode();
-								if(parser.semantico.contextAuxBool && !(aux.getCode().indexOf("exists(")>0 || aux.getCode().indexOf("forAll(")>0 || aux.getCode().indexOf("select(")>0) ){
+								if(parser.semantico.contextAuxBool && !(aux.getCode().indexOf("exists(")>0 || aux.getCode().indexOf("forAll(")>0 || aux.getCode().indexOf("select(")>0)){
 									aux.setCode("x."+code_aux);
 								}else{
-									
-									
-									aux.setCode("self."+code_aux);
+									if(!parser.semantico.contemNoContexto(code_aux)) {
+										aux.setCode("self."+code_aux);
+									}
 								}
 								
 							}
 						}
 //						System.out.println(aux.getCode());
 						aux.setCode(aux.getCode().replace(".size()", ".__len__()"));
-						if(aux.getCode().indexOf(".includes(")>0){
-							
-						}
 						if(!(parser.semantico.contextAuxBool && !(aux.getCode().indexOf("exists(")>0 || aux.getCode().indexOf("forAll(")>0 || aux.getCode().indexOf("select(")>0) )){
 							if(aux.getCode().indexOf("forAll(")>0){
 								int forI = aux.getCode().indexOf("forAll(");
@@ -1639,7 +1636,7 @@ class CUP$parser$actions {
 									codeAux = "([ x for x in "+pathBefore+" if("+fim+")].__len__() > 0)"+end;
 								}
 								aux.setCode(codeAux);
-							}
+							} 
 						}
 						if( postfexp != null || ((Node)primexp).getRole() == Node.VARIABLE ){
 							//System.out.println("List : " + ((Node)aux).listToString() + "\n" + "Caminho = " + ((Node)aux).printAllParamethrs() );
@@ -1677,7 +1674,9 @@ class CUP$parser$actions {
 		int postfexpright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-0)).right;
 		Object postfexp = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-0)).value;
 		
-							RESULT = postfexp;
+							Node node = (Node)postfexp;
+							node.setCode(unop + " " + node.getCode());
+							RESULT = node;
 						
               CUP$parser$result = new java_cup.runtime.Symbol(61/*unaryExpressionAux*/, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-0)).right, RESULT);
             }
@@ -2301,6 +2300,8 @@ class CUP$parser$actions {
               Object RESULT = null;
 
               CUP$parser$result = new java_cup.runtime.Symbol(4/*constraint*/, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-0)).right, RESULT);
+              
+              parser.semantico.inicializarLista();
             }
           return CUP$parser$result;
 

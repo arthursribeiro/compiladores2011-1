@@ -22,6 +22,7 @@ public class AnalisadorSemantico {
 
         private String stereotype;
         
+        private ArrayList<String> contextParams = new ArrayList<String>();
         private ArrayList<OperacaoMaior> collOperations = new ArrayList<OperacaoMaior>();
         
 //        private String[] collectionOperations = {"forAll", "exists", "includes", "excludes",
@@ -708,11 +709,15 @@ public class AnalisadorSemantico {
 			params.addElement(param);
 			if(loop!=null)
 				params.addAllElements( ((Node) loop).getElements() );
+			System.out.println("entrou aqui4");
+			this.contextParams.add((String)idParam);
 			return params;
         }
         
         public Object checkFormalParameterListAux(Object idParam, Object typeSpec,int line) throws Exception{
         	Node param = new Node( ((String) idParam),  getTypeFromTypeSpecifier(((Node)typeSpec),line).getType());
+        	System.out.println("entrou aqui3");
+        	this.contextParams.add((String)idParam);
 			return param;
         }
         
@@ -833,6 +838,21 @@ public class AnalisadorSemantico {
 		
 		public void addParentesis() {
 			this.parentesis++;
+		}
+
+		public void inicializarLista() {
+			// TODO Auto-generated method stub
+			contextParams = new ArrayList<String>();
+			System.out.println("entrou aqui");
+		}
+
+		public boolean contemNoContexto(String codeAux) {
+			for(String a : contextParams) {
+				if(a.equals(codeAux)) {
+					return true;
+				}
+			}
+			return false;
 		}
 		
 }
