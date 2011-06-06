@@ -1555,7 +1555,7 @@ class CUP$parser$actions {
 			}
 			if(aux.isArrobapre()){
 				String code_aux = aux.getCode();
-				aux.setCode("context"+code_aux);
+				aux.setCode("context."+code_aux);
 			}else{
 
 				if(!aux.isSelfable()){
